@@ -1,6 +1,6 @@
 {
   "name": "adrianorosa/laravel-geolocation",
-  "description": "Laravel Geo Location package to get details for a given Ip Address",
+  "description": "Laravel Geo Location package to get details for a given IP Address",
   "keywords": ["geolocation", "ipinfo", "geoip", "laravel", "laravel-geolocation"],
   "license": "MIT",
   "authors": [
@@ -14,19 +14,18 @@
     "php": ">=7.2",
     "ext-openssl": "*",
     "ext-json": "*",
-    "illuminate/support": "~5.7.0|~5.8.0|^6.0|^7.0|^8.0|^9.0|^10.0",
+    "illuminate/support": "~5.7.0|~5.8.0|^6.0|^7.0|^8.0|^9.0|^10.0|^11.0|^12.0",
     "guzzlehttp/guzzle": "^6.0|^7.0"
   },
   "require-dev": {
-    "orchestra/testbench": "^7.4",
-    "phpunit/phpunit": "^9.5"
+    "orchestra/testbench": "^7.4|^9.0",
+    "phpunit/phpunit": "^9.5|^10.5"
   },
   "autoload": {
     "psr-4": {
       "Adrianorosa\\GeoLocation\\": "src"
     },
-    "files": [
-    ]
+    "files": []
   },
   "autoload-dev": {
     "psr-4": {
