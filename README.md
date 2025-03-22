@@ -1,5 +1,6 @@
 Laravel GeoLocation Package
 ===========================
+## This package is updated to be compatible with Laravel 12
 
 Laravel package to get the details about Region, City and Country for a given IP Address.
 
@@ -8,9 +9,10 @@ MaxMind GeoIP2 databases.
 
 ### Install
 
-    composer require adrianorosa/laravel-geolocation
+    composer require bkhim/laravel-geolocation
 
-> This package supports the latest version of Laravel, for now 5.8+ was tested, but older versions should work fine.
+The rest of the commands remain the same.
+> This package supports the latest version of Laravel (v12).
 
 As of Laravel 5.5 there is no need to add the ServiceProvider within the `AppServiceProvider` array. 
 Laravel loads this provider using Package Discovery.
@@ -92,9 +94,13 @@ Publish translations
 
 **Adriano Rosa** (https://adrianorosa.com)  
 
+## Updated by
+
+**Blancos Khim** (https://github.com/bkhim)  
+
 ## Licence
 
-Copyright © 2021, Adriano Rosa  <info@adrianorosa.com>
+Copyright © 2025, Adriano Rosa  <info@adrianorosa.com>
 All rights reserved.
 
 For the full copyright and license information, please view the LICENSE 
