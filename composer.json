@@ -1,5 +1,5 @@
 {
-  "name": "adrianorosa/laravel-geolocation",
+  "name": "bkhim/laravel-geolocation",
   "description": "Laravel Geo Location package to get details for a given Ip Address",
   "keywords": ["geolocation", "ipinfo", "geoip", "laravel", "laravel-geolocation"],
   "license": "MIT",
