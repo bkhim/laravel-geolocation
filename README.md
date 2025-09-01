@@ -1,5 +1,8 @@
 Laravel GeoLocation Package
 ===========================
+# bkhim/laravel-geolocation
+A maintained fork of [adrianorsouza/laravel-geolocation](https://github.com/adrianorsouza/laravel-geolocation) for Laravel 12+.  
+Originally developed by [Adriano Rosa](https://github.com/adrianorsouza).  
 
 Laravel package to get the details about Region, City and Country for a given IP Address.
 
