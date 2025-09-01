@@ -36,19 +36,29 @@ class GeoLocationServiceProvider extends ServiceProvider
 
     public function boot()
     {
+        // Publish config file
         $this->publishes([
             __DIR__ . '/../config/geolocation.php' => config_path('geolocation.php'),
         ], 'geolocation-config');
 
+        // Publish translations
         $this->publishes([
             __DIR__ . '/../translations' => resource_path('lang/vendor/geolocation')
         ], 'geolocation-translations');
 
+        // Publish database directory structure for MaxMind
+        $this->publishes([
+            __DIR__ . '/../database/geoip' => storage_path('app/geoip')
+        ], 'geolocation-storage');
+
+        // Load translations
         $this->loadTranslationsFrom(__DIR__ . '/../translations', 'geolocation');
 
+        // Register console commands
         if ($this->app->runningInConsole()) {
             $this->commands([
                 Console\GeoLocationCommand::class,
+                // Add future commands here
             ]);
         }
     }

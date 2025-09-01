@@ -2,6 +2,8 @@
 
 namespace Adrianorosa\GeoLocation\Tests;
 
+use Illuminate\Support\Facades\Cache;
+
 /**
  * Class ConfigTest.
  *
@@ -21,7 +23,7 @@ class ConfigTest extends TestCase
         $this->assertNotNull(config('geolocation.providers.ipinfo.access_token'));
         $this->assertNotNull(config('geolocation.cache.ttl'));
 
-        $this->assertEquals(86400, config('geolocation.cache.ttl'));
+        $this->assertEquals(3600, config('geolocation.cache.ttl'));
     }
 
 }

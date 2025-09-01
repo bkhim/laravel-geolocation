@@ -15,6 +15,34 @@ MaxMind GeoIP2 databases.
 
 > This package supports the latest version of Laravel, for now 5.8+ was tested, but older versions should work fine.
 
+
+```markdown
+## Configuration
+
+Detailed configuration options are available in the [CONFIGURATION.md](CONFIGURATION.md) file.
+
+### Quick Configuration
+
+```bash
+# Publish config file
+php artisan vendor:publish --tag=geolocation-config
+
+# Set up IpInfo (recommended for most users)
+GEOLOCATION_IPINFO_ACCESS_TOKEN=your_token_here
+
+# Or set up MaxMind
+MAXMIND_DATABASE_PATH=/path/to/database.mmdb
+```
+## MaxMind Troubleshooting
+
+### Database Not Found Error
+If you get "database not found" errors:
+
+1. **Use absolute path** in your .env:
+```env
+   MAXMIND_DATABASE_PATH=/absolute/path/to/GeoLite2-City.mmdb
+```
+
 As of Laravel 5.5 there is no need to add the ServiceProvider within the `AppServiceProvider` array. 
 Laravel loads this provider using Package Discovery.
 

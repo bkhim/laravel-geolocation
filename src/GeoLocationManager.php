@@ -2,8 +2,10 @@
 
 namespace Adrianorosa\GeoLocation;
 
+use GeoIp2\Database\Reader;
 use GuzzleHttp\Client;
 use InvalidArgumentException;
+use MaxMind\Db\Reader\InvalidDatabaseException;
 
 /**
  * Class GeoLocationManager.
@@ -91,6 +93,46 @@ class GeoLocationManager
     }
 
     /**
+     * @param  array  $config
+     *
+     * @return \Adrianorosa\GeoLocation\Contracts\LookupInterface
+     * @throws InvalidDatabaseException
+     */
+    protected function createMaxmindDriver($config)
+    {
+        $databasePath = $config['database_path'] ?? null;
+
+        if (!$databasePath) {
+            throw new InvalidArgumentException("MaxMind database path is not configured.");
+        }
+
+        // Resolve the path properly - handle both absolute and relative paths
+        if (!str_starts_with($databasePath, '/')) {
+            // If it's a relative path, resolve it from storage_path or base_path
+            $databasePath = storage_path($databasePath);
+        }
+
+        if (!file_exists($databasePath)) {
+            throw new InvalidArgumentException(
+                "MaxMind database not found at: {$databasePath}. " .
+                "Please download the database from https://dev.maxmind.com/geoip/geolite2-free-geolocation-data " .
+                "and place it in the specified location."
+            );
+        }
+
+        if (!is_readable($databasePath)) {
+            throw new InvalidArgumentException(
+                "MaxMind database is not readable: {$databasePath}. " .
+                "Check file permissions."
+            );
+        }
+
+        $reader = new Reader($databasePath);
+
+        return new Providers\MaxMind($reader, $this->cacheProvider->getStore());
+    }
+
+    /**
      * @param  null $name
      *
      * @return mixed
@@ -134,6 +176,7 @@ class GeoLocationManager
     {
         return $this->config['providers'][$name] ?? null;
     }
+
 
     /**
      * Dynamically call the default driver instance.

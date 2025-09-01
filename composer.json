@@ -19,7 +19,8 @@
     "ext-openssl": "*",
     "ext-json": "*",
     "illuminate/support": "^5.7|^6.0|^7.0|^8.0|^9.0|^10.0|^11.0|^12.0",
-    "guzzlehttp/guzzle": "^6.0|^7.0"
+    "guzzlehttp/guzzle": "^6.0|^7.0",
+    "geoip2/geoip2": "dev-main"
   },
   "require-dev": {
     "orchestra/testbench": "^6.0|^7.0|^8.0|^9.0",
