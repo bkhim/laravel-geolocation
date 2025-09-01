@@ -4,6 +4,7 @@ namespace Adrianorosa\GeoLocation;
 
 use GeoIp2\Database\Reader;
 use GuzzleHttp\Client;
+use Illuminate\Cache\CacheManager;
 use Illuminate\Contracts\Cache\Repository as CacheRepository;
 use Illuminate\Support\Str;
 use InvalidArgumentException;
@@ -30,17 +31,17 @@ class GeoLocationManager
     protected $providers = [];
 
     /**
-     * @var \Illuminate\Contracts\Cache\Repository
+     * @var CacheManager
      */
     protected $cacheProvider;
 
     /**
      * GeoLocation constructor.
      *
-     * @param  array $config
-     * @param  \Illuminate\Contracts\Cache\Repository $cacheProvider
+     * @param  array  $config
+     * @param  CacheManager  $cacheProvider
      */
-    public function __construct($config, CacheRepository $cacheProvider)
+    public function __construct($config, \Illuminate\Cache\CacheManager $cacheProvider)
     {
         $this->config = $config;
         $this->cacheProvider = $cacheProvider;
@@ -96,7 +97,7 @@ class GeoLocationManager
     {
         $options = $config['client_options'] ?? [];
 
-        return new Providers\IpInfo(new Client($options), $this->cacheProvider);
+        return new Providers\IpInfo(new Client($options), $this->cacheProvider->getStore());
     }
 
     /**
@@ -135,7 +136,7 @@ class GeoLocationManager
 
         try {
             $reader = new Reader($databasePath);
-            return new Providers\MaxMind($reader, $this->cacheProvider);
+            return new Providers\MaxMind($reader, $this->cacheProvider->getStore());
 
         } catch (InvalidDatabaseException $e) {
             throw new InvalidArgumentException(
