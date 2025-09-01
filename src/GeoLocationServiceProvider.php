@@ -2,7 +2,6 @@
 
 namespace Bkhim\GeoLocation;
 
-use Bkhim\GeoLocation\Console\GeoLocationCommand;
 use Illuminate\Support\ServiceProvider;
 
 /**
@@ -26,7 +25,7 @@ class GeoLocationServiceProvider extends ServiceProvider
         $this->mergeConfigFrom(__DIR__ . '/../config/geolocation.php', 'geolocation');
 
         $this->app->singleton('geolocation', function ($app) {
-            return new GeoLocationManager(
+            return new \Bkhim\GeoLocation\GeoLocationManager(
                 config('geolocation'),
                 $app->get('cache')
             );
@@ -56,8 +55,7 @@ class GeoLocationServiceProvider extends ServiceProvider
         // Register console commands
         if ($this->app->runningInConsole()) {
             $this->commands([
-                GeoLocationCommand::class,
-                // Add future commands here
+                \Bkhim\GeoLocation\Console\GeoLocationCommand::class,
             ]);
         }
     }
