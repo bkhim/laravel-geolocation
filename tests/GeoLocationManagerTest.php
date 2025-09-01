@@ -1,14 +1,14 @@
 <?php
 
-namespace Adrianorosa\GeoLocation\Tests;
+namespace Bkhim\GeoLocation\Tests;
 
-use Adrianorosa\GeoLocation\Providers\IpInfo;
-use Adrianorosa\GeoLocation\GeoLocationManager;
+use Bkhim\GeoLocation\GeoLocationManager;
+use Bkhim\GeoLocation\Providers\IpInfo;
 
 class GeoLocationManagerTest extends TestCase
 {
     /**
-     * @covers \Adrianorosa\GeoLocation\GeoLocationManager::resolve()
+     * @covers \Bkhim\GeoLocation\GeoLocationManager::resolve()
      */
     public function testBindManagerInvalidArgumentException()
     {
@@ -21,7 +21,7 @@ class GeoLocationManagerTest extends TestCase
     }
 
     /**
-     * @covers \Adrianorosa\GeoLocation\GeoLocationManager::resolve()
+     * @covers \Bkhim\GeoLocation\GeoLocationManager::resolve()
      */
     public function testBindManagerMethodNotSupportedException()
     {
@@ -39,7 +39,7 @@ class GeoLocationManagerTest extends TestCase
     }
 
     /**
-     * @covers \Adrianorosa\GeoLocation\GeoLocationManager::resolve()
+     * @covers \Bkhim\GeoLocation\GeoLocationManager::resolve()
      */
     public function testCreateUndefinedProvider()
     {

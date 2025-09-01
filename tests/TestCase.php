@@ -1,10 +1,10 @@
 <?php
 
-namespace Adrianorosa\GeoLocation\Tests;
+namespace Bkhim\GeoLocation\Tests;
 
-use Orchestra\Testbench\TestCase as BaseTestCase;
-use Adrianorosa\GeoLocation\GeoLocationServiceProvider;
+use Bkhim\GeoLocation\GeoLocationServiceProvider;
 use Illuminate\Support\Facades\Http;
+use Orchestra\Testbench\TestCase as BaseTestCase;
 
 abstract class TestCase extends BaseTestCase
 {

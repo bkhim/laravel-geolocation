@@ -1,9 +1,9 @@
 <?php
 
-namespace Adrianorosa\GeoLocation\Console;
+namespace Bkhim\GeoLocation\Console;
 
+use Bkhim\GeoLocation\GeoLocation;
 use Illuminate\Console\Command;
-use Adrianorosa\GeoLocation\GeoLocation;
 
 /**
  * Class GeoLocationCommand.
@@ -11,7 +11,7 @@ use Adrianorosa\GeoLocation\GeoLocation;
  * @author Adriano Rosa <https://adrianorosa.com>
  * @date 2019-08-13 20:13
  *
- * @package Adrianorosa\GeoLocation\Console
+ * @package Bkhim\GeoLocation\Console
  */
 class GeoLocationCommand extends Command
 {

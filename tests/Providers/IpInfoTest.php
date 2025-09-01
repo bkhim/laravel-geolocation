@@ -1,10 +1,10 @@
 <?php
 
-namespace Adrianorosa\GeoLocation\Tests\Providers;
+namespace Bkhim\GeoLocation\Tests\Providers;
 
-use Adrianorosa\GeoLocation\Providers\IpInfo;
-use Adrianorosa\GeoLocation\GeoLocationException;
-use Adrianorosa\GeoLocation\Tests\TestCase;
+use Bkhim\GeoLocation\GeoLocationException;
+use Bkhim\GeoLocation\Providers\IpInfo;
+use Bkhim\GeoLocation\Tests\TestCase;
 use Illuminate\Support\Facades\Http;
 
 class IpInfoTest extends TestCase

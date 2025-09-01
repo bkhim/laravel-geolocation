@@ -1,11 +1,10 @@
 <?php
 
-namespace Adrianorosa\GeoLocation;
+namespace Bkhim\GeoLocation;
 
 use GeoIp2\Database\Reader;
 use GuzzleHttp\Client;
 use Illuminate\Cache\CacheManager;
-use Illuminate\Contracts\Cache\Repository as CacheRepository;
 use Illuminate\Support\Str;
 use InvalidArgumentException;
 use MaxMind\Db\Reader\InvalidDatabaseException;
@@ -16,7 +15,7 @@ use MaxMind\Db\Reader\InvalidDatabaseException;
  * @author Adriano Rosa <https://adrianorosa.com>
  * @date 2019-08-13 11:50
  *
- * @package Adrianorosa\GeoLocation
+ * @package Bkhim\GeoLocation
  */
 class GeoLocationManager
 {
@@ -53,7 +52,7 @@ class GeoLocationManager
      * Get a GeoLocation driver instance.
      *
      * @param string|null $name
-     * @return \Adrianorosa\GeoLocation\Contracts\LookupInterface
+     * @return \Bkhim\GeoLocation\Contracts\LookupInterface
      */
     public function driver(?string $name = null): Contracts\LookupInterface
     {
@@ -91,7 +90,7 @@ class GeoLocationManager
      * Create IpInfo driver instance.
      *
      * @param  array $config
-     * @return \Adrianorosa\GeoLocation\Contracts\LookupInterface
+     * @return \Bkhim\GeoLocation\Contracts\LookupInterface
      */
     protected function createIpinfoDriver(array $config): Contracts\LookupInterface
     {
@@ -104,7 +103,7 @@ class GeoLocationManager
      * Create MaxMind driver instance.
      *
      * @param  array  $config
-     * @return \Adrianorosa\GeoLocation\Contracts\LookupInterface
+     * @return \Bkhim\GeoLocation\Contracts\LookupInterface
      * @throws InvalidArgumentException
      */
     protected function createMaxmindDriver(array $config): Contracts\LookupInterface
@@ -153,7 +152,7 @@ class GeoLocationManager
      * Get a provider instance.
      *
      * @param string|null $name
-     * @return \Adrianorosa\GeoLocation\Contracts\LookupInterface
+     * @return \Bkhim\GeoLocation\Contracts\LookupInterface
      */
     protected function provider(?string $name = null): Contracts\LookupInterface
     {
@@ -165,7 +164,7 @@ class GeoLocationManager
      * Resolve the given provider.
      *
      * @param  string  $name
-     * @return \Adrianorosa\GeoLocation\Contracts\LookupInterface
+     * @return \Bkhim\GeoLocation\Contracts\LookupInterface
      * @throws \InvalidArgumentException
      */
     protected function resolve(string $name): Contracts\LookupInterface

@@ -1,7 +1,8 @@
 <?php
 
-namespace Adrianorosa\GeoLocation;
+namespace Bkhim\GeoLocation;
 
+use Bkhim\GeoLocation\Contracts\LookupInterface;
 use Illuminate\Support\Facades\Facade;
 
 /**
@@ -10,12 +11,12 @@ use Illuminate\Support\Facades\Facade;
  * @author Adriano Rosa <https://adrianorosa.com>
  * @date 2019-08-13 10:02
  *
- * @package Adrianorosa
+ * @package Bkhim
  *
  * @method static|GeoLocationDetails lookup($ipAddress, $responseFilter = 'geo')
- * @method static|\Adrianorosa\GeoLocation\Contracts\LookupInterface driver($name)
+ * @method static|LookupInterface driver($name)
  *
- * @see \Adrianorosa\GeoLocation\Providers\IpInfo
+ * @see \Bkhim\GeoLocation\Providers\IpInfo
  */
 class GeoLocation extends Facade
 {
@@ -32,7 +33,8 @@ class GeoLocation extends Facade
     }
 
     /**
-     * @return string
+     * @method static GeoLocationDetails lookup($ipAddress, $responseFilter = 'geo')
+     * @method static LookupInterface driver($name)
      */
     protected static function getFacadeAccessor()
     {

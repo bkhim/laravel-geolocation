@@ -1,8 +1,8 @@
 <?php
 
-namespace Adrianorosa\GeoLocation\Contracts;
+namespace Bkhim\GeoLocation\Contracts;
 
-use Adrianorosa\GeoLocation\GeoLocationDetails;
+use Bkhim\GeoLocation\GeoLocationDetails;
 
 /**
  * LookupInterface.
@@ -10,7 +10,7 @@ use Adrianorosa\GeoLocation\GeoLocationDetails;
  * @author Adriano Rosa <https://adrianorosa.com>
  * @date 2019-08-13 17:50
  *
- * @package Adrianorosa\GeoLocation
+ * @package Bkhim\GeoLocation
  */
 interface LookupInterface
 {
@@ -19,7 +19,7 @@ interface LookupInterface
      *
      * @param  string $responseFilter
      *
-     * @return \Adrianorosa\GeoLocation\GeoLocationDetails
+     * @return \Bkhim\GeoLocation\GeoLocationDetails
      */
     public function lookup($ipAddress, $responseFilter = 'geo'): GeoLocationDetails;
 }

@@ -1,6 +1,6 @@
 <?php
 
-namespace Adrianorosa\GeoLocation;
+namespace Bkhim\GeoLocation;
 
 /**
  * Class GeoLocationException.
@@ -8,7 +8,7 @@ namespace Adrianorosa\GeoLocation;
  * @author Adriano Rosa <https://adrianorosa.com>
  * @date 2019-08-13 16:00
  *
- * @package Adrianorosa\GeoLocation
+ * @package Bkhim\GeoLocation
  */
 class GeoLocationException extends \Exception
 {

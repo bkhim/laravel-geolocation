@@ -34,7 +34,7 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Default Geolocation Driver
+    | Default GeoLocation Driver
     |--------------------------------------------------------------------------
     |
     | This option specifies the default geolocation driver that will be used
@@ -50,7 +50,7 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Geolocation Providers Configuration
+    | GeoLocation Providers Configuration
     |--------------------------------------------------------------------------
     |
     | Here you may configure the settings for each geolocation provider.
@@ -86,7 +86,7 @@ return [
                 'connect_timeout' => 5,
                 'timeout' => 10,
                 'headers' => [
-                    'User-Agent' => 'Laravel-Geolocation-Package/1.0',
+                    'User-Agent' => 'Laravel-GeoLocation-Package/1.0',
                 ],
             ]
         ],
@@ -137,7 +137,7 @@ return [
     | Cache Configuration
     |--------------------------------------------------------------------------
     |
-    | Geolocation results can be cached to improve performance and reduce
+    | GeoLocation results can be cached to improve performance and reduce
     | API rate limit usage. This is especially useful for frequently
     | requested IP addresses.
     |

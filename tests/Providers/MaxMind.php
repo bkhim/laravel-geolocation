@@ -1,12 +1,10 @@
 <?php
 
-namespace Adrianorosa\GeoLocation\Tests\Providers;
+namespace Bkhim\GeoLocation\Tests\Providers;
 
-use Adrianorosa\GeoLocation\GeoLocation;
-use Adrianorosa\GeoLocation\GeoLocationException;
-use Adrianorosa\GeoLocation\Tests\TestCase;
+use Bkhim\GeoLocation\GeoLocation;
+use Bkhim\GeoLocation\Tests\TestCase;
 use InvalidArgumentException;
-use Mockery;
 
 class MaxMind extends TestCase
 {
@@ -36,11 +34,11 @@ class MaxMind extends TestCase
         // Test IpInfo driver
         $ipinfoDr= config(['geolocation.drivers.default' => 'ipinfo']);
         $ipinfo = GeoLocation::driver($ipinfoDr);
-        $this->assertInstanceOf(\Adrianorosa\GeoLocation\Providers\IpInfo::class, $ipinfo);
+        $this->assertInstanceOf(\Bkhim\GeoLocation\Providers\IpInfo::class, $ipinfo);
 
         // Test MaxMind driver
         $maxmindDr = config(['geolocation.drivers.default' => 'maxmind']);
         $maxmind = GeoLocation::driver($maxmindDr);
-        $this->assertInstanceOf(\Adrianorosa\GeoLocation\Providers\MaxMind::class, $maxmind);
+        $this->assertInstanceOf(\Bkhim\GeoLocation\Providers\MaxMind::class, $maxmind);
     }
 }

@@ -1,6 +1,6 @@
 <?php
 
-namespace Adrianorosa\GeoLocation\Tests;
+namespace Bkhim\GeoLocation\Tests;
 
 use Illuminate\Support\Facades\Http;
 

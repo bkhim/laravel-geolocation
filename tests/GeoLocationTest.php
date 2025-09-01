@@ -1,10 +1,10 @@
 <?php
 
-namespace Adrianorosa\GeoLocation\Tests;
+namespace Bkhim\GeoLocation\Tests;
 
-use Adrianorosa\GeoLocation\GeoLocation;
-use Adrianorosa\GeoLocation\GeoLocationDetails;
-use Adrianorosa\GeoLocation\GeoLocationException;
+use Bkhim\GeoLocation\GeoLocation;
+use Bkhim\GeoLocation\GeoLocationDetails;
+use Bkhim\GeoLocation\GeoLocationException;
 use Illuminate\Support\Facades\Http;
 
 class GeoLocationTest extends TestCase

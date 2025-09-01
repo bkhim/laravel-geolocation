@@ -1,12 +1,12 @@
 <?php
 
-namespace Adrianorosa\GeoLocation\Providers;
+namespace Bkhim\GeoLocation\Providers;
 
-use Illuminate\Contracts\Cache\Store;
+use Bkhim\GeoLocation\Contracts\LookupInterface;
+use Bkhim\GeoLocation\GeoLocationDetails;
+use Bkhim\GeoLocation\GeoLocationException;
 use GuzzleHttp\Exception\GuzzleException;
-use Adrianorosa\GeoLocation\GeoLocationDetails;
-use Adrianorosa\GeoLocation\GeoLocationException;
-use Adrianorosa\GeoLocation\Contracts\LookupInterface;
+use Illuminate\Contracts\Cache\Store;
 
 /**
  * Class IpInfo.

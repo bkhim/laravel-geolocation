@@ -1,14 +1,14 @@
 <?php
 
-namespace Adrianorosa\GeoLocation\Tests;
+namespace Bkhim\GeoLocation\Tests;
 
-use Adrianorosa\GeoLocation\GeoLocationDetails;
+use Bkhim\GeoLocation\GeoLocationDetails;
 
 class GeoLocationDetailsTest extends TestCase
 {
     /**
-     * @covers \Adrianorosa\GeoLocation\GeoLocationDetails::parse()
-     * @covers \Adrianorosa\GeoLocation\GeoLocationDetails::toArray()
+     * @covers \Bkhim\GeoLocation\GeoLocationDetails::parse()
+     * @covers \Bkhim\GeoLocation\GeoLocationDetails::toArray()
      */
     public function testParseData()
     {
@@ -36,12 +36,12 @@ class GeoLocationDetailsTest extends TestCase
     }
 
     /**
-     * @covers \Adrianorosa\GeoLocation\GeoLocationDetails::getIp()
-     * @covers \Adrianorosa\GeoLocation\GeoLocationDetails::getCity()
-     * @covers \Adrianorosa\GeoLocation\GeoLocationDetails::getRegion()
-     * @covers \Adrianorosa\GeoLocation\GeoLocationDetails::getCountryCode()
-     * @covers \Adrianorosa\GeoLocation\GeoLocationDetails::getLatitude()
-     * @covers \Adrianorosa\GeoLocation\GeoLocationDetails::getLongitude()
+     * @covers \Bkhim\GeoLocation\GeoLocationDetails::getIp()
+     * @covers \Bkhim\GeoLocation\GeoLocationDetails::getCity()
+     * @covers \Bkhim\GeoLocation\GeoLocationDetails::getRegion()
+     * @covers \Bkhim\GeoLocation\GeoLocationDetails::getCountryCode()
+     * @covers \Bkhim\GeoLocation\GeoLocationDetails::getLatitude()
+     * @covers \Bkhim\GeoLocation\GeoLocationDetails::getLongitude()
      */
     public function testParseBogon()
     {
@@ -59,12 +59,12 @@ class GeoLocationDetailsTest extends TestCase
     }
 
     /**
-     * @covers \Adrianorosa\GeoLocation\GeoLocationDetails::getIp()
-     * @covers \Adrianorosa\GeoLocation\GeoLocationDetails::getCity()
-     * @covers \Adrianorosa\GeoLocation\GeoLocationDetails::getRegion()
-     * @covers \Adrianorosa\GeoLocation\GeoLocationDetails::getCountryCode()
-     * @covers \Adrianorosa\GeoLocation\GeoLocationDetails::getLatitude()
-     * @covers \Adrianorosa\GeoLocation\GeoLocationDetails::getLongitude()
+     * @covers \Bkhim\GeoLocation\GeoLocationDetails::getIp()
+     * @covers \Bkhim\GeoLocation\GeoLocationDetails::getCity()
+     * @covers \Bkhim\GeoLocation\GeoLocationDetails::getRegion()
+     * @covers \Bkhim\GeoLocation\GeoLocationDetails::getCountryCode()
+     * @covers \Bkhim\GeoLocation\GeoLocationDetails::getLatitude()
+     * @covers \Bkhim\GeoLocation\GeoLocationDetails::getLongitude()
      */
     public function testParseNull()
     {

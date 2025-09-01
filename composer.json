@@ -1,16 +1,14 @@
 {
   "name": "bkhim/laravel-geolocation",
-  "description": "Fork of adrianorsouza/laravel-geolocation with Laravel 12 support",
-  "keywords": ["geolocation", "ipinfo", "geoip", "laravel", "laravel-geolocation"],
+  "description": "Modern Laravel geolocation package with multiple drivers (IpInfo, MaxMind), Laravel 12+ support, and enhanced features",
+  "keywords": ["geolocation", "ip", "location", "laravel", "maxmind", "ipinfo"],
+  "homepage": "https://github.com/bkhim/laravel-geolocation",
   "license": "MIT",
   "authors": [
     {
-      "name": "Adriano Rosa",
-      "email": "info@adrianorosa.com"
-    },
-    {
-      "name": "Your Name",
-      "email": "your@email.com"
+      "name": "Blancos Khim",
+      "email": "brian@briankimathi.com",
+      "homepage": "https://briankimathi.com"
     }
   ],
   "minimum-stability": "dev",
@@ -20,7 +18,7 @@
     "ext-json": "*",
     "illuminate/support": "^5.7|^6.0|^7.0|^8.0|^9.0|^10.0|^11.0|^12.0",
     "guzzlehttp/guzzle": "^6.0|^7.0",
-    "geoip2/geoip2": "dev-main"
+    "geoip2/geoip2": "^3.2"
   },
   "require-dev": {
     "orchestra/testbench": "^6.0|^7.0|^8.0|^9.0",
@@ -28,29 +26,31 @@
   },
   "autoload": {
     "psr-4": {
-      "Adrianorosa\\GeoLocation\\": "src"
+      "Bkhim\\GeoLocation\\": "src"
     }
   },
   "autoload-dev": {
     "psr-4": {
-      "Adrianorosa\\GeoLocation\\Tests\\": "tests/"
+      "Bkhim\\GeoLocation\\Tests\\": "tests/"
     }
   },
   "suggest": {
-    "geoip2/geoip2": "Required if using MaxMind database driver in the future",
-    "ext-maxminddb": "Better performance for MaxMind database reads"
+    "ext-maxminddb": "For better performance with MaxMind databases"
   },
   "scripts": {
     "test": "vendor/bin/phpunit",
     "test-coverage": "vendor/bin/phpunit --coverage-html coverage"
   },
+  "conflict": {
+    "adrianorsouza/laravel-geolocation": "*"
+  },
   "extra": {
     "laravel": {
       "providers": [
-        "Adrianorosa\\GeoLocation\\GeoLocationServiceProvider"
+        "Bkhim\\GeoLocation\\GeoLocationServiceProvider"
       ],
       "aliases": {
-        "GeoLocation": "Adrianorosa\\GeoLocation\\GeoLocation"
+        "GeoLocation": "Bkhim\\GeoLocation\\GeoLocation"
       }
     }
   }

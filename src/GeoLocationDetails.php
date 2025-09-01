@@ -1,6 +1,6 @@
 <?php
 
-namespace Adrianorosa\GeoLocation;
+namespace Bkhim\GeoLocation;
 
 use Illuminate\Contracts\Support\Arrayable;
 
@@ -10,7 +10,7 @@ use Illuminate\Contracts\Support\Arrayable;
  * @author Adriano Rosa <https://adrianorosa.com>
  * @date 2019-08-13 13:24
  *
- * @package Adrianorosa\GeoLocation
+ * @package Bkhim\GeoLocation
  */
 class GeoLocationDetails implements \JsonSerializable, Arrayable
 {

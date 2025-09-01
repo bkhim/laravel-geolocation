@@ -1,9 +1,9 @@
 <?php
 
-namespace Adrianorosa\GeoLocation;
+namespace Bkhim\GeoLocation;
 
+use Bkhim\GeoLocation\Console\GeoLocationCommand;
 use Illuminate\Support\ServiceProvider;
-use Illuminate\Contracts\Support\DeferrableProvider;
 
 /**
  * Class GeoLocationServiceProvider.
@@ -11,7 +11,7 @@ use Illuminate\Contracts\Support\DeferrableProvider;
  * @author Adriano Rosa <https://adrianorosa.com>
  * @date 2019-08-13 10:04
  *
- * @package Adrianorosa
+ * @package Bkhim
  */
 class GeoLocationServiceProvider extends ServiceProvider
 {
@@ -26,7 +26,6 @@ class GeoLocationServiceProvider extends ServiceProvider
         $this->mergeConfigFrom(__DIR__ . '/../config/geolocation.php', 'geolocation');
 
         $this->app->singleton('geolocation', function ($app) {
-            /**@var \Illuminate\Foundation\Application $app*/
             return new GeoLocationManager(
                 config('geolocation'),
                 $app->get('cache')
@@ -57,7 +56,7 @@ class GeoLocationServiceProvider extends ServiceProvider
         // Register console commands
         if ($this->app->runningInConsole()) {
             $this->commands([
-                Console\GeoLocationCommand::class,
+                GeoLocationCommand::class,
                 // Add future commands here
             ]);
         }

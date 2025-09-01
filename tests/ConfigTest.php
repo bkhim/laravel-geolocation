@@ -1,8 +1,6 @@
 <?php
 
-namespace Adrianorosa\GeoLocation\Tests;
-
-use Illuminate\Support\Facades\Cache;
+namespace Bkhim\GeoLocation\Tests;
 
 /**
  * Class ConfigTest.
@@ -10,12 +8,12 @@ use Illuminate\Support\Facades\Cache;
  * @author Adriano Rosa <https://adrianorosa.com>
  * @date 2019-08-13 20:36
  *
- * @package Adrianorosa\GeoLocation\Tests
+ * @package Bkhim\GeoLocation\Tests
  */
 class ConfigTest extends TestCase
 {
     /**
-     * @covers \Adrianorosa\GeoLocation\GeoLocationServiceProvider::boot
+     * @covers \Bkhim\GeoLocation\GeoLocationServiceProvider::boot
      */
     public function testGetConfigValues()
     {
