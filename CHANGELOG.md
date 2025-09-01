@@ -1,11 +1,41 @@
-CHANGELOG
-=========
+# Changelog
+
+## [v2.1.0] - 2025-09-01
+
+### Added
+- Complete namespace refactor from `Adrianorosa\GeoLocation` to `Bkhim\Geolocation`
+- Enhanced error handling and validation
+- Improved caching system with configurable TTL
+- Comprehensive test suite with HTTP mocking
+- Better documentation and configuration examples
+
+### Changed
+- **BREAKING**: Namespace changed to `Bkhim\Geolocation`
+- Updated to support Laravel 5.7+ to 12.x
+- Improved IP validation with filter_var checks
+- Enhanced exception messages with better debugging information
+
+### Fixed
+- Cache key collisions with improved namespacing
+- HTTP timeout handling for API providers
+- Rate limit detection and proper error reporting
+- Configuration loading and environment variable support
+
+### Migration Guide
+Update your namespace imports:
+```php
+// Before
+use Adrianorosa\GeoLocation\GeoLocation;
+
+// After  
+use Bkhim\Geolocation\GeoLocation;
+```
 
 ### v1.2.0
 
-- 2023-03-07 - update version constraint for require-dev testbench package
-- 2023-03-07 - typo fix
-- 2023-03-07 - Merge pull request #6 from BrekiTomasson/dev-l10-compatibility
+- update version constraint for require-dev testbench package
+- typo fix
+- Merge pull request #6 from BrekiTomasson/dev-l10-compatibility
 
 ### v1.1.0
 
