@@ -8,7 +8,7 @@ use Adrianorosa\GeoLocation\Tests\TestCase;
 use InvalidArgumentException;
 use Mockery;
 
-class MaxMindTest extends TestCase
+class MaxMind extends TestCase
 {
     protected function setUp(): void
     {
@@ -34,13 +34,13 @@ class MaxMindTest extends TestCase
     public function it_can_switch_between_drivers()
     {
         // Test IpInfo driver
-        config(['geolocation.drivers.default' => 'ipinfo']);
-        $ipinfo = GeoLocation::driver();
+        $ipinfoDr= config(['geolocation.drivers.default' => 'ipinfo']);
+        $ipinfo = GeoLocation::driver($ipinfoDr);
         $this->assertInstanceOf(\Adrianorosa\GeoLocation\Providers\IpInfo::class, $ipinfo);
 
         // Test MaxMind driver
-        config(['geolocation.drivers.default' => 'maxmind']);
-        $maxmind = GeoLocation::driver();
+        $maxmindDr = config(['geolocation.drivers.default' => 'maxmind']);
+        $maxmind = GeoLocation::driver($maxmindDr);
         $this->assertInstanceOf(\Adrianorosa\GeoLocation\Providers\MaxMind::class, $maxmind);
     }
 }
