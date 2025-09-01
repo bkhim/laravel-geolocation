@@ -4,6 +4,8 @@ namespace Adrianorosa\GeoLocation;
 
 use GeoIp2\Database\Reader;
 use GuzzleHttp\Client;
+use Illuminate\Contracts\Cache\Repository as CacheRepository;
+use Illuminate\Support\Str;
 use InvalidArgumentException;
 use MaxMind\Db\Reader\InvalidDatabaseException;
 
@@ -28,7 +30,7 @@ class GeoLocationManager
     protected $providers = [];
 
     /**
-     * @var \Illuminate\Cache\CacheManager
+     * @var \Illuminate\Contracts\Cache\Repository
      */
     protected $cacheProvider;
 
@@ -36,9 +38,9 @@ class GeoLocationManager
      * GeoLocation constructor.
      *
      * @param  array $config
-     * @param  \Illuminate\Cache\CacheManager $cacheProvider
+     * @param  \Illuminate\Contracts\Cache\Repository $cacheProvider
      */
-    public function __construct($config, \Illuminate\Cache\CacheManager $cacheProvider)
+    public function __construct($config, CacheRepository $cacheProvider)
     {
         $this->config = $config;
         $this->cacheProvider = $cacheProvider;
@@ -49,11 +51,10 @@ class GeoLocationManager
     /**
      * Get a GeoLocation driver instance.
      *
-     * @param $name
-     *
-     * @return mixed
+     * @param string|null $name
+     * @return \Adrianorosa\GeoLocation\Contracts\LookupInterface
      */
-    public function driver($name)
+    public function driver(?string $name = null): Contracts\LookupInterface
     {
         $name = $name ?: $this->getDefaultDriver();
 
@@ -61,44 +62,51 @@ class GeoLocationManager
     }
 
     /**
-     * @param  null $name
+     * Set the default driver.
+     *
+     * @param string|null $name
+     * @return void
      */
-    protected function setDefaultDriver($name = null)
+    protected function setDefaultDriver(?string $name = null): void
     {
         $provider = $name ?? $this->getDefaultDriver();
 
         if ($provider) {
-            $this->providers[$name] = $this->resolve($provider);
+            $this->providers[$provider] = $this->resolve($provider);
         }
     }
 
     /**
-     * @return mixed
+     * Get the default driver name.
+     *
+     * @return string
      */
-    protected function getDefaultDriver()
+    protected function getDefaultDriver(): string
     {
         return $this->config['drivers']['default'];
     }
 
     /**
-     * @param  array $config
+     * Create IpInfo driver instance.
      *
+     * @param  array $config
      * @return \Adrianorosa\GeoLocation\Contracts\LookupInterface
      */
-    protected function createIpinfoDriver($config)
+    protected function createIpinfoDriver(array $config): Contracts\LookupInterface
     {
         $options = $config['client_options'] ?? [];
 
-        return new Providers\IpInfo(new Client($options), $this->cacheProvider->getStore());
+        return new Providers\IpInfo(new Client($options), $this->cacheProvider);
     }
 
     /**
-     * @param  array  $config
+     * Create MaxMind driver instance.
      *
+     * @param  array  $config
      * @return \Adrianorosa\GeoLocation\Contracts\LookupInterface
-     * @throws InvalidDatabaseException
+     * @throws InvalidArgumentException
      */
-    protected function createMaxmindDriver($config)
+    protected function createMaxmindDriver(array $config): Contracts\LookupInterface
     {
         $databasePath = $config['database_path'] ?? null;
 
@@ -106,51 +114,60 @@ class GeoLocationManager
             throw new InvalidArgumentException("MaxMind database path is not configured.");
         }
 
-        // Resolve the path properly - handle both absolute and relative paths
-        if (!str_starts_with($databasePath, '/')) {
-            // If it's a relative path, resolve it from storage_path or base_path
+        // Resolve relative paths
+        if (!Str::startsWith($databasePath, '/')) {
             $databasePath = storage_path($databasePath);
         }
 
         if (!file_exists($databasePath)) {
             throw new InvalidArgumentException(
                 "MaxMind database not found at: {$databasePath}. " .
-                "Please download the database from https://dev.maxmind.com/geoip/geolite2-free-geolocation-data " .
-                "and place it in the specified location."
+                "Please download from: https://dev.maxmind.com/geoip/geolite2-free-geolocation-data"
             );
         }
 
         if (!is_readable($databasePath)) {
             throw new InvalidArgumentException(
                 "MaxMind database is not readable: {$databasePath}. " .
-                "Check file permissions."
+                "Check file permissions. Current: " . substr(sprintf('%o', fileperms($databasePath)), -4)
             );
         }
 
-        $reader = new Reader($databasePath);
+        try {
+            $reader = new Reader($databasePath);
+            return new Providers\MaxMind($reader, $this->cacheProvider);
 
-        return new Providers\MaxMind($reader, $this->cacheProvider->getStore());
+        } catch (InvalidDatabaseException $e) {
+            throw new InvalidArgumentException(
+                "MaxMind database is corrupt or invalid: " . $e->getMessage()
+            );
+        } catch (\Exception $e) {
+            throw new InvalidArgumentException(
+                "Failed to initialize MaxMind reader: " . $e->getMessage()
+            );
+        }
     }
 
     /**
-     * @param  null $name
+     * Get a provider instance.
      *
-     * @return mixed
+     * @param string|null $name
+     * @return \Adrianorosa\GeoLocation\Contracts\LookupInterface
      */
-    protected function provider($name = null)
+    protected function provider(?string $name = null): Contracts\LookupInterface
     {
+        $name = $name ?: $this->getDefaultDriver();
         return $this->providers[$name] ?? $this->resolve($name);
     }
 
     /**
-     * Resolve the given store.
+     * Resolve the given provider.
      *
      * @param  string  $name
      * @return \Adrianorosa\GeoLocation\Contracts\LookupInterface
-     *
      * @throws \InvalidArgumentException
      */
-    protected function resolve($name)
+    protected function resolve(string $name): Contracts\LookupInterface
     {
         $config = $this->getConfig($name);
 
@@ -162,21 +179,21 @@ class GeoLocationManager
 
         if (method_exists($this, $driverMethod)) {
             return $this->{$driverMethod}($config);
-        } else {
-            throw new InvalidArgumentException("GeoLocation Driver [{$config['driver']}] is not supported.");
         }
+
+        throw new InvalidArgumentException("GeoLocation Driver [{$config['driver']}] is not supported.");
     }
 
     /**
-     * @param $name
+     * Get configuration for a provider.
      *
-     * @return string|null
+     * @param string $name
+     * @return array|null
      */
-    protected function getConfig($name)
+    protected function getConfig(string $name): ?array
     {
         return $this->config['providers'][$name] ?? null;
     }
-
 
     /**
      * Dynamically call the default driver instance.
