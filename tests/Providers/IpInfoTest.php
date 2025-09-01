@@ -2,32 +2,52 @@
 
 namespace Adrianorosa\GeoLocation\Tests\Providers;
 
-use GuzzleHttp\Client;
-use Adrianorosa\GeoLocation\Tests\TestCase;
 use Adrianorosa\GeoLocation\Providers\IpInfo;
+use Adrianorosa\GeoLocation\GeoLocationException;
+use Adrianorosa\GeoLocation\Tests\TestCase;
+use Illuminate\Support\Facades\Http;
 
 class IpInfoTest extends TestCase
 {
-    /**
-     * @covers \Adrianorosa\GeoLocation\Providers\IpInfo::lookup
-     */
-    public function testCacheData()
+    /** @test */
+    public function it_uses_cache_to_prevent_redundant_api_calls()
     {
-        /**@var \Illuminate\Cache\ArrayStore $cache*/
-        $cache = $this->app->get('cache')->getStore();
+        // Clear any previous calls
+        Http::fake();
 
-        $ipAddress = '127.0.0.1';
-        $data = json_decode('{"ip": "127.0.0.1","city": "X","region": "X", "country": "XX","loc": "-23.5475,-46.6361"}', true);
+        $ipInfo = new IpInfo(app('http'), app('cache'));
 
-        $cache->put($ipAddress, $data, 2000);
-        $provider = new IpInfo(new Client(), $this->app->get('cache')->getStore());
+        // First call - should make API request
+        $result1 = $ipInfo->lookup('8.8.8.8');
 
-        $detail = $provider->lookup($ipAddress);
+        // Second call - should use cache
+        $result2 = $ipInfo->lookup('8.8.8.8');
 
-        $this->assertEquals('127.0.0.1', $detail->getIp());
-        $this->assertEquals('X', $detail->getCity());
-        $this->assertEquals('X', $detail->getRegion());
-        $this->assertEquals('XX', $detail->getCountry());
+        // Assert only one API call was made
+        Http::assertSentCount(1);
+        $this->assertEquals($result1->getIp(), $result2->getIp());
     }
 
+    /** @test */
+    public function it_validates_ip_before_api_call()
+    {
+        $this->expectException(GeoLocationException::class);
+        $this->expectExceptionMessage('Invalid IP address: invalid.ip');
+
+        $ipInfo = new IpInfo(app('http'), app('cache'));
+        $ipInfo->lookup('invalid.ip');
+    }
+
+    /** @test */
+    public function it_throws_exception_for_missing_api_key()
+    {
+        // Temporarily remove API key from config
+        config(['geolocation.providers.ipinfo.access_token' => null]);
+
+        $this->expectException(GeoLocationException::class);
+        $this->expectExceptionMessage('IpInfo API key is missing');
+
+        $ipInfo = new IpInfo(app('http'), app('cache'));
+        $ipInfo->lookup('8.8.8.8');
+    }
 }

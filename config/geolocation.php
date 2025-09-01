@@ -1,6 +1,12 @@
 <?php
 
 return [
+    'timeout' => env('GEOLOCATION_TIMEOUT', 5), // Request timeout in seconds
+
+    'retry' => [
+        'attempts' => env('GEOLOCATION_RETRY_ATTEMPTS', 2),
+        'delay' => env('GEOLOCATION_RETRY_DELAY', 100), // milliseconds
+    ],
 
     /*
     |--------------------------------------------------------------------------

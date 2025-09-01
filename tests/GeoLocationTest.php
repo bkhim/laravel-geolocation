@@ -5,100 +5,87 @@ namespace Adrianorosa\GeoLocation\Tests;
 use Adrianorosa\GeoLocation\GeoLocation;
 use Adrianorosa\GeoLocation\GeoLocationDetails;
 use Adrianorosa\GeoLocation\GeoLocationException;
+use Illuminate\Support\Facades\Http;
 
 class GeoLocationTest extends TestCase
 {
-    /**
-     * @covers \Adrianorosa\GeoLocation\GeoLocation
-     */
-    public function testLoadConfig()
+    /** @test */
+    public function it_returns_geolocation_details_for_valid_ip()
     {
-        $this->assertNotNull($this->app['config']['geolocation']);
-    }
-
-    /**
-     * @covers \Adrianorosa\GeoLocation\GeoLocation
-     */
-    public function testProviderBoundInstance()
-    {
-        $this->assertTrue($this->app->bound('geolocation'));
-    }
-
-    /**
-     * @covers \Adrianorosa\GeoLocation\GeoLocation
-     */
-    public function testProvider()
-    {
-        $this->assertTrue($this->app->bound('geolocation'));
-    }
-
-    /**
-     * @covers \Adrianorosa\GeoLocation\GeoLocation
-     */
-    public function testGeoLocation()
-    {
-        /**@var \Illuminate\Cache\ArrayStore $cache*/
-        $cache = $this->app->get('cache')->getStore();
-        $ipAddress = '8.8.8.8';
-        $data = json_decode('{"ip":"' . $ipAddress . '","city":"Mountain View","region":"California","country":"US","loc":"37.3860,-122.0838"}', true);
-        $cache->put($ipAddress, $data, 2000);
-
-        $this->app->setLocale('en');
-
-        $info = GeoLocation::lookup($ipAddress);
+        $info = GeoLocation::lookup('8.8.8.8');
 
         $this->assertInstanceOf(GeoLocationDetails::class, $info);
-        $this->assertEquals($ipAddress, $info->getIp());
+        $this->assertEquals('8.8.8.8', $info->getIp());
         $this->assertEquals('Mountain View', $info->getCity());
         $this->assertEquals('California', $info->getRegion());
         $this->assertEquals('United States', $info->getCountry());
         $this->assertEquals('US', $info->getCountryCode());
-        $this->assertIsFloat($info->getLatitude());
-        $this->assertIsFloat($info->getLongitude());
+        $this->assertEquals(37.3860, $info->getLatitude());
+        $this->assertEquals(-122.0838, $info->getLongitude());
     }
 
-    /**
-     * @covers \Adrianorosa\GeoLocation\GeoLocation
-     */
-    public function testCountryLocaleChange()
+    /** @test */
+    public function it_handles_country_name_translations()
     {
-        /**@var \Illuminate\Cache\ArrayStore $cache*/
-        $cache = $this->app->get('cache')->getStore();
-        $ipAddress = '8.8.8.8';
-        $data = json_decode('{"ip":"' . $ipAddress . '","city":"Mountain View","region":"California","country":"US","loc":"37.3860,-122.0838"}', true);
-        $cache->put($ipAddress, $data, 2000);
+        $this->app->setLocale('en');
+        $info = GeoLocation::lookup('8.8.8.8');
+        $this->assertEquals('United States', $info->getCountry());
 
-        $this->app->setLocale('pt_BR');
-
-        $info = GeoLocation::lookup($ipAddress);
-
-        $this->assertInstanceOf(GeoLocationDetails::class, $info);
+        $this->app->setLocale('pt');
+        $info = GeoLocation::lookup('8.8.8.8');
         $this->assertEquals('Estados Unidos', $info->getCountry());
-        $this->assertEquals('US', $info->getCountryCode());
     }
 
-    /**
-     * @covers \Adrianorosa\GeoLocation\GeoLocation
-     */
-    public function testGelLocationException()
+    /** @test */
+    public function it_throws_exception_for_invalid_ip()
     {
-        $this->app->setLocale('pt_BR');
+        $this->expectException(GeoLocationException::class);
+        $this->expectExceptionMessage('Invalid IP address');
+
+        GeoLocation::lookup('invalid.ip.address');
+    }
+
+    /** @test */
+    public function it_handles_rate_limit_errors()
+    {
+        Http::fake([
+            'ipinfo.io/8.8.8.8/geo' => Http::response([], 429)
+        ]);
 
         $this->expectException(GeoLocationException::class);
-        GeoLocation::lookup('1222398333');
+        $this->expectExceptionMessage('Rate limit exceeded');
+
+        GeoLocation::lookup('8.8.8.8');
     }
 
-    /**
-     * @covers \Adrianorosa\GeoLocation\GeoLocation::countries()
-     */
-    public function testGetTranslationsOfCountriesLocale()
+    /** @test */
+    public function it_handles_invalid_api_key_errors()
     {
-        $en = GeoLocation::countries('en');
-        $this->assertArrayHasKey('US', $en);
-        $this->assertEquals('United States', $en['US']);
+        Http::fake([
+            'ipinfo.io/8.8.8.8/geo' => Http::response([], 401)
+        ]);
 
-        $pt_BR = GeoLocation::countries('pt_BR');
-        $this->assertArrayHasKey('US', $pt_BR);
-        $this->assertEquals('Estados Unidos', $pt_BR['US']);
+        $this->expectException(GeoLocationException::class);
+        $this->expectExceptionMessage('Invalid API key');
+
+        GeoLocation::lookup('8.8.8.8');
+    }
+
+    /** @test */
+    public function it_handles_api_timeouts()
+    {
+        Http::fake([
+            'ipinfo.io/8.8.8.8/geo' => function () {
+                throw new \GuzzleHttp\Exception\ConnectException(
+                    'Connection timed out',
+                    new \GuzzleHttp\Psr7\Request('GET', 'test')
+                );
+            }
+        ]);
+
+        $this->expectException(GeoLocationException::class);
+        $this->expectExceptionMessage('Connection timeout');
+
+        GeoLocation::lookup('8.8.8.8');
     }
 }
