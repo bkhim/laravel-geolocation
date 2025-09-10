@@ -1,18 +1,18 @@
 <?php
 
-namespace Bkhim\GeoLocation;
+namespace Bkhim\Geolocation;
 
 use Illuminate\Contracts\Support\Arrayable;
 
 /**
- * Class GeoLocationDetails.
+ * Class GeolocationDetails.
  *
  * @author Adriano Rosa <https://adrianorosa.com>
  * @date 2019-08-13 13:24
  *
- * @package Bkhim\GeoLocation
+ * @package Bkhim\Geolocation
  */
-class GeoLocationDetails implements \JsonSerializable, Arrayable
+class GeolocationDetails implements \JsonSerializable, Arrayable
 {
     /**
      * @var string
@@ -50,7 +50,12 @@ class GeoLocationDetails implements \JsonSerializable, Arrayable
     protected $longitude;
 
     /**
-     * GeoLocationDetails constructor.
+     * @var string|null
+     */
+    protected $timezone;
+
+    /**
+     * GeolocationDetails constructor.
      *
      * @param  array $data
      */
@@ -80,7 +85,7 @@ class GeoLocationDetails implements \JsonSerializable, Arrayable
     }
 
     /**
-     * Get teh region name.
+     * Get the region name.
      *
      * @return string|null
      */
@@ -127,6 +132,16 @@ class GeoLocationDetails implements \JsonSerializable, Arrayable
     public function getLongitude()
     {
         return $this->longitude;
+    }
+
+    /**
+     * Get the timezone for the IP address.
+     *
+     * @return string|null
+     */
+    public function getTimezone(): ?string
+    {
+        return $this->timezone;
     }
 
     /**
@@ -184,6 +199,54 @@ class GeoLocationDetails implements \JsonSerializable, Arrayable
     }
 
     /**
+     * Check if timezone data is available.
+     *
+     * @return bool
+     */
+    public function hasTimezone(): bool
+    {
+        return !empty($this->timezone);
+    }
+
+    /**
+     * Get current time in the IP's timezone.
+     *
+     * @return \DateTime|null
+     */
+    public function getCurrentTime(): ?\DateTime
+    {
+        if (!$this->timezone) {
+            return null;
+        }
+
+        try {
+            return new \DateTime('now', new \DateTimeZone($this->timezone));
+        } catch (\Exception $e) {
+            return null;
+        }
+    }
+
+    /**
+     * Convert a datetime to the IP's timezone.
+     *
+     * @param \DateTimeInterface $dateTime
+     * @return \DateTime|null
+     */
+    public function convertToLocalTime(\DateTimeInterface $dateTime): ?\DateTime
+    {
+        if (!$this->timezone) {
+            return null;
+        }
+
+        try {
+            return (new \DateTime($dateTime->format('Y-m-d H:i:s')))
+                ->setTimezone(new \DateTimeZone($this->timezone));
+        } catch (\Exception $e) {
+            return null;
+        }
+    }
+
+    /**
      * Get list of location items as an array.
      *
      * @return array
@@ -197,6 +260,7 @@ class GeoLocationDetails implements \JsonSerializable, Arrayable
             'countryCode' => $this->countryCode,
             'latitude' => $this->latitude,
             'longitude' => $this->longitude,
+            'timezone' => $this->timezone,
         ];
     }
 

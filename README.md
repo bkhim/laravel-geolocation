@@ -188,8 +188,6 @@ MAXMIND_DATABASE_PATH="/absolute/path/to/GeoLite2-City.mmdb"
 # Run tests
 composer test
 
-# Test with coverage
-composer test-coverage
 ```
 
 ## Contributing

@@ -88,7 +88,8 @@ return [
                 'headers' => [
                     'User-Agent' => 'Laravel-GeoLocation-Package/1.0',
                 ],
-            ]
+            ],
+            'include_timezone' => true,
         ],
 
         /*
@@ -113,6 +114,7 @@ return [
             ),
 
             'license_key' => env('MAXMIND_LICENSE_KEY'),
+            'include_timezone' => true,
         ],
 
         /*

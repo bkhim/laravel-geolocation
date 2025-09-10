@@ -1,5 +1,51 @@
 # Changelog
 
+## [v2.1.1] - 2025-09-10
+### Usage with Timezone
+
+```php
+use Bkhim\Geolocation\GeoLocation;
+
+$details = GeoLocation::lookup('8.8.8.8');
+
+echo $details->getTimezone();  // America/Los_Angeles
+echo $details->getCity();      // Mountain View
+echo $details->getCountry();   // United States
+
+// Array representation includes timezone
+$data = $details->toArray();
+/*
+[
+    'ip' => '8.8.8.8',
+    'city' => 'Mountain View',
+    'region' => 'California',
+    'country' => 'United States',
+    'countryCode' => 'US',
+    'latitude' => 37.386,
+    'longitude' => -122.0838,
+    'timezone' => 'America/Los_Angeles'
+]
+*/
+```
+### Advanced usage
+```php
+$details = GeoLocation::lookup('8.8.8.8');
+
+if ($details->hasTimezone()) {
+    $localTime = $details->getCurrentTime();
+    echo "Current time in {$details->getCity()}: " . $localTime->format('Y-m-d H:i:s');
+}
+```
+```php
+// Convert server time to IP's local time
+$serverTime = new \DateTime();
+$localTime = $details->convertToLocalTime($serverTime);
+
+// Schedule events in user's timezone
+$userTimezone = $details->getTimezone();
+date_default_timezone_set($userTimezone);
+```
+
 ## [v2.1.0] - 2025-09-01
 
 ### Added

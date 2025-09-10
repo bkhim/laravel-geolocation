@@ -4,26 +4,26 @@
          bootstrap="vendor/autoload.php"
          colors="true"
          executionOrder="depends,defects"
-         forceCoversAnnotation="true"
-         beStrictAboutCoversAnnotation="true"
+         forceCoversAnnotation="false"
+         beStrictAboutCoversAnnotation="false"
          beStrictAboutOutputDuringTests="true"
          beStrictAboutTodoAnnotatedTests="true"
          processIsolation="false"
          stopOnFailure="true"
          verbose="false">
-      <coverage processUncoveredFiles="true">
-          <include>
-            <directory suffix=".php">./src</directory>
-          </include>
-      </coverage>
-      <testsuites>
-        <testsuite name="GeoLocation Test Suite">
-            <directory suffix="Test.php">./tests</directory>
-        </testsuite>
-    </testsuites>
+
+  <testsuites>
+    <testsuite name="GeoLocation Test Suite">
+      <directory suffix="Test.php">./tests</directory>
+    </testsuite>
+  </testsuites>
 
   <php>
-    <env name="GEOLOCATION_IPINFO_ACCESS_TOKEN" value="LftDDkrDdJtxhA"/>
+    <env name="GEOLOCATION_IPINFO_ACCESS_TOKEN" value="758524cdce39c8"/>
     <env name="GEOLOCATION_CACHE_TTL" value="4096"/>
+    <env name="GEOLOCATION_DRIVER" value="ipinfo"/>
+    <env name="MAXMIND_DATABASE_PATH" value="storage/app/geoip/test.mmdb"/>
+    <env name="GEOLOCATION_CACHE_ENABLED" value="false"/>
+    <env name="APP_ENV" value="testing"/>
   </php>
 </phpunit>

@@ -1,13 +1,15 @@
 <?php
 
-namespace Bkhim\GeoLocation\Providers;
+namespace Bkhim\Geolocation\Providers;
 
-use Bkhim\GeoLocation\Contracts\LookupInterface;
-use Bkhim\GeoLocation\GeoLocationDetails;
-use Bkhim\GeoLocation\GeoLocationException;
+use Bkhim\Geolocation\Contracts\LookupInterface;
+use Bkhim\Geolocation\GeolocationDetails;
+use Bkhim\Geolocation\GeolocationException;
 use GeoIp2\Database\Reader;
 use GeoIp2\Exception\AddressNotFoundException;
 use Illuminate\Contracts\Cache\Store;
+use Illuminate\Contracts\Cache\Repository as CacheRepository;
+use MaxMind\Db\Reader\InvalidDatabaseException;
 
 /**
  * Class MaxMind.
@@ -23,7 +25,7 @@ class MaxMind implements LookupInterface
     protected $reader;
 
     /**
-     * @var \Illuminate\Contracts\Cache\Store
+     * @var \Illuminate\Contracts\Cache\CacheRepository
      */
     protected $cache;
 
@@ -33,7 +35,7 @@ class MaxMind implements LookupInterface
      * @param Reader $reader
      * @param Store $cache
      */
-    public function __construct(Reader $reader, Store $cache)
+    public function __construct(Reader $reader, CacheRepository $cache)
     {
         $this->reader = $reader;
         $this->cache = $cache;
@@ -44,14 +46,14 @@ class MaxMind implements LookupInterface
      *
      * @param string|null $ipAddress
      * @param string $responseFilter
-     * @return GeoLocationDetails
-     * @throws GeoLocationException
+     * @return GeolocationDetails
+     * @throws GeolocationException
      */
-    public function lookup($ipAddress = null, $responseFilter = 'geo'): GeoLocationDetails
+    public function lookup($ipAddress = null, $responseFilter = 'geo'): GeolocationDetails
     {
         // Validate IP address
         if ($ipAddress && !filter_var($ipAddress, FILTER_VALIDATE_IP)) {
-            throw new GeoLocationException("Invalid IP address: {$ipAddress}");
+            throw new GeolocationException("Invalid IP address: {$ipAddress}");
         }
 
         // Use client IP if none provided
@@ -62,7 +64,7 @@ class MaxMind implements LookupInterface
 
         // Check cache first
         if (!is_null($data = $this->cache->get($cacheKey))) {
-            return new GeoLocationDetails($data);
+            return new GeolocationDetails($data);
         }
 
         try {
@@ -78,6 +80,7 @@ class MaxMind implements LookupInterface
                 'countryCode' => $record->country->isoCode ?? 'XX',
                 'latitude' => $record->location->latitude ?? 0,
                 'longitude' => $record->location->longitude ?? 0,
+                'timezone' => $record->location->timeZone ?? null,
                 'loc' => ($record->location->latitude ?? 0) . ',' . ($record->location->longitude ?? 0)
             ];
 
@@ -90,12 +93,14 @@ class MaxMind implements LookupInterface
                 );
             }
 
-            return new GeoLocationDetails($data);
+            return new GeolocationDetails($data);
 
         } catch (AddressNotFoundException $e) {
-            throw new GeoLocationException("IP address not found in database: {$ipAddress}");
-        } catch (\Exception $e) {
-            throw new GeoLocationException("MaxMind database error: " . $e->getMessage());
+            throw new GeolocationException("IP address not found in database: {$ipAddress}");
+        } catch (InvalidDatabaseException $e) {
+            throw new GeolocationException(
+                "MaxMind database is corrupt or invalid: " . $e->getMessage()
+            );
         }
     }
 }

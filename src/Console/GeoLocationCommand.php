@@ -1,8 +1,8 @@
 <?php
 
-namespace Bkhim\GeoLocation\Console;
+namespace Bkhim\Geolocation\Console;
 
-use Bkhim\GeoLocation\GeoLocation;
+use Bkhim\Geolocation\GeoLocation;
 use Illuminate\Console\Command;
 
 /**
@@ -11,7 +11,7 @@ use Illuminate\Console\Command;
  * @author Adriano Rosa <https://adrianorosa.com>
  * @date 2019-08-13 20:13
  *
- * @package Bkhim\GeoLocation\Console
+ * @package Bkhim\Geolocation\Console
  */
 class GeoLocationCommand extends Command
 {

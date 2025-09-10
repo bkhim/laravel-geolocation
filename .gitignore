@@ -4,3 +4,4 @@
 .env.*
 *.lock
 .phpunit.result.cache
+GeoLite2-City.mmdb

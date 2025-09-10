@@ -1,10 +1,10 @@
 <?php
 
-namespace Bkhim\GeoLocation\Providers;
+namespace Bkhim\Geolocation\Providers;
 
-use Bkhim\GeoLocation\Contracts\LookupInterface;
-use Bkhim\GeoLocation\GeoLocationDetails;
-use Bkhim\GeoLocation\GeoLocationException;
+use Bkhim\Geolocation\Contracts\LookupInterface;
+use Bkhim\Geolocation\GeolocationDetails;
+use Bkhim\Geolocation\GeolocationException;
 use GuzzleHttp\Exception\GuzzleException;
 use Illuminate\Contracts\Cache\Store;
 
@@ -16,6 +16,7 @@ use Illuminate\Contracts\Cache\Store;
  */
 class IpInfo implements LookupInterface
 {
+
     /**
      * @const Define the baseurl.
      */
@@ -35,50 +36,50 @@ class IpInfo implements LookupInterface
      * IpInfo constructor.
      *
      * @param $client
-     * @param Store $cache
+     * @param  Store  $cache
      */
-    public function __construct($client, Store $cache)
+    public function __construct(\GuzzleHttp\Client $client, Store $cache)
     {
-        $this->client = $client;
-        $this->cache = $cache;
+        $this->client        = $client;
+        $this->cache         = $cache;
     }
 
     /**
      * Filter the API response down to specific fields or objects
      * by adding the field or object name to the URL.
      *
-     * @param  string|null $ipAddress  An Ip or 'me' For yourself IP
-     * @param  string $responseFilter Options are: (city / org / geo)
+     * @param  string|null  $ipAddress  An Ip or 'me' For yourself IP
+     * @param  string  $responseFilter  Options are: (city / org / geo)
      *
-     * @return GeoLocationDetails
-     * @throws GeoLocationException
+     * @return GeolocationDetails
+     * @throws GeolocationException
      */
-    public function lookup($ipAddress = null, $responseFilter = 'geo'): GeoLocationDetails
+    public function lookup($ipAddress = null, $responseFilter = 'geo'): GeolocationDetails
     {
         // Validate IP address format before any processing
-        if ($ipAddress && !filter_var($ipAddress, FILTER_VALIDATE_IP)) {
-            throw new GeoLocationException("Invalid IP address: {$ipAddress}");
+        if ($ipAddress && ! filter_var($ipAddress, FILTER_VALIDATE_IP)) {
+            throw new GeolocationException("Invalid IP address: {$ipAddress}");
         }
 
         // Create secure, namespaced cache key to prevent collisions
-        $cacheKey = 'geolocation:ipinfo:' . md5($ipAddress ?? 'current');
+        $cacheKey = 'geolocation:ipinfo:'.md5($ipAddress ?? 'current');
 
         // Check cache first to avoid unnecessary API calls
-        if (!is_null($data = $this->cache->get($cacheKey))) {
-            return new GeoLocationDetails($data);
+        if ( ! is_null($data = $this->cache->get($cacheKey))) {
+            return new GeolocationDetails($data);
         }
 
         // Build API endpoint
-        $endpoint = static::BASEURL;
+        $endpoint    = static::BASEURL;
         $accessToken = config('geolocation.providers.ipinfo.access_token');
 
         // Validate API key presence
         if (empty($accessToken)) {
-            throw new GeoLocationException("IpInfo API key is missing. Set IPINFO_API_KEY in your .env file");
+            throw new GeolocationException("IpInfo API key is missing. Set IPINFO_API_KEY in your .env file");
         }
 
         // Always use 'geo' filter for consistent response format
-        // Other filters may return different data structures that break GeoLocationDetails
+        // Other filters may return different data structures that break GeolocationDetails
         $filter = 'geo';
         if ($ipAddress) {
             $endpoint .= "/{$ipAddress}/{$filter}";
@@ -86,16 +87,16 @@ class IpInfo implements LookupInterface
 
         try {
             // Make API request with timeout to prevent hanging
-            $response = $this->client->get($endpoint, [
-                'headers' => [
+            $response = \Illuminate\Support\Facades\Http::withOptions($this->client->getConfig() ?? [])
+                ->timeout(config('geolocation.timeout', 5))
+                ->withHeaders([
                     'Authorization' => 'Bearer ' . $accessToken,
                     'Accept' => 'application/json'
-                ],
-                'timeout' => config('geolocation.timeout', 5),
-            ]);
+                ])
+                ->get($endpoint);
 
-            // Handle HTTP errors and rate limits
-            $statusCode = $response->getStatusCode();
+            // Handle HTTP errors
+            $statusCode = $response->status();
             if ($statusCode !== 200) {
                 $errorMessage = match($statusCode) {
                     401 => "Invalid API key - please check your IPINFO_API_KEY",
@@ -104,31 +105,32 @@ class IpInfo implements LookupInterface
                     500 => "IpInfo API server error",
                     default => "API returned HTTP error: {$statusCode}"
                 };
-                throw new GeoLocationException($errorMessage);
+                throw new GeolocationException($errorMessage);
             }
 
-            // Parse and validate JSON response
-            $responseBody = $response->getBody()->getContents();
-            $data = json_decode($responseBody, true);
+            // Get JSON data from response
+            $data = $response->json();
 
             // Strict JSON validation - reject malformed responses
             if (json_last_error() !== JSON_ERROR_NONE) {
-                throw new GeoLocationException("Invalid JSON response from IpInfo API");
+                throw new GeolocationException("Invalid JSON response from IpInfo API");
             }
 
             // Validate essential response fields exist
-            if (!isset($data['ip']) || !isset($data['country'])) {
-                throw new GeoLocationException("Incomplete geolocation data received from API");
+            if ( ! isset($data['ip']) || ! isset($data['country'])) {
+                throw new GeolocationException("Incomplete geolocation data received from API");
             }
 
             // Parse coordinates from 'loc' field if present
             if (isset($data['loc'])) {
                 $coordinates = explode(',', $data['loc']);
                 if (count($coordinates) === 2) {
-                    $data['latitude'] = (float) $coordinates[0];
+                    $data['latitude']  = (float) $coordinates[0];
                     $data['longitude'] = (float) $coordinates[1];
                 }
             }
+
+            $data['timezone'] = $data['timezone'] ?? null;
 
             // Cache successful response with TTL from config (default: 24 hours)
             $this->cache->put(
@@ -137,21 +139,15 @@ class IpInfo implements LookupInterface
                 config('geolocation.cache.ttl', 86400)
             );
 
-            return new GeoLocationDetails($data);
+            return new GeolocationDetails($data);
 
-        } catch (GuzzleException $e) {
-            // Handle network errors with specific messaging
-            $errorCode = $e->getCode();
-            $errorMessage = match(true) {
-                str_contains($e->getMessage(), 'cURL error 28') => "Connection timeout - please try again",
-                $errorCode === 0 => "Network error: " . $e->getMessage(),
-                default => "API request failed: " . $e->getMessage()
-            };
-
-            throw new GeoLocationException($errorMessage, $errorCode, $e);
+        } catch (\Illuminate\Http\Client\RequestException $e) {
+            // Handle HTTP client exceptions
+            throw new GeolocationException("API request failed: " . $e->getMessage());
         } catch (\Exception $e) {
             // Catch any other unexpected exceptions
-            throw new GeoLocationException("Unexpected error: " . $e->getMessage(), $e->getCode(), $e);
+            throw new GeolocationException("Unexpected error: ".$e->getMessage(), $e->getCode(), $e);
         }
     }
+
 }

@@ -1,6 +1,6 @@
 {
   "name": "bkhim/laravel-geolocation",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "description": "Modern Laravel geolocation package with multiple drivers (IpInfo, MaxMind), Laravel 12+ support, and enhanced features",
   "keywords": ["geolocation", "ip", "location", "laravel", "maxmind", "ipinfo"],
   "homepage": "https://github.com/bkhim/laravel-geolocation",
@@ -27,20 +27,19 @@
   },
   "autoload": {
     "psr-4": {
-      "Bkhim\\GeoLocation\\": "src"
+      "Bkhim\\Geolocation\\": "src"
     }
   },
   "autoload-dev": {
     "psr-4": {
-      "Bkhim\\GeoLocation\\Tests\\": "tests/"
+      "Bkhim\\Geolocation\\Tests\\": "tests/"
     }
   },
   "suggest": {
     "ext-maxminddb": "For better performance with MaxMind databases"
   },
   "scripts": {
-    "test": "vendor/bin/phpunit",
-    "test-coverage": "vendor/bin/phpunit --coverage-html coverage"
+    "test": "vendor/bin/phpunit"
   },
   "conflict": {
     "adrianorsouza/laravel-geolocation": "*"
@@ -48,10 +47,10 @@
   "extra": {
     "laravel": {
       "providers": [
-        "Bkhim\\GeoLocation\\GeoLocationServiceProvider"
+        "Bkhim\\Geolocation\\GeolocationServiceProvider"
       ],
       "aliases": {
-        "GeoLocation": "Bkhim\\GeoLocation\\GeoLocation"
+        "GeoLocation": "Bkhim\\Geolocation\\GeoLocation"
       }
     }
   }

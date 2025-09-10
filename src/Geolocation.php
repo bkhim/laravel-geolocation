@@ -1,8 +1,8 @@
 <?php
 
-namespace Bkhim\GeoLocation;
+namespace Bkhim\Geolocation;
 
-use Bkhim\GeoLocation\Contracts\LookupInterface;
+use Bkhim\Geolocation\Contracts\LookupInterface;
 use Illuminate\Support\Facades\Facade;
 
 /**
@@ -13,12 +13,12 @@ use Illuminate\Support\Facades\Facade;
  *
  * @package Bkhim
  *
- * @method static|GeoLocationDetails lookup($ipAddress, $responseFilter = 'geo')
+ * @method static|GeolocationDetails lookup($ipAddress, $responseFilter = 'geo')
  * @method static|LookupInterface driver($name)
  *
- * @see \Bkhim\GeoLocation\Providers\IpInfo
+ * @see \Bkhim\Geolocation\Providers\IpInfo
  */
-class GeoLocation extends Facade
+class Geolocation extends Facade
 {
     /**
      * Convenient method to get the translation list of countries codes.
@@ -33,7 +33,7 @@ class GeoLocation extends Facade
     }
 
     /**
-     * @method static GeoLocationDetails lookup($ipAddress, $responseFilter = 'geo')
+     * @method static GeolocationDetails lookup($ipAddress, $responseFilter = 'geo')
      * @method static LookupInterface driver($name)
      */
     protected static function getFacadeAccessor()
