@@ -1,6 +1,6 @@
 {
   "name": "bkhim/laravel-geolocation",
-  "version": "2.1.3",
+  "version": "2.1.4",
   "description": "Modern Laravel geolocation package with multiple drivers (IpInfo, MaxMind), Laravel 12+ support, and enhanced features",
   "keywords": ["geolocation", "ip", "location", "laravel", "maxmind", "ipinfo"],
   "homepage": "https://github.com/bkhim/laravel-geolocation",

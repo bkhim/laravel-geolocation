@@ -99,7 +99,7 @@ class GeolocationManager
         // Use Laravel's HTTP client instead of raw Guzzle
         return new Providers\IpInfo(
             new \GuzzleHttp\Client($options),
-            $this->cacheProvider->getStore()
+            $this->cacheProvider->store()
         );
     }
 
@@ -139,7 +139,7 @@ class GeolocationManager
 
         try {
             $reader = new Reader($databasePath);
-            return new Providers\MaxMind($reader, $this->cacheProvider->getStore());
+            return new Providers\MaxMind($reader, $this->cacheProvider->store());
 
         } catch (InvalidDatabaseException $e) {
             throw new InvalidArgumentException(
