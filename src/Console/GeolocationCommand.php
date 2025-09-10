@@ -13,7 +13,7 @@ use Illuminate\Console\Command;
  *
  * @package Bkhim\Geolocation\Console
  */
-class GeoLocationCommand extends Command
+class GeolocationCommand extends Command
 {
     /**
      * The name and signature of the console command.
