@@ -7,6 +7,7 @@ use Bkhim\Geolocation\GeolocationDetails;
 use Bkhim\Geolocation\GeolocationException;
 use GuzzleHttp\Exception\GuzzleException;
 use Illuminate\Contracts\Cache\Store;
+use Illuminate\Contracts\Cache\Repository as CacheRepository;
 
 /**
  * Class IpInfo.
@@ -28,7 +29,7 @@ class IpInfo implements LookupInterface
     protected $client;
 
     /**
-     * @var \Illuminate\Contracts\Cache\Store
+     * @var \Illuminate\Contracts\Cache\Repository
      */
     protected $cache;
 
@@ -36,9 +37,9 @@ class IpInfo implements LookupInterface
      * IpInfo constructor.
      *
      * @param $client
-     * @param  Store  $cache
+     * @param  CacheRepository  $cache
      */
-    public function __construct(\GuzzleHttp\Client $client, Store $cache)
+    public function __construct(\GuzzleHttp\Client $client, CacheRepository $cache)
     {
         $this->client        = $client;
         $this->cache         = $cache;
