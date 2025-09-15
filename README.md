@@ -48,7 +48,7 @@ MAXMIND_DATABASE_PATH=/path/to/GeoLite2-City.mmdb
 Publish the configuration file:
 
 ```bash
-php artisan vendor:publish --provider="Bkhim\GeoLocation\GeoLocationServiceProvider" --tag="geolocation-config"
+php artisan vendor:publish --tag=geolocation-config
 ```
 
 ### Environment Variables
