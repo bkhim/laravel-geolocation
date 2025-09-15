@@ -1,4 +1,4 @@
-# Laravel GeoLocation Package
+# Laravel Geolocation Package
 
 A modern, feature-rich geolocation package for Laravel with multiple driver support. Originally forked from [adrianorsouza/laravel-geolocation](https://github.com/adrianorsouza/laravel-geolocation), now significantly enhanced and maintained.
 
@@ -79,9 +79,9 @@ GEOLOCATION_RETRY_DELAY=100
 ### Basic Lookup
 
 ```php
-use Bkhim\GeoLocation\GeoLocation;
+use Bkhim\Geolocation\Geolocation;
 
-$details = GeoLocation::lookup('8.8.8.8');
+$details = Geolocation::lookup('8.8.8.8');
 
 echo $details->getIp();          // 8.8.8.8
 echo $details->getCity();        // Mountain View
@@ -99,22 +99,22 @@ $data = $details->toArray();
 
 ```php
 // Use specific driver
-$ipinfoDetails = GeoLocation::driver('ipinfo')->lookup('8.8.8.8');
-$maxmindDetails = GeoLocation::driver('maxmind')->lookup('8.8.8.8');
+$ipinfoDetails = Geolocation::driver('ipinfo')->lookup('8.8.8.8');
+$maxmindDetails = Geolocation::driver('maxmind')->lookup('8.8.8.8');
 
 // Switch default driver temporarily
 config(['geolocation.drivers.default' => 'maxmind']);
-$details = GeoLocation::lookup('8.8.8.8');
+$details = Geolocation::lookup('8.8.8.8');
 ```
 
 ### Error Handling
 
 ```php
 try {
-    $details = GeoLocation::lookup('8.8.8.8');
-} catch (\Bkhim\GeoLocation\GeoLocationException $e) {
+    $details = Geolocation::lookup('8.8.8.8');
+} catch (\Bkhim\Geolocation\GeolocationException $e) {
     // Handle errors (invalid IP, API failures, etc.)
-    logger()->error('GeoLocation failed: ' . $e->getMessage());
+    logger()->error('Geolocation failed: ' . $e->getMessage());
 }
 ```
 
@@ -153,14 +153,14 @@ try {
 The package includes translations for country names. Publish translation files:
 
 ```bash
-php artisan vendor:publish --provider="Bkhim\GeoLocation\GeoLocationServiceProvider" --tag="geolocation-translations"
+php artisan vendor:publish --tag="geolocation-translations"
 ```
 
 ### Using Translations
 
 ```php
 app()->setLocale('pt');
-$details = GeoLocation::lookup('8.8.8.8');
+$details = Geolocation::lookup('8.8.8.8');
 echo $details->getCountry(); // "Estados Unidos" instead of "United States"
 ```
 
