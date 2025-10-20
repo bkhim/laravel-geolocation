@@ -6,13 +6,13 @@ use Bkhim\Geolocation\Contracts\LookupInterface;
 use Bkhim\Geolocation\GeolocationDetails;
 use Bkhim\Geolocation\GeolocationException;
 use GuzzleHttp\Exception\GuzzleException;
-use Illuminate\Contracts\Cache\Store;
 use Illuminate\Contracts\Cache\Repository as CacheRepository;
 
 /**
  * Class IpInfo.
  *
  * @author Adriano Rosa <https://adrianorosa.com>
+ * @maintainer Blancos khim <https://www.briankimathi.com>
  * @date 2019-08-13 13:55
  */
 class IpInfo implements LookupInterface
