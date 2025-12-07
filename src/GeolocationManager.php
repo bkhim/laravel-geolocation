@@ -94,11 +94,8 @@ class GeolocationManager
      */
     protected function createIpinfoDriver($config)
     {
-        $options = $config['client_options'] ?? [];
-
         // Use Laravel's HTTP client instead of raw Guzzle
         return new Providers\IpInfo(
-            new \GuzzleHttp\Client($options),
             $this->cacheProvider->store()
         );
     }

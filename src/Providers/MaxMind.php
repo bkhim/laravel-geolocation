@@ -81,6 +81,7 @@ class MaxMind implements LookupInterface
                 'latitude'    => $record->location->latitude ?? 0,
                 'longitude'   => $record->location->longitude ?? 0,
                 'timezone'    => $record->location->timeZone ?? null,
+                'postalCode'  => $record->postal->code ?? null,
                 'loc'         => ($record->location->latitude ?? 0).','.($record->location->longitude ?? 0)
             ];
 
