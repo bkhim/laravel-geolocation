@@ -93,6 +93,7 @@ class IpInfo implements LookupInterface
             }
             $data['timezone'] = $data['timezone'] ?? null;
             $data['postalCode'] = $data['postal'] ?? null;
+            $data['org'] = $data['org'] ?? null;
             $this->cache->put(
                 $cacheKey,
                 $data,

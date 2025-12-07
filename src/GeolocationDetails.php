@@ -60,6 +60,11 @@ class GeolocationDetails implements \JsonSerializable, Arrayable
     protected $postalCode;
 
     /**
+     * @var string|null
+     */
+    protected $org;
+
+    /**
      * GeolocationDetails constructor.
      *
      * @param  array $data
@@ -157,6 +162,16 @@ class GeolocationDetails implements \JsonSerializable, Arrayable
     public function getPostalCode(): ?string
     {
         return $this->postalCode;
+    }
+
+    /**
+     * Get the organization for the IP address.
+     *
+     * @return string|null
+     */
+    public function getOrg(): ?string
+    {
+        return $this->org;
     }
 
     /**
@@ -277,6 +292,7 @@ class GeolocationDetails implements \JsonSerializable, Arrayable
             'longitude' => $this->longitude,
             'timezone' => $this->timezone,
             'postalCode' => $this->postalCode,
+            'org' => $this->org,
         ];
     }
 
