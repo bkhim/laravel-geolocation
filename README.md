@@ -5,7 +5,7 @@ A modern, feature-rich geolocation package for Laravel with multiple driver supp
 ## Features
 
 - **Multiple Drivers**: Support for IpInfo API and MaxMind database
-- **Laravel 12+ Ready**: Full compatibility with latest Laravel versions
+- **Laravel 10+ Ready**: Full compatibility with Laravel 10.x through 12.x
 - **Enhanced Caching**: Intelligent caching system with configurable TTL
 - **Robust Error Handling**: Comprehensive exception handling and validation
 - **IP Validation**: Built-in IP address validation
@@ -20,8 +20,8 @@ composer require bkhim/laravel-geolocation
 
 ## Supported Laravel Versions
 
-- Laravel 5.7+ to 12.x
-- PHP 8.2+
+- Laravel 10.x to 12.x
+- PHP 8.1+
 
 ## Quick Start
 

@@ -1,7 +1,7 @@
 {
   "name": "bkhim/laravel-geolocation",
-  "version": "2.1.5",
-  "description": "Modern Laravel geolocation package with multiple drivers (IpInfo, MaxMind), Laravel 12+ support, and enhanced features",
+  "version": "2.1.6",
+  "description": "Modern Laravel geolocation package with multiple drivers (IpInfo, MaxMind), Laravel 10-12 support, and enhanced features",
   "keywords": ["geolocation", "ip", "location", "laravel", "maxmind", "ipinfo"],
   "homepage": "https://github.com/bkhim/laravel-geolocation",
   "license": "MIT",
@@ -9,21 +9,22 @@
     {
       "name": "Blancos Khim",
       "email": "brian@briankimathi.com",
-      "homepage": "https://briankimathi.com"
+      "homepage": "https://www.briankimathi.com"
     }
   ],
   "minimum-stability": "dev",
   "require": {
-    "php": "^8.2",
+    "php": "^8.1",
     "ext-openssl": "*",
     "ext-json": "*",
-    "illuminate/support": "^5.7|^6.0|^7.0|^8.0|^9.0|^10.0|^11.0|^12.0",
+    "illuminate/support": "^10.0|^11.0|^12.0",
     "guzzlehttp/guzzle": "^6.0|^7.0",
     "geoip2/geoip2": "^3.2"
   },
   "require-dev": {
     "orchestra/testbench": "^6.0|^7.0|^8.0|^9.0",
-    "phpunit/phpunit": "^9.5|^10.5"
+    "pestphp/pest": "2.x-dev",
+    "pestphp/pest-plugin-laravel": "2.x-dev"
   },
   "autoload": {
     "psr-4": {
@@ -52,6 +53,11 @@
       "aliases": {
         "GeoLocation": "Bkhim\\Geolocation\\GeoLocation"
       }
+    }
+  },
+  "config": {
+    "allow-plugins": {
+      "pestphp/pest-plugin": true
     }
   }
 }

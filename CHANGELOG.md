@@ -1,5 +1,11 @@
 # Changelog
 
+## [v2.1.6] - 2025-12-07
+### Changed
+- **BREAKING**: Lowered PHP requirement from ^8.2 to ^8.1 for better Laravel 10.x compatibility from user requests
+- **BREAKING**: Removed Laravel 9.x support - now requires Laravel 10.x minimum
+- Updated documentation to reflect realistic version support
+
 ## [v2.1.1] - 2025-09-10
 ### Usage with Timezone
 
