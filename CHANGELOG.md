@@ -1,10 +1,50 @@
 # Changelog
 
 ## [v2.1.6] - 2025-12-07
+### Added
+- New `getPostalCode()` method to retrieve postal/zip code information from IP addresses
+- New `getOrg()` method to retrieve organization information from IP addresses
+- Postal code support for both IpInfo and MaxMind providers
+- Organization support for both IpInfo and MaxMind providers
+- Updated `toArray()` and JSON serialization to include postal code and organization data
+
 ### Changed
 - **BREAKING**: Lowered PHP requirement from ^8.2 to ^8.1 for better Laravel 10.x compatibility from user requests
 - **BREAKING**: Removed Laravel 9.x support - now requires Laravel 10.x minimum
 - Updated documentation to reflect realistic version support
+
+### Fixed
+- Fixed GeolocationManager constructor parameter mismatch for IpInfo provider
+
+### Usage with New Methods
+
+```php
+use Bkhim\Geolocation\GeoLocation;
+
+$details = GeoLocation::lookup('8.8.8.8');
+
+echo $details->getPostalCode(); // 94043
+echo $details->getOrg();        // Google LLC
+echo $details->getCity();       // Mountain View
+echo $details->getCountry();    // United States
+
+// Array representation now includes postal code and organization
+$data = $details->toArray();
+/*
+[
+    'ip' => '8.8.8.8',
+    'city' => 'Mountain View',
+    'region' => 'California', 
+    'country' => 'United States',
+    'countryCode' => 'US',
+    'latitude' => 37.386,
+    'longitude' => -122.0838,
+    'timezone' => 'America/Los_Angeles',
+    'postalCode' => '94043',
+    'org' => 'Google LLC'
+]
+*/
+```
 
 ## [v2.1.1] - 2025-09-10
 ### Usage with Timezone

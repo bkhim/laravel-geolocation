@@ -6,6 +6,7 @@ A modern, feature-rich geolocation package for Laravel with multiple driver supp
 
 - **Multiple Drivers**: Support for IpInfo API and MaxMind database
 - **Laravel 10+ Ready**: Full compatibility with Laravel 10.x through 12.x
+- **Comprehensive Data**: City, region, country, coordinates, timezone, postal codes, and organization info
 - **Enhanced Caching**: Intelligent caching system with configurable TTL
 - **Robust Error Handling**: Comprehensive exception handling and validation
 - **IP Validation**: Built-in IP address validation
@@ -90,9 +91,24 @@ echo $details->getCountry();     // United States
 echo $details->getCountryCode(); // US
 echo $details->getLatitude();    // 37.386
 echo $details->getLongitude();   // -122.0838
+echo $details->getPostalCode();  // 94043
+echo $details->getOrg();         // Google LLC
 
 // Get as array
 $data = $details->toArray();
+/*
+[
+    'city' => 'Mountain View',
+    'region' => 'California',
+    'country' => 'United States', 
+    'countryCode' => 'US',
+    'latitude' => 37.386,
+    'longitude' => -122.0838,
+    'timezone' => 'America/Los_Angeles',
+    'postalCode' => '94043',
+    'org' => 'Google LLC'
+]
+*/
 ```
 
 ### Specific Driver Usage
@@ -105,6 +121,34 @@ $maxmindDetails = Geolocation::driver('maxmind')->lookup('8.8.8.8');
 // Switch default driver temporarily
 config(['geolocation.drivers.default' => 'maxmind']);
 $details = Geolocation::lookup('8.8.8.8');
+```
+
+### Available Methods
+
+The `GeolocationDetails` object provides the following methods:
+
+```php
+$details = Geolocation::lookup('8.8.8.8');
+
+// Basic location information
+$details->getIp();          // string|null - IP address
+$details->getCity();        // string|null - City name
+$details->getRegion();      // string|null - State/Province name
+$details->getCountry();     // string|null - Country name (translated if available)
+$details->getCountryCode(); // string|null - ISO country code (e.g., 'US', 'GB')
+
+// Coordinates
+$details->getLatitude();    // float|null - Latitude coordinate
+$details->getLongitude();   // float|null - Longitude coordinate
+
+// Additional data
+$details->getTimezone();    // string|null - Timezone identifier (e.g., 'America/New_York')
+$details->getPostalCode();  // string|null - Postal/ZIP code
+$details->getOrg();         // string|null - Organization/ISP name
+
+// Serialization
+$details->toArray();        // array - All data as associative array
+json_encode($details);      // string - JSON representation
 ```
 
 ### Error Handling
@@ -200,13 +244,7 @@ composer test
 
 ## Changelog
 
-### v2.1.0
-- Complete rewrite with multiple driver support
-- Laravel 12+ compatibility
-- Enhanced error handling and validation
-- MaxMind database integration
-- Improved caching system
-- Better testing infrastructure
+- See [CHANGELOG.md](CHANGELOG.md) for details--
 
 ## License
 
