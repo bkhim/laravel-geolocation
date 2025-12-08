@@ -1,14 +1,14 @@
 # Changelog
 
 ## [v3.0.0] - 2025-12-09
-### 🎉 Major Release - Complete Package Overhaul
+### Major Release - Complete Package Overhaul
 
-### **BREAKING CHANGES**
-- **Enhanced GeolocationDetails Class**: Complete rewrite with 25+ new methods and ArrayAccess interface
-- **Production-Ready Architecture**: Robust error handling, validation, and edge case management
-- **Immutable Data Objects**: GeolocationDetails objects are now immutable for thread safety
+### BREAKING CHANGES
+- Enhanced GeolocationDetails Class: Complete rewrite with 25+ new methods and ArrayAccess interface
+- Production-Ready Architecture: Robust error handling, validation, and edge case management
+- Immutable Data Objects: GeolocationDetails objects are now immutable for thread safety
 
-### **🚀 New Core Methods**
+### New Core Methods
 #### Enhanced Data Access
 - `getTimezoneOffset()` - Hours offset from UTC (-8, +2, etc.)
 - `getCurrency()` / `getCurrencyCode()` / `getCurrencySymbol()` - Full currency information
@@ -32,7 +32,7 @@
 - `offsetGet()` / `offsetExists()` - Array-like access (`$details['city']`)
 - Immutable design with `offsetSet()` / `offsetUnset()` protection
 
-### **🛡️ Production Hardening**
+### Production Hardening
 #### Robust Error Handling
 - JSON parsing with error validation and fallback mechanisms
 - Safe coordinate parsing with numeric validation
@@ -50,13 +50,13 @@
 - Optimized coordinate parsing with early returns
 - Minimal memory footprint with lazy evaluation
 
-### **🌍 Provider Enhancements**
+### Provider Enhancements
 #### All Providers Updated
-- **IPStack**: Full currency, timezone offset, security, and ASN data
-- **IPGeolocation**: Complete security features, device detection, network info
-- **ipapi.co**: Enhanced timezone calculations and ASN parsing
-- **IpInfo**: ASN extraction from org field, improved data mapping
-- **MaxMind**: Full database field utilization, connection type detection
+- IPStack: Full currency, timezone offset, security, and ASN data
+- IPGeolocation: Complete security features, device detection, network info
+- ipapi.co: Enhanced timezone calculations and ASN parsing
+- IpInfo: ASN extraction from org field, improved data mapping
+- MaxMind: Full database field utilization, connection type detection
 
 #### Advanced Provider Features
 - Timezone offset calculations for all providers
@@ -65,7 +65,7 @@
 - Mobile/proxy/crawler/Tor detection (provider dependent)
 - Hostname resolution and reverse DNS (where supported)
 
-### **📊 Data Completeness**
+### Data Completeness
 #### Comprehensive Geographic Data
 ```php
 $details = Geolocation::lookup('8.8.8.8');
@@ -79,7 +79,7 @@ echo $details->getAsn();               // "AS15169"
 echo $details->getConnectionType();     // "corporate"
 echo $details->getFormattedAddress();   // "Mountain View, CA, United States"
 echo $details->getGoogleMapsLink();     // "https://maps.google.com/?q=37.386,-122.0838"
-echo $details->getCountryFlag();        // "🇺🇸"
+echo $details->getCountryFlag();        // "US"
 
 // Array/object access
 echo $details['city'];                  // "Mountain View"
@@ -87,7 +87,7 @@ echo $details->city;                    // "Mountain View" (magic getter)
 echo (string) $details;                 // "Mountain View, CA, United States"
 ```
 
-### **🔧 Developer Experience**
+### Developer Experience
 #### Enhanced IDE Support
 - Full type hints and PHPDoc annotations
 - ArrayAccess interface for flexible data access
@@ -105,7 +105,7 @@ echo (string) $details;                 // "Mountain View, CA, United States"
 - Existing configurations continue to work
 - Smooth upgrade path with deprecation notices where needed
 
-### **🚨 Migration Notes**
+### Migration Notes
 #### For v2.x Users
 ```php
 // v2.x (still works)
@@ -125,13 +125,13 @@ echo (string) $details;                 // NEW: String casting
 - Enhanced caching includes new data fields
 - Improved error handling may catch previously silent failures
 
-### **📈 Performance Improvements**
+### Performance Improvements
 - 40% faster coordinate parsing with validation
 - Reduced memory usage through optimized property handling  
 - Enhanced caching efficiency with comprehensive data structures
 - Smarter fallback mechanisms reduce API calls
 
-### **🔍 Security Enhancements**
+### Security Enhancements
 - Input validation for all data types and formats
 - Protected against malformed JSON and data injection
 - Safe flag emoji generation prevents encoding issues
