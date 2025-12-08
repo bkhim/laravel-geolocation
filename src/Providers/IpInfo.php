@@ -91,9 +91,50 @@ class IpInfo implements LookupInterface
                     $data['longitude'] = (float) $coordinates[1];
                 }
             }
+
+            // Map IpInfo response to standard format
             $data['timezone'] = $data['timezone'] ?? null;
             $data['postalCode'] = $data['postal'] ?? null;
             $data['org'] = $data['org'] ?? null;
+
+            // Additional fields from IpInfo
+            $data['continent'] = $data['continent'] ?? null;
+            $data['continentCode'] = $data['continent'] ?? null;
+
+            // Currency information (if available)
+            $data['currency'] = $data['currency'] ?? null;
+            $data['currencyCode'] = $data['currency'] ?? null;
+            $data['currencySymbol'] = null; // IpInfo doesn't provide symbol directly
+
+            // ISP and network information
+            $data['isp'] = $data['org'] ?? null;
+            $data['asn'] = null;
+            $data['asnName'] = null;
+            $data['connectionType'] = null;
+            $data['isMobile'] = null;
+            $data['isProxy'] = null;
+            $data['isCrawler'] = null;
+            $data['isTor'] = null;
+            $data['hostname'] = $data['hostname'] ?? null;
+
+            // Parse ASN from org field if available (format: "AS15169 Google LLC")
+            if (!empty($data['org']) && preg_match('/^AS(\d+)\s+(.+)/', $data['org'], $matches)) {
+                $data['asn'] = 'AS' . $matches[1];
+                $data['asnName'] = trim($matches[2]);
+            }
+
+            // Calculate timezone offset if timezone is available
+            $data['timezoneOffset'] = null;
+            if (!empty($data['timezone'])) {
+                try {
+                    $tz = new \DateTimeZone($data['timezone']);
+                    $utc = new \DateTimeZone('UTC');
+                    $datetime = new \DateTime('now', $tz);
+                    $data['timezoneOffset'] = $tz->getOffset($datetime) / 3600; // Convert seconds to hours
+                } catch (\Exception $e) {
+                    $data['timezoneOffset'] = null;
+                }
+            }
             $this->cache->put(
                 $cacheKey,
                 $data,

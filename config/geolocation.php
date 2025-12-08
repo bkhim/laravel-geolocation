@@ -41,7 +41,7 @@ return [
     | when no specific driver is requested. You can change this to any of
     | the supported drivers listed in the 'providers' section below.
     |
-    | Supported drivers: 'ipinfo', 'maxmind'
+    | Supported drivers: 'ipinfo', 'maxmind', 'ipstack', 'ipgeolocation', 'ipapi'
     |
     */
     'drivers' => [
@@ -115,6 +115,87 @@ return [
 
             'license_key' => env('MAXMIND_LICENSE_KEY'),
             'include_timezone' => true,
+        ],
+
+        /*
+        |----------------------------------------------------------------------
+        | IPStack Provider Configuration
+        |----------------------------------------------------------------------
+        |
+        | IPStack provides IP geolocation data through a RESTful API.
+        | You can get a free API key from https://ipstack.com/
+        | Free tier includes 10,000 requests per month.
+        |
+        | Required: access_key (get from https://ipstack.com/dashboard)
+        |
+        */
+        'ipstack' => [
+            'driver' => 'ipstack',
+
+            // Your IPStack API access key
+            'access_key' => env('GEOLOCATION_IPSTACK_ACCESS_KEY', null),
+
+            // Additional options
+            'secure' => env('IPSTACK_SECURE', true),
+        ],
+
+        /*
+        |----------------------------------------------------------------------
+        | IPGeolocation Provider Configuration
+        |----------------------------------------------------------------------
+        |
+        | IPGeolocation provides comprehensive IP geolocation data including
+        | timezone, ISP, and security information through a RESTful API.
+        | You can get a free API key from https://ipgeolocation.io/
+        |
+        | API Plans:
+        | - Free: City-level geolocation, country details, currency (1,000 req/month)
+        | - Standard: Everything in Free + hostname, ASN, ISP info (50,000 req/month)
+        | - Security: Everything in Standard + security checks, threat score
+        | - Advance: Everything in Security + accuracy radius, deeper network data
+        |
+        | Required: api_key (get from https://ipgeolocation.io/dashboard)
+        |
+        */
+        'ipgeolocation' => [
+            'driver' => 'ipgeolocation',
+
+            // Your IPGeolocation API key
+            'api_key' => env('GEOLOCATION_IPGEOLOCATION_API_KEY', null),
+
+            // Response language (paid plans only, except 'en')
+            // Supported: en, de, ru, ja, fr, cn, es, cs, it, ko, fa, pt
+            'language' => env('IPGEOLOCATION_LANGUAGE', 'en'),
+
+            // Additional fields (requires appropriate paid plan)
+            'include_hostname' => env('IPGEOLOCATION_INCLUDE_HOSTNAME', false), // Standard+
+            'include_security' => env('IPGEOLOCATION_INCLUDE_SECURITY', false), // Security+
+            'include_useragent' => env('IPGEOLOCATION_INCLUDE_USERAGENT', false), // Paid plans
+        ],
+
+        /*
+        |----------------------------------------------------------------------
+        | ipapi.co Provider Configuration
+        |----------------------------------------------------------------------
+        |
+        | ipapi.co provides a simple, free IP geolocation API with no API key
+        | required. It supports both IPv4 and IPv6 addresses and provides
+        | comprehensive location data including timezone and ISP information.
+        |
+        | Features:
+        | - No API key required (30,000 requests/month free)
+        | - IPv4 & IPv6 support
+        | - Multiple output formats (JSON, XML, CSV, YAML)
+        | - Comprehensive location data
+        | - ASN and organization information
+        | - HTTPS support
+        |
+        */
+        'ipapi' => [
+            'driver' => 'ipapi',
+
+            // No configuration needed - free tier provides 30K requests/month
+            // without requiring an API key
         ],
 
         /*

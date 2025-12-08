@@ -81,10 +81,37 @@ class MaxMind implements LookupInterface
                 'latitude'    => $record->location->latitude ?? 0,
                 'longitude'   => $record->location->longitude ?? 0,
                 'timezone'    => $record->location->timeZone ?? null,
+                'timezoneOffset' => null,
+                'currency' => null, // MaxMind doesn't provide currency data
+                'currencyCode' => null,
+                'currencySymbol' => null,
+                'continent' => $record->continent->name ?? null,
+                'continentCode' => $record->continent->code ?? null,
                 'postalCode'  => $record->postal->code ?? null,
                 'org'         => $record->traits->autonomousSystemOrganization ?? null,
+                'isp'         => $record->traits->autonomousSystemOrganization ?? null,
+                'asn'         => isset($record->traits->autonomousSystemNumber) ? 'AS' . $record->traits->autonomousSystemNumber : null,
+                'asnName'     => $record->traits->autonomousSystemOrganization ?? null,
+                'connectionType' => $record->traits->connectionType ?? null,
+                'isMobile'    => isset($record->traits->isMobile) ? (bool) $record->traits->isMobile : null,
+                'isProxy'     => isset($record->traits->isAnonymousProxy) ? (bool) $record->traits->isAnonymousProxy : null,
+                'isCrawler'   => null, // Not available in MaxMind
+                'isTor'       => isset($record->traits->isTorExitNode) ? (bool) $record->traits->isTorExitNode : null,
+                'hostname'    => null, // Not available in basic MaxMind database
                 'loc'         => ($record->location->latitude ?? 0).','.($record->location->longitude ?? 0)
             ];
+
+            // Calculate timezone offset if timezone is available
+            if (!empty($data['timezone'])) {
+                try {
+                    $tz = new \DateTimeZone($data['timezone']);
+                    $utc = new \DateTimeZone('UTC');
+                    $datetime = new \DateTime('now', $tz);
+                    $data['timezoneOffset'] = $tz->getOffset($datetime) / 3600; // Convert seconds to hours
+                } catch (\Exception $e) {
+                    $data['timezoneOffset'] = null;
+                }
+            }
 
             // Cache the result
             if (config('geolocation.cache.enabled', true)) {

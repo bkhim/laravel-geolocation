@@ -150,6 +150,46 @@ class GeolocationManager
     }
 
     /**
+     * Create IPStack driver instance.
+     *
+     * @param  array $config
+     * @return \Bkhim\Geolocation\Contracts\LookupInterface
+     */
+    protected function createIpstackDriver($config)
+    {
+        return new Providers\IpStack(
+            $this->cacheProvider->store()
+        );
+    }
+
+    /**
+     * Create IPGeolocation driver instance.
+     *
+     * @param  array $config
+     * @return \Bkhim\Geolocation\Contracts\LookupInterface
+     */
+    protected function createIpgeolocationDriver($config)
+    {
+        return new Providers\IpGeolocation(
+            $this->cacheProvider->store()
+        );
+    }
+
+    /**
+     * Create IP-API driver instance.
+     *
+     * @param  array $config
+     * @return \Bkhim\Geolocation\Contracts\LookupInterface
+     */
+    protected function createIpapiDriver($config)
+    {
+        return new Providers\IpApi(
+            $this->cacheProvider->store()
+        );
+    }
+
+
+    /**
      * Get a provider instance.
      *
      * @param string|null $name
