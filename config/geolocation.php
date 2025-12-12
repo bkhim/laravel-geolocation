@@ -34,7 +34,7 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Default GeoLocation Driver
+    | Default Geolocation Driver
     |--------------------------------------------------------------------------
     |
     | This option specifies the default geolocation driver that will be used
@@ -50,7 +50,7 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | GeoLocation Providers Configuration
+    | Geolocation Providers Configuration
     |--------------------------------------------------------------------------
     |
     | Here you may configure the settings for each geolocation provider.
@@ -86,7 +86,7 @@ return [
                 'connect_timeout' => 5,
                 'timeout' => 10,
                 'headers' => [
-                    'User-Agent' => 'Laravel-GeoLocation-Package/1.0',
+                    'User-Agent' => 'Laravel-Geolocation-Package/1.0',
                 ],
             ],
             'include_timezone' => true,
@@ -220,7 +220,7 @@ return [
     | Cache Configuration
     |--------------------------------------------------------------------------
     |
-    | GeoLocation results can be cached to improve performance and reduce
+    | Geolocation results can be cached to improve performance and reduce
     | API rate limit usage. This is especially useful for frequently
     | requested IP addresses.
     |
@@ -278,6 +278,43 @@ return [
 
         // Maximum number of fallback attempts
         'max_attempts' => env('GEOLOCATION_FALLBACK_ATTEMPTS', 2),
+    ],
+
+    'addons' => [
+        'middleware' => [
+            'enabled' => false,
+            'cache_time' => 3600, // 1 hour
+            'response_type' => 'abort', // abort, redirect, json
+            'redirect_to' => '/restricted',
+            'status_code' => 403,
+        ],
+
+        'rate_limiting' => [
+            'enabled' => false,
+            'limits' => [
+                // 'country_code' => ['requests_per_minute' => X]
+                'US' => ['requests_per_minute' => 100],
+                'CN' => ['requests_per_minute' => 50],
+                '*' => ['requests_per_minute' => 30], // Default
+            ],
+            'storage' => 'redis', // redis, database, file
+        ],
+
+        'anonymization' => [
+            'enabled' => false,
+            'ipv4_mask' => '255.255.255.0', // Last octet
+            'ipv6_mask' => 'ffff:ffff:ffff:ffff:0000:0000:0000:0000',
+            'preserve_local' => true,
+            'gdpr_countries' => ['AT','BE','BG','HR','CY','CZ','DK','EE','FI','FR','DE','GR','HU','IE','IT','LV','LT','LU','MT','NL','PL','PT','RO','SK','SI','ES','SE','GB','IS','LI','NO'],
+        ],
+
+        'gdpr' => [
+            'enabled' => false,
+            'require_consent_for' => ['EU', 'EEA', 'GDPR'],
+            'consent_cookie' => 'geo_consent',
+            'consent_lifetime' => 365, // days
+            'banner_view' => 'geolocation::gdpr.banner',
+        ],
     ],
 
 ];

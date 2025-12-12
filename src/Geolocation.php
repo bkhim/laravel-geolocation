@@ -6,7 +6,7 @@ use Bkhim\Geolocation\Contracts\LookupInterface;
 use Illuminate\Support\Facades\Facade;
 
 /**
- * Class GeoLocation.
+ * Class Geolocation.
  *
  * @author Adriano Rosa <https://adrianorosa.com>
  * @date 2019-08-13 10:02

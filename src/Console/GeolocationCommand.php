@@ -2,11 +2,11 @@
 
 namespace Bkhim\Geolocation\Console;
 
-use Bkhim\Geolocation\GeoLocation;
+use Bkhim\Geolocation\Geolocation;
 use Illuminate\Console\Command;
 
 /**
- * Class GeoLocationCommand.
+ * Class GeolocationCommand.
  *
  * @author Adriano Rosa <https://adrianorosa.com>
  * @date 2019-08-13 20:13
@@ -27,7 +27,7 @@ class GeolocationCommand extends Command
      *
      * @var string
      */
-    protected $description = 'The Console GeoLocation Console Command allows one to call this in the background';
+    protected $description = 'The Console Geolocation Console Command allows one to call this in the background';
 
     /**
      * Execute the console command.
@@ -36,7 +36,7 @@ class GeolocationCommand extends Command
     {
         $ipAddress = $this->option('ip');
 
-        $data = GeoLocation::lookup($ipAddress);
+        $data = Geolocation::lookup($ipAddress);
 
         $data = array_merge(['ip' => $data->getIp()], $data->toArray());
 

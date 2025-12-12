@@ -2,7 +2,7 @@
 
 namespace Bkhim\Geolocation\Contracts;
 
-use Bkhim\Geolocation\GeoLocationDetails;
+use Bkhim\Geolocation\GeolocationDetails;
 
 /**
  * LookupInterface.
@@ -19,7 +19,7 @@ interface LookupInterface
      *
      * @param  string $responseFilter
      *
-     * @return \Bkhim\Geolocation\GeoLocationDetails
+     * @return \Bkhim\Geolocation\GeolocationDetails
      */
-    public function lookup($ipAddress, $responseFilter = 'geo'): GeoLocationDetails;
+    public function lookup($ipAddress, $responseFilter = 'geo'): GeolocationDetails;
 }

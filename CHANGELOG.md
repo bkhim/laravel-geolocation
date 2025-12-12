@@ -1,5 +1,94 @@
 # Changelog
 
+## [v4.0.0] - 2025-12-12
+
+### Major Release: Addon Architecture & Enterprise Features
+
+**Migration Required**: This release introduces a new addon architecture.
+
+---
+
+### New Features
+
+#### **Addon Architecture**
+- **Modular addon system** - Enable/disable features via config
+- **Addon contracts** - Extensible interface for custom addons
+- **Service provider improvements** - Lazy-loaded addons for performance
+
+#### **Security & Access Control**
+- **Geo-blocking middleware** - Allow/deny countries or continents
+  - Route middleware: `geo.allow:US,CA,GB` and `geo.deny:CN,RU`
+  - Configurable responses (abort, redirect, JSON)
+  - Cache optimized with configurable TTL
+- **Rate limiting by geolocation**
+  - Country-specific rate limits (different limits per country)
+  - `geo.ratelimit` middleware with granular control
+  - Multiple storage backends (Redis, database, file)
+  - Custom rate limit headers
+
+#### **Privacy & Compliance**
+- **GDPR compliance tools**
+  - Automatic IP anonymization for EU users
+  - Configurable IPv4/IPv6 masking levels
+  - `IpAnonymizer` service with GDPR country detection
+- **Consent management system**
+  - `LocationConsentManager` for GDPR consent flows
+  - Cookie-based consent storage
+  - Region detection (EU, EEA, GDPR countries)
+  - Configurable consent banners
+
+#### **Developer Experience**
+- **New facade**: `GeolocationAddons` for addon-specific methods
+- **Test routes** - Built-in demonstration endpoints
+- **Comprehensive configuration** - Granular control over all features
+- **Blade components** - GDPR consent banner component
+- **Database migrations** - Optional access logging tables
+
+---
+
+### New Addons
+
+#### 1. **Middleware Addon**
+```php
+// Block specific countries
+Route::middleware(['geo.deny:CN,RU'])->group(...);
+
+// Allow only specific countries  
+Route::middleware(['geo.allow:US,CA,GB'])->group(...);
+
+// Rate limit by country
+Route::middleware(['geo.ratelimit:100,1'])->group(...);
+```
+
+### Anonymization Addon
+```php
+use Bkhim\LaravelGeolocation\Addons\Anonymization\IpAnonymizer;
+
+$anonymizer = app(IpAnonymizer::class);
+$anonymizedIp = $anonymizer->anonymize($request->ip());
+```
+
+### GDPR Addon
+```php
+use Bkhim\LaravelGeolocation\Addons\Gdpr\LocationConsentManager;
+
+$gdpr = app(LocationConsentManager::class);
+if ($gdpr->needsConsent($ip) && !$gdpr->hasGivenConsent()) {
+    return view('gdpr-consent-banner');
+}
+```
+
+### Configuration Changes
+#### New addons Configuration Section:
+```php
+'addons' => [
+    'middleware' => ['enabled' => true, 'cache_time' => 3600],
+    'rate_limiting' => ['enabled' => true, 'limits' => [...]],
+    'anonymization' => ['enabled' => true, 'ipv4_mask' => '255.255.255.0'],
+    'gdpr' => ['enabled' => true, 'require_consent_for' => ['EU']],
+],
+```
+
 ## [v3.0.0] - 2025-12-09
 ### Major Release - Complete Package Overhaul
 

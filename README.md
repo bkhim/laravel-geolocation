@@ -543,22 +543,16 @@ composer test
 
 ## Changelog
 
-- See [CHANGELOG.md](CHANGELOG.md) for details--
+- See [CHANGELOG.md](CHANGELOG.md) for details
 
 ## License
 
 This package is open-source software licensed under the MIT License.
 
-## Credits
-
-- **Original Author**: [Adriano Rosa](https://github.com/adrianorsouza)
-- **Current Maintainer**: [Brian Kimathi (Blancos Khim)](https://github.com/bkhim)
-- **Contributors**: [List of contributors](https://github.com/bkhim/laravel-geolocation/graphs/contributors)
-
 ## Support
 
 - [GitHub Issues](https://github.com/bkhim/laravel-geolocation/issues)
-- [Documentation](https://github.com/bkhim/laravel-geolocation/wiki)
+- [Documentation](https://briankimathi.com/packages/laravel-geolocation)
 - [Packagist](https://packagist.org/packages/bkhim/laravel-geolocation)
 
 ---

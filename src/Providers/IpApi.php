@@ -70,7 +70,7 @@ class IpApi implements LookupInterface
         try {
             $response = \Illuminate\Support\Facades\Http::timeout(config('geolocation.timeout', 5))
                 ->withHeaders([
-                    'User-Agent' => 'Laravel-GeoLocation-Package/1.0',
+                    'User-Agent' => 'Laravel-Geolocation-Package/1.0',
                     'Accept' => 'application/json'
                 ])
                 ->get($endpoint);
