@@ -2,6 +2,10 @@
 
 A modern, comprehensive IP geolocation and location detection package for Laravel applications with support for 5+ providers. Get accurate visitor location data including city, country, timezone, currency, ISP information, and security detection. Perfect for user personalization, analytics, fraud prevention, and geo-targeting in Laravel 10+ projects.
 
+> Release: v4.0.0 — Stable (2025-12-12). This is a major release with architecture improvements, new drivers, and expanded geolocation features. See `CHANGELOG.md` for a complete list of changes, migration notes, and examples.
+
+This package powers reliable IP lookup and geolocation integration for Laravel applications — useful for IP intelligence, visitor localization, time zone and currency detection, and fraud prevention.
+
 ## Key Features & Benefits
 
 - **5 Geolocation Providers**: IpInfo.io, MaxMind GeoIP2, IPStack.com, IPGeolocation.io, and ipapi.co for reliable IP address location lookup
@@ -396,13 +400,7 @@ $details->isTor();            // bool|null - Is Tor exit node
 $details->getFormattedAddress();   // string|null - "Mountain View, CA, United States"
 $details->getShortAddress();       // string|null - "Mountain View, US"
 $details->getFullAddress();        // string|null - "Mountain View, CA 94043, US"
-
-// Map links
 $details->getGoogleMapsLink();     // string|null - "https://maps.google.com/?q=37.386,-122.0838"
-$details->getOpenStreetMapLink();  // string|null - "https://www.openstreetmap.org/?mlat=..."
-$details->getAppleMapsLink();      // string|null - "maps://maps.apple.com/?ll=..."
-
-// Country flags & emojis
 $details->getCountryFlag();        // string|null - "🇺🇸"
 $details->getCountryFlagEmoji();   // string|null - "🇺🇸"
 $details->getCountryFlagUrl();     // string|null - "https://flagcdn.com/w320/us.png"
