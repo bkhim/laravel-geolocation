@@ -570,3 +570,24 @@ $anonIp = IpAnonymizer::anonymize($ipAddress);
 
 This uses your configured anonymization settings and works out of the box. See the configuration file for options.
 
+## GDPR Consent Management (Facade)
+
+Easily manage GDPR consent using the built-in facade:
+
+```php
+use LocationConsentManager;
+
+// Check if consent is needed for an IP
+$needsConsent = LocationConsentManager::needsConsent($ipAddress);
+
+// Check if user has given consent
+$hasConsent = LocationConsentManager::hasGivenConsent();
+
+// Give consent (set cookie)
+LocationConsentManager::giveConsent();
+
+// Withdraw consent (remove cookie)
+LocationConsentManager::withdrawConsent();
+```
+
+This uses your configured GDPR settings and works out of the box. See the configuration file for options.

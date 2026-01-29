@@ -52,7 +52,8 @@
       ],
       "aliases": {
         "GeoLocation": "Bkhim\\Geolocation\\GeoLocation",
-        "IpAnonymizer": "Bkhim\\Geolocation\\Facades\\IpAnonymizer"
+        "IpAnonymizer": "Bkhim\\Geolocation\\Facades\\IpAnonymizer",
+        "LocationConsentManager": "Bkhim\\Geolocation\\Facades\\LocationConsentManager"
       }
     }
   },
