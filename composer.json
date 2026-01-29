@@ -9,7 +9,7 @@
     {
       "name": "Blancos Khim",
       "email": "brian@briankimathi.com",
-      "homepage": "https://www.briankimathi.com"
+      "homepage": "https://briankimathi.com/packages/laravel-geolocation"
     }
   ],
   "minimum-stability": "dev",
@@ -51,7 +51,8 @@
         "Bkhim\\Geolocation\\GeolocationServiceProvider"
       ],
       "aliases": {
-        "GeoLocation": "Bkhim\\Geolocation\\GeoLocation"
+        "GeoLocation": "Bkhim\\Geolocation\\GeoLocation",
+        "IpAnonymizer": "Bkhim\\Geolocation\\Facades\\IpAnonymizer"
       }
     }
   },

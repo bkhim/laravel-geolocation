@@ -556,3 +556,17 @@ This package is open-source software licensed under the MIT License.
 ---
 
 **Note**: This package is actively maintained. For bug reports, feature requests, or contributions, please use the GitHub issue tracker.
+
+## IP Anonymization (GDPR/Privacy)
+
+Easily anonymize IP addresses for privacy and GDPR compliance using the built-in facade:
+
+```php
+use IpAnonymizer;
+
+// In Blade or PHP
+$anonIp = IpAnonymizer::anonymize($ipAddress);
+```
+
+This uses your configured anonymization settings and works out of the box. See the configuration file for options.
+
