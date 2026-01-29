@@ -50,6 +50,13 @@ class IpAnonymizer
             return false;
         }
 
+        $gdprCountries = $config['gdpr_countries'] ?? [];
+
+        // Anonymize all if gdpr_countries is empty or contains '*'
+        if (empty($gdprCountries) || (is_array($gdprCountries) && in_array('*', $gdprCountries, true))) {
+            return true;
+        }
+
         // Check if user is from a GDPR country
         $location = null;
         try {
@@ -59,10 +66,7 @@ class IpAnonymizer
             return false;
         }
 
-        $gdprCountries = $config['gdpr_countries'] ?? [];
-
         $countryCode = '';
-
         if ($location) {
             if (is_callable([$location, 'getCountryCode'])) {
                 $countryCode = $location->getCountryCode() ?? '';
