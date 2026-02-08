@@ -34,11 +34,17 @@ class IpAnonymizer
         $config = config('geolocation.addons.anonymization', []);
         $mask = $config['ipv6_mask'] ?? 'ffff:ffff:ffff:ffff:0000:0000:0000:0000';
 
-        $ipHex = bin2hex(inet_pton($ip));
-        $maskHex = bin2hex(inet_pton($mask));
-        $anonymizedHex = $ipHex & $maskHex;
+        $ipBin = inet_pton($ip);
+        $maskBin = inet_pton($mask);
 
-        return inet_ntop(hex2bin(str_pad($anonymizedHex, 32, '0', STR_PAD_LEFT)));
+        if ($ipBin === false || $maskBin === false) {
+            return $ip;
+        }
+
+        // Perform bitwise AND on binary strings
+        $anonymizedBin = $ipBin & $maskBin;
+
+        return inet_ntop($anonymizedBin);
     }
 
     protected function shouldAnonymize(string $ip): bool

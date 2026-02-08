@@ -19,6 +19,7 @@ class IpStack implements LookupInterface
      * @const Define the base URL for IPStack API.
      */
     const BASEURL = 'http://api.ipstack.com';
+    const BASEURL_SECURE = 'https://api.ipstack.com';
 
     /**
      * @var \Illuminate\Contracts\Cache\Repository
@@ -33,6 +34,17 @@ class IpStack implements LookupInterface
     public function __construct(CacheRepository $cache)
     {
         $this->cache = $cache;
+    }
+
+    /**
+     * Get the appropriate base URL based on configuration.
+     *
+     * @return string
+     */
+    protected function getBaseUrl(): string
+    {
+        $secure = config('geolocation.providers.ipstack.secure', true);
+        return $secure ? self::BASEURL_SECURE : self::BASEURL;
     }
 
     /**
@@ -54,17 +66,35 @@ class IpStack implements LookupInterface
 
         $cacheKey = 'geolocation:ipstack:'.md5($ipAddress ?? 'current');
 
-        if ( ! is_null($data = $this->cache->get($cacheKey))) {
-            return new GeolocationDetails($data);
-        }
+        try {
+            $data = $this->cache->remember($cacheKey, config('geolocation.cache.ttl', 86400), function () use ($ipAddress) {
+                return $this->fetchGeolocationData($ipAddress);
+            });
 
+            return new GeolocationDetails($data);
+        } catch (GeolocationException $e) {
+            throw $e;
+        } catch (\Exception $e) {
+            throw new GeolocationException("Unexpected error: ".$e->getMessage(), $e->getCode(), $e);
+        }
+    }
+
+    /**
+     * Fetch geolocation data from IPStack API.
+     *
+     * @param string $ipAddress
+     * @return array
+     * @throws GeolocationException
+     */
+    protected function fetchGeolocationData(string $ipAddress): array
+    {
         $accessKey = config('geolocation.providers.ipstack.access_key');
 
         if (empty($accessKey)) {
             throw new GeolocationException("IPStack API key is missing. Set IPSTACK_ACCESS_KEY in your .env file");
         }
 
-        $endpoint = static::BASEURL . "/{$ipAddress}";
+        $endpoint = $this->getBaseUrl() . "/{$ipAddress}";
 
         try {
             $response = \Illuminate\Support\Facades\Http::timeout(config('geolocation.timeout', 5))
@@ -106,7 +136,7 @@ class IpStack implements LookupInterface
                 'ip' => $data['ip'],
                 'city' => $data['city'] ?? null,
                 'region' => $data['region_name'] ?? null,
-                'country' => $data['country_code'] ?? null, // Will be transformed to country name in GeolocationDetails
+                'country' => $data['country_code'] ?? null,
                 'countryCode' => $data['country_code'] ?? null,
                 'latitude' => isset($data['latitude']) ? (float) $data['latitude'] : null,
                 'longitude' => isset($data['longitude']) ? (float) $data['longitude'] : null,
@@ -118,28 +148,24 @@ class IpStack implements LookupInterface
                 'continent' => $data['continent_name'] ?? null,
                 'continentCode' => $data['continent_code'] ?? null,
                 'postalCode' => $data['zip'] ?? null,
-                'org' => null, // IPStack doesn't provide organization info in free tier
+                'org' => null,
                 'isp' => $data['connection']['isp'] ?? null,
                 'asn' => isset($data['connection']['asn']) ? 'AS' . $data['connection']['asn'] : null,
                 'asnName' => $data['connection']['asn_org'] ?? null,
                 'connectionType' => $data['connection_type'] ?? null,
-                'isMobile' => null, // Not available in basic IPStack response
+                'isMobile' => null,
                 'isProxy' => isset($data['security']['is_proxy']) ? (bool) $data['security']['is_proxy'] : null,
                 'isCrawler' => isset($data['security']['is_crawler']) ? (bool) $data['security']['is_crawler'] : null,
                 'isTor' => isset($data['security']['is_tor']) ? (bool) $data['security']['is_tor'] : null,
-                'hostname' => null // Not available in basic IPStack response
+                'hostname' => null
             ];
 
-            $this->cache->put(
-                $cacheKey,
-                $transformedData,
-                config('geolocation.cache.ttl', 86400)
-            );
-
-            return new GeolocationDetails($transformedData);
+            return $transformedData;
 
         } catch (\Illuminate\Http\Client\RequestException $e) {
             throw new GeolocationException("IPStack API request failed: " . $e->getMessage());
+        } catch (GeolocationException $e) {
+            throw $e;
         } catch (\Exception $e) {
             throw new GeolocationException("Unexpected error: ".$e->getMessage(), $e->getCode(), $e);
         }

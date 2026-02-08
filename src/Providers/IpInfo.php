@@ -5,6 +5,7 @@ namespace Bkhim\Geolocation\Providers;
 use Bkhim\Geolocation\Contracts\LookupInterface;
 use Bkhim\Geolocation\GeolocationDetails;
 use Bkhim\Geolocation\GeolocationException;
+use Bkhim\Geolocation\Traits\CalculatesTimezoneOffset;
 use Illuminate\Contracts\Cache\Repository as CacheRepository;
 
 /**
@@ -16,6 +17,7 @@ use Illuminate\Contracts\Cache\Repository as CacheRepository;
  */
 class IpInfo implements LookupInterface
 {
+    use CalculatesTimezoneOffset;
 
     /**
      * @const Define the baseurl.
@@ -50,10 +52,31 @@ class IpInfo implements LookupInterface
         if ($ipAddress && ! filter_var($ipAddress, FILTER_VALIDATE_IP)) {
             throw new GeolocationException("Invalid IP address: {$ipAddress}");
         }
+
         $cacheKey = 'geolocation:ipinfo:'.md5($ipAddress ?? 'current');
-        if ( ! is_null($data = $this->cache->get($cacheKey))) {
+
+        try {
+            $data = $this->cache->remember($cacheKey, config('geolocation.cache.ttl', 86400), function () use ($ipAddress) {
+                return $this->fetchGeolocationData($ipAddress);
+            });
+
             return new GeolocationDetails($data);
+        } catch (GeolocationException $e) {
+            throw $e;
+        } catch (\Exception $e) {
+            throw new GeolocationException("Unexpected error: ".$e->getMessage(), $e->getCode(), $e);
         }
+    }
+
+    /**
+     * Fetch geolocation data from IpInfo API.
+     *
+     * @param string|null $ipAddress
+     * @return array
+     * @throws GeolocationException
+     */
+    protected function fetchGeolocationData($ipAddress): array
+    {
         $endpoint    = static::BASEURL;
         $accessToken = config('geolocation.providers.ipinfo.access_token');
         if (empty($accessToken)) {
@@ -81,7 +104,7 @@ class IpInfo implements LookupInterface
                 throw new GeolocationException($errorMessage);
             }
             $data = $response->json();
-            if ( ! isset($data['ip']) || ! isset($data['country'])) {
+            if ( ! isset($data['ip']) || ! isset($data['country_code'])) {
                 throw new GeolocationException("Incomplete geolocation data received from API");
             }
             if (isset($data['loc'])) {
@@ -93,13 +116,14 @@ class IpInfo implements LookupInterface
             }
 
             // Map IpInfo response to standard format
+            $data['countryCode'] = $data['country_code'] ?? $data['country'] ?? null;
             $data['timezone'] = $data['timezone'] ?? null;
             $data['postalCode'] = $data['postal'] ?? null;
             $data['org'] = $data['org'] ?? null;
 
             // Additional fields from IpInfo
             $data['continent'] = $data['continent'] ?? null;
-            $data['continentCode'] = $data['continent'] ?? null;
+            $data['continentCode'] = $data['continent_code'] ?? null;
 
             // Currency information (if available)
             $data['currency'] = $data['currency'] ?? null;
@@ -124,25 +148,13 @@ class IpInfo implements LookupInterface
             }
 
             // Calculate timezone offset if timezone is available
-            $data['timezoneOffset'] = null;
-            if (!empty($data['timezone'])) {
-                try {
-                    $tz = new \DateTimeZone($data['timezone']);
-                    $utc = new \DateTimeZone('UTC');
-                    $datetime = new \DateTime('now', $tz);
-                    $data['timezoneOffset'] = $tz->getOffset($datetime) / 3600; // Convert seconds to hours
-                } catch (\Exception $e) {
-                    $data['timezoneOffset'] = null;
-                }
-            }
-            $this->cache->put(
-                $cacheKey,
-                $data,
-                config('geolocation.cache.ttl', 86400)
-            );
-            return new GeolocationDetails($data);
+            $data['timezoneOffset'] = $this->calculateTimezoneOffset($data['timezone'] ?? null);
+
+            return $data;
         } catch (\Illuminate\Http\Client\RequestException $e) {
             throw new GeolocationException("API request failed: " . $e->getMessage());
+        } catch (GeolocationException $e) {
+            throw $e;
         } catch (\Exception $e) {
             throw new GeolocationException("Unexpected error: ".$e->getMessage(), $e->getCode(), $e);
         }

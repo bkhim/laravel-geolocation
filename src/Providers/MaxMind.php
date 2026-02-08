@@ -5,6 +5,7 @@ namespace Bkhim\Geolocation\Providers;
 use Bkhim\Geolocation\Contracts\LookupInterface;
 use Bkhim\Geolocation\GeolocationDetails;
 use Bkhim\Geolocation\GeolocationException;
+use Bkhim\Geolocation\Traits\CalculatesTimezoneOffset;
 use GeoIp2\Database\Reader;
 use Illuminate\Contracts\Cache\Repository as CacheRepository;
 use GeoIp2\Exception\AddressNotFoundException;
@@ -18,6 +19,7 @@ use MaxMind\Db\Reader\InvalidDatabaseException;
  */
 class MaxMind implements LookupInterface
 {
+    use CalculatesTimezoneOffset;
 
     /**
      * @var Reader
@@ -102,16 +104,7 @@ class MaxMind implements LookupInterface
             ];
 
             // Calculate timezone offset if timezone is available
-            if (!empty($data['timezone'])) {
-                try {
-                    $tz = new \DateTimeZone($data['timezone']);
-                    $utc = new \DateTimeZone('UTC');
-                    $datetime = new \DateTime('now', $tz);
-                    $data['timezoneOffset'] = $tz->getOffset($datetime) / 3600; // Convert seconds to hours
-                } catch (\Exception $e) {
-                    $data['timezoneOffset'] = null;
-                }
-            }
+            $data['timezoneOffset'] = $this->calculateTimezoneOffset($data['timezone']);
 
             // Cache the result
             if (config('geolocation.cache.enabled', true)) {

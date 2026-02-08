@@ -38,9 +38,9 @@ class GeolocationManager
      * Geolocation constructor.
      *
      * @param  array  $config
-     * @param  CacheManager  $cacheProvider
+     * @param  \Illuminate\Contracts\Cache\Repository  $cacheProvider
      */
-    public function __construct($config, \Illuminate\Cache\CacheManager $cacheProvider)
+    public function __construct($config, \Illuminate\Contracts\Cache\Repository $cacheProvider)
     {
         $this->config = $config;
         $this->cacheProvider = $cacheProvider;
@@ -96,7 +96,7 @@ class GeolocationManager
     {
         // Use Laravel's HTTP client instead of raw Guzzle
         return new Providers\IpInfo(
-            $this->cacheProvider->store()
+            $this->cacheProvider
         );
     }
 
@@ -184,7 +184,7 @@ class GeolocationManager
     protected function createIpapiDriver($config)
     {
         return new Providers\IpApi(
-            $this->cacheProvider->store()
+            $this->cacheProvider
         );
     }
 

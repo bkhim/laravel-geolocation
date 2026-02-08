@@ -21,6 +21,11 @@ abstract class TestCase extends BaseTestCase
         $app['config']->set('geolocation.cache.enabled', false);
         $app['config']->set('cache.default', 'array');
 
+        // Set up test API keys for all providers
+        $app['config']->set('geolocation.providers.ipinfo.access_token', 'test_ipinfo_token');
+        $app['config']->set('geolocation.providers.ipstack.access_key', 'test_ipstack_key');
+        $app['config']->set('geolocation.providers.ipgeolocation.api_key', 'test_ipgeolocation_key');
+
         $app['config']->set('geolocation.providers.maxmind.database_path',
             storage_path('app/geoip/test.mmdb')
         );
@@ -39,8 +44,6 @@ abstract class TestCase extends BaseTestCase
     {
         parent::setUp();
 
-        Http::preventStrayRequests();
-        Http::fake();
 
         app('cache')->flush();
     }

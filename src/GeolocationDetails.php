@@ -800,6 +800,7 @@ class GeolocationDetails implements \JsonSerializable, Arrayable, \ArrayAccess
     public function toArray()
     {
         return [
+            'ip' => $this->ip,
             'city' => $this->city,
             'region' => $this->region,
             'country' => $this->country,

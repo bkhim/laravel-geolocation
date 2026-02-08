@@ -154,7 +154,7 @@ class IpGeolocation implements LookupInterface
                 'isProxy' => isset($data['security']['is_proxy']) ? (bool) $data['security']['is_proxy'] : null,
                 'isCrawler' => isset($data['security']['is_crawler']) ? (bool) $data['security']['is_crawler'] : null,
                 'isTor' => isset($data['security']['is_tor']) ? (bool) $data['security']['is_tor'] : null,
-                'hostname' => null // Available in hostname add-on only
+                'hostname' => $data['hostname'] ?? null
             ];
 
             $this->cache->put(

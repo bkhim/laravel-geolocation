@@ -29,7 +29,7 @@ class GeolocationServiceProvider extends ServiceProvider
         $this->app->singleton('geolocation', function ($app) {
             return new \Bkhim\Geolocation\GeolocationManager(
                 config('geolocation'),
-                $app->get('cache')
+                $app['cache']->store()
             );
         });
 
@@ -39,6 +39,9 @@ class GeolocationServiceProvider extends ServiceProvider
 
     public function boot()
     {
+        // Validate configuration
+        $this->validateConfiguration();
+
         // Publish config file
         $this->publishes([
             __DIR__ . '/../config/geolocation.php' => config_path('geolocation.php'),
@@ -66,6 +69,59 @@ class GeolocationServiceProvider extends ServiceProvider
         }
 
         $this->bootAddons();
+    }
+
+    /**
+     * Validate package configuration.
+     *
+     * @return void
+     * @throws \InvalidArgumentException
+     */
+    protected function validateConfiguration(): void
+    {
+        $driver = config('geolocation.drivers.default');
+        $providers = config('geolocation.providers', []);
+
+        // Validate default driver is configured
+        if (!array_key_exists($driver, $providers)) {
+            throw new \InvalidArgumentException(
+                "Default geolocation driver '{$driver}' is not configured in config('geolocation.providers')"
+            );
+        }
+
+        // Validate required API keys based on driver
+        switch ($driver) {
+            case 'ipinfo':
+                if (empty(config('geolocation.providers.ipinfo.access_token'))) {
+                    throw new \InvalidArgumentException(
+                        "IpInfo driver is selected but 'GEOLOCATION_IPINFO_ACCESS_TOKEN' is not set in environment"
+                    );
+                }
+                break;
+            case 'ipstack':
+                if (empty(config('geolocation.providers.ipstack.access_key'))) {
+                    throw new \InvalidArgumentException(
+                        "IPStack driver is selected but 'GEOLOCATION_IPSTACK_ACCESS_KEY' is not set in environment"
+                    );
+                }
+                break;
+            case 'ipgeolocation':
+                if (empty(config('geolocation.providers.ipgeolocation.api_key'))) {
+                    throw new \InvalidArgumentException(
+                        "IPGeolocation driver is selected but 'GEOLOCATION_IPGEOLOCATION_API_KEY' is not set in environment"
+                    );
+                }
+                break;
+            case 'maxmind':
+                $dbPath = config('geolocation.providers.maxmind.database_path');
+                if (empty($dbPath)) {
+                    throw new \InvalidArgumentException(
+                        "MaxMind driver is selected but 'MAXMIND_DATABASE_PATH' is not configured"
+                    );
+                }
+                break;
+            // ipapi doesn't require API key
+        }
     }
 
     protected function ensureStorageDirectoryExists()

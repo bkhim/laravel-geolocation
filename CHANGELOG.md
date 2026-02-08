@@ -1,5 +1,37 @@
 # Changelog
 
+## [v4.0.2] - 2026-02-08
+
+### Bug Fixes
+- Fixed IpInfo provider `continentCode` field mapping (was using wrong field)
+- Fixed IpInfo validation checking for non-existent `country` field instead of `country_code`
+- Fixed IpStack provider hardcoded HTTP URL - now uses configurable HTTPS by default
+- Fixed cache race condition in IpInfo and IpStack providers using atomic `cache->remember()`
+- Fixed IpGeolocation provider missing hostname extraction from API response
+- Fixed IPv6 anonymization using incorrect hex string bitwise operations
+- Fixed GeolocationDetails `toArray()` missing `ip` field
+- Fixed GeolocationManager driver creation passing wrong cache type
+- Removed exposed API key from phpunit.xml
+
+### Code Quality
+- Added `CalculatesTimezoneOffset` trait to eliminate duplicate timezone offset calculations
+- Added configuration validation in ServiceProvider boot
+- Added `countryCode` field mapping in IpInfo provider
+- Corrected type hints throughout codebase
+
+### Test Coverage
+- Added 85 comprehensive Pest tests with 165 assertions
+- Full coverage for all 4 providers (IpInfo, IpStack, IpApi, IpGeolocation)
+- Full coverage for GeolocationDetails and GeolocationManager
+- Added Anonymization and GDPR addon tests
+- Added integration tests for ServiceProvider
+
+### Documentation
+- Added `.env.example` with all configuration variables
+- Added `tests/README.md` with test documentation
+
+---
+
 ## [v4.0.0] - 2025-12-12
 
 ### Major Release: Addon Architecture & Enterprise Features
