@@ -29,19 +29,19 @@ it('can lookup geolocation data for an ip address', function () {
         ]),
     ]);
 
-    $cache = Cache::store();
+    $cache = Cache::driver();
     $provider = new IpStack($cache);
 
     $details = $provider->lookup('8.8.8.8');
 
-    expect($details)->toBeInstanceOf(GeolocationDetails::class);
-    expect($details->getIp())->toBe('8.8.8.8');
-    expect($details->getCity())->toBe('Mountain View');
-    expect($details->getCountryCode())->toBe('US');
+    expect($details)->toBeInstanceOf(GeolocationDetails::class)
+        ->and($details->getIp())->toBe('8.8.8.8')
+        ->and($details->getCity())->toBe('Mountain View')
+        ->and($details->getCountryCode())->toBe('US');
 });
 
 it('throws exception for invalid ip address', function () {
-    $cache = Cache::store();
+    $cache = Cache::driver();
     $provider = new IpStack($cache);
 
     expect(fn () => $provider->lookup('invalid-ip'))
@@ -51,7 +51,7 @@ it('throws exception for invalid ip address', function () {
 it('throws exception when api key is missing', function () {
     config(['geolocation.providers.ipstack.access_key' => null]);
 
-    $cache = Cache::store();
+    $cache = Cache::driver();
     $provider = new IpStack($cache);
 
     expect(fn () => $provider->lookup('8.8.8.8'))
@@ -69,7 +69,7 @@ it('handles api error responses', function () {
         ]),
     ]);
 
-    $cache = Cache::store();
+    $cache = Cache::driver();
     $provider = new IpStack($cache);
 
     expect(fn () => $provider->lookup('8.8.8.8'))
@@ -87,14 +87,14 @@ it('transforms currency data correctly', function () {
         ]),
     ]);
 
-    $cache = Cache::store();
+    $cache = Cache::driver();
     $provider = new IpStack($cache);
 
     $details = $provider->lookup('8.8.8.8');
 
-    expect($details->getCurrency())->toBe('US Dollar');
-    expect($details->getCurrencyCode())->toBe('USD');
-    expect($details->getCurrencySymbol())->toBe('$');
+    expect($details->getCurrency())->toBe('US Dollar')
+        ->and($details->getCurrencyCode())->toBe('USD')
+        ->and($details->getCurrencySymbol())->toBe('$');
 });
 
 it('handles timezone offset calculation', function () {
@@ -108,7 +108,7 @@ it('handles timezone offset calculation', function () {
         ]),
     ]);
 
-    $cache = Cache::store();
+    $cache = Cache::driver();
     $provider = new IpStack($cache);
 
     $details = $provider->lookup('8.8.8.8');

@@ -237,7 +237,7 @@ return [
         'ttl' => env('GEOLOCATION_CACHE_TTL', 86400),
 
         // Optional: Specify a custom cache store
-        // 'store' => env('GEOLOCATION_CACHE_STORE', null),
+        'store' => env('GEOLOCATION_CACHE_STORE', null),
     ],
 
     /*

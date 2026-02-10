@@ -5,7 +5,7 @@ use Illuminate\Support\Facades\Cache;
 
 it('can instantiate geolocation manager', function () {
     $config = config('geolocation');
-    $cache = Cache::store();
+    $cache = Cache::driver();
 
     $manager = new GeolocationManager($config, $cache);
 

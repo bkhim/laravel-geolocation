@@ -22,14 +22,17 @@ class GeolocationServiceProvider extends ServiceProvider
      *
      * @return void
      */
-    public function register()
+    public function register(): void
     {
         $this->mergeConfigFrom(__DIR__ . '/../config/geolocation.php', 'geolocation');
 
         $this->app->singleton('geolocation', function ($app) {
+            $cacheStore = config('geolocation.cache.store');
+            $cacheRepository = $cacheStore ? $app['cache']->store($cacheStore) : $app['cache']->driver();
+
             return new \Bkhim\Geolocation\GeolocationManager(
                 config('geolocation'),
-                $app['cache']->store()
+                $cacheRepository
             );
         });
 
@@ -124,7 +127,7 @@ class GeolocationServiceProvider extends ServiceProvider
         }
     }
 
-    protected function ensureStorageDirectoryExists()
+    protected function ensureStorageDirectoryExists(): void
     {
         $storagePath = storage_path('app/geoip');
 
@@ -141,7 +144,7 @@ class GeolocationServiceProvider extends ServiceProvider
         return ['geolocation'];
     }
 
-    protected function registerAddons()
+    protected function registerAddons(): void
     {
         // Anonymization
         if (config('geolocation.addons.anonymization.enabled')) {
@@ -158,7 +161,7 @@ class GeolocationServiceProvider extends ServiceProvider
         }
     }
 
-    protected function bootAddons()
+    protected function bootAddons(): void
     {
         // Register middleware
         if (config('geolocation.addons.middleware.enabled')) {

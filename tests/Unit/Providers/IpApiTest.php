@@ -30,18 +30,18 @@ it('can lookup geolocation data for an ip address', function () {
         ]),
     ]);
 
-    $cache = Cache::store();
+    $cache = Cache::driver();
     $provider = new IpApi($cache);
 
     $details = $provider->lookup('8.8.8.8');
 
-    expect($details)->toBeInstanceOf(GeolocationDetails::class);
-    expect($details->getIp())->toBe('8.8.8.8');
-    expect($details->getCity())->toBe('Mountain View');
+    expect($details)->toBeInstanceOf(GeolocationDetails::class)
+        ->and($details->getIp())->toBe('8.8.8.8')
+        ->and($details->getCity())->toBe('Mountain View');
 });
 
 it('throws exception for invalid ip address', function () {
-    $cache = Cache::store();
+    $cache = Cache::driver();
     $provider = new IpApi($cache);
 
     expect(fn () => $provider->lookup('invalid-ip'))
@@ -56,7 +56,7 @@ it('throws exception for error responses', function () {
         ]),
     ]);
 
-    $cache = Cache::store();
+    $cache = Cache::driver();
     $provider = new IpApi($cache);
 
     expect(fn () => $provider->lookup('8.8.8.8'))
@@ -71,7 +71,7 @@ it('throws exception for missing ip in response', function () {
         ]),
     ]);
 
-    $cache = Cache::store();
+    $cache = Cache::driver();
     $provider = new IpApi($cache);
 
     expect(fn () => $provider->lookup('8.8.8.8'))
@@ -89,7 +89,7 @@ it('parses utc offset correctly', function () {
         ]),
     ]);
 
-    $cache = Cache::store();
+    $cache = Cache::driver();
     $provider = new IpApi($cache);
 
     $details = $provider->lookup('8.8.8.8');
@@ -108,7 +108,7 @@ it('handles positive utc offset', function () {
         ]),
     ]);
 
-    $cache = Cache::store();
+    $cache = Cache::driver();
     $provider = new IpApi($cache);
 
     $details = $provider->lookup('8.8.8.8');
@@ -135,12 +135,12 @@ it('transforms all response fields correctly', function () {
         ]),
     ]);
 
-    $cache = Cache::store();
+    $cache = Cache::driver();
     $provider = new IpApi($cache);
 
     $details = $provider->lookup('8.8.8.8');
 
-    expect($details->getPostalCode())->toBe('94043');
-    expect($details->getCurrencyCode())->toBe('USD');
-    expect($details->getCurrency())->toBe('US Dollar');
+    expect($details->getPostalCode())->toBe('94043')
+        ->and($details->getCurrencyCode())->toBe('USD')
+        ->and($details->getCurrency())->toBe('US Dollar');
 });

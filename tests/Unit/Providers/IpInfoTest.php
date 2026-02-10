@@ -26,21 +26,21 @@ it('can lookup geolocation data for an ip address', function () {
         ]),
     ]);
 
-    $cache = Cache::store();
+    $cache = Cache::driver();
     $provider = new IpInfo($cache);
 
     $details = $provider->lookup('8.8.8.8');
 
-    expect($details)->toBeInstanceOf(GeolocationDetails::class);
-    expect($details->getIp())->toBe('8.8.8.8');
-    expect($details->getCity())->toBe('Mountain View');
-    expect($details->getCountryCode())->toBe('US');
-    expect($details->getLatitude())->toBe(37.386);
-    expect($details->getLongitude())->toBe(-122.084);
+    expect($details)->toBeInstanceOf(GeolocationDetails::class)
+        ->and($details->getIp())->toBe('8.8.8.8')
+        ->and($details->getCity())->toBe('Mountain View')
+        ->and($details->getCountryCode())->toBe('US')
+        ->and($details->getLatitude())->toBe(37.386)
+        ->and($details->getLongitude())->toBe(-122.084);
 });
 
 it('throws exception for invalid ip address', function () {
-    $cache = Cache::store();
+    $cache = Cache::driver();
     $provider = new IpInfo($cache);
 
     expect(fn () => $provider->lookup('invalid-ip'))
@@ -50,7 +50,7 @@ it('throws exception for invalid ip address', function () {
 it('throws exception when api key is missing', function () {
     config(['geolocation.providers.ipinfo.access_token' => null]);
 
-    $cache = Cache::store();
+    $cache = Cache::driver();
     $provider = new IpInfo($cache);
 
     expect(fn () => $provider->lookup('8.8.8.8'))
@@ -65,7 +65,7 @@ it('throws exception for incomplete response data', function () {
         ]),
     ]);
 
-    $cache = Cache::store();
+    $cache = Cache::driver();
     $provider = new IpInfo($cache);
 
     expect(fn () => $provider->lookup('8.8.8.8'))
@@ -77,7 +77,7 @@ it('handles http error responses', function () {
         '*' => Http::response([], 401),
     ]);
 
-    $cache = Cache::store();
+    $cache = Cache::driver();
     $provider = new IpInfo($cache);
 
     expect(fn () => $provider->lookup('8.8.8.8'))
@@ -89,7 +89,7 @@ it('handles rate limit errors', function () {
         '*' => Http::response([], 429),
     ]);
 
-    $cache = Cache::store();
+    $cache = Cache::driver();
     $provider = new IpInfo($cache);
 
     expect(fn () => $provider->lookup('8.8.8.8'))
@@ -108,13 +108,13 @@ it('parses asn information from org field', function () {
         ]),
     ]);
 
-    $cache = Cache::store();
+    $cache = Cache::driver();
     $provider = new IpInfo($cache);
 
     $details = $provider->lookup('8.8.8.8');
 
-    expect($details->getAsn())->toBe('AS15169');
-    expect($details->getAsnName())->toBe('Google LLC');
+    expect($details->getAsn())->toBe('AS15169')
+        ->and($details->getAsnName())->toBe('Google LLC');
 });
 
 it('calculates timezone offset correctly', function () {
@@ -128,11 +128,11 @@ it('calculates timezone offset correctly', function () {
         ]),
     ]);
 
-    $cache = Cache::store();
+    $cache = Cache::driver();
     $provider = new IpInfo($cache);
 
     $details = $provider->lookup('8.8.8.8');
 
-    expect($details->getTimezone())->toBe('America/Los_Angeles');
-    expect($details->getTimezoneOffset())->toBeNumeric();
+    expect($details->getTimezone())->toBe('America/Los_Angeles')
+        ->and($details->getTimezoneOffset())->toBeNumeric();
 });
