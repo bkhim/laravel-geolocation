@@ -136,7 +136,7 @@ class GeolocationManager
 
         try {
             $reader = new Reader($databasePath);
-            return new Providers\MaxMind($reader, $this->cacheProvider->store());
+            return new Providers\MaxMind($reader, $this->cacheProvider);
 
         } catch (InvalidDatabaseException $e) {
             throw new InvalidArgumentException(
@@ -158,7 +158,7 @@ class GeolocationManager
     protected function createIpstackDriver($config)
     {
         return new Providers\IpStack(
-            $this->cacheProvider->store()
+            $this->cacheProvider
         );
     }
 
@@ -171,7 +171,7 @@ class GeolocationManager
     protected function createIpgeolocationDriver($config)
     {
         return new Providers\IpGeolocation(
-            $this->cacheProvider->store()
+            $this->cacheProvider
         );
     }
 
