@@ -53,10 +53,17 @@ class IpInfo implements LookupInterface
             throw new GeolocationException("Invalid IP address: {$ipAddress}");
         }
 
+        // Check if caching is enabled before attempting to cache
+        if (!config('geolocation.cache.enabled', true)) {
+            $data = $this->fetchGeolocationData($ipAddress);
+            return new GeolocationDetails($data);
+        }
+
         $cacheKey = 'geolocation:ipinfo:'.md5($ipAddress ?? 'current');
+        $cacheTtl = config('geolocation.cache.ttl', 86400);
 
         try {
-            $data = $this->cache->remember($cacheKey, config('geolocation.cache.ttl', 86400), function () use ($ipAddress) {
+            $data = $this->cache->remember($cacheKey, $cacheTtl, function () use ($ipAddress) {
                 return $this->fetchGeolocationData($ipAddress);
             });
 

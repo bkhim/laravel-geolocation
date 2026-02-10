@@ -143,13 +143,7 @@ class IpApi implements LookupInterface
                 }
             }
 
-            $this->cache->put(
-                $cacheKey,
-                $transformedData,
-                config('geolocation.cache.ttl', 86400)
-            );
-
-            return new GeolocationDetails($transformedData);
+            return $transformedData;
 
         } catch (\Illuminate\Http\Client\RequestException $e) {
             throw new GeolocationException("ipapi.co API request failed: " . $e->getMessage());

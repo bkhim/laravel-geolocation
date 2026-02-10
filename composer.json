@@ -1,6 +1,6 @@
 {
   "name": "bkhim/laravel-geolocation",
-  "version": "4.0.4",
+  "version": "4.0.5",
   "description": "Modern Laravel geolocation package with 5 providers (IpInfo, MaxMind, IPStack, IPGeolocation, ipapi.co), 25+ data methods, security detection, and production-ready features for Laravel 10-12",
   "keywords": ["geolocation", "ip", "location", "laravel", "maxmind", "ipinfo", "ipstack", "ipgeolocation", "security", "timezone", "currency", "maps"],
   "homepage": "https://github.com/bkhim/laravel-geolocation",
@@ -23,8 +23,8 @@
   },
   "require-dev": {
     "orchestra/testbench": "^6.0|^7.0|^8.0|^9.0",
-    "pestphp/pest": "2.x-dev",
-    "pestphp/pest-plugin-laravel": "2.x-dev"
+    "pestphp/pest": "^4.3.2",
+    "pestphp/pest-plugin-laravel": "^4.0.0"
   },
   "autoload": {
     "psr-4": {

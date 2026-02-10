@@ -831,7 +831,7 @@ class GeolocationDetails implements \JsonSerializable, Arrayable, \ArrayAccess
     /**
      * {@inheritdoc}
      */
-    public function jsonSerialize()
+    public function jsonSerialize(): mixed
     {
         return $this->toArray();
     }
@@ -881,10 +881,10 @@ class GeolocationDetails implements \JsonSerializable, Arrayable, \ArrayAccess
     /**
      * ArrayAccess implementation - get offset.
      *
-     * @param mixed $offset
+    /**
      * @return mixed
      */
-    public function offsetGet($offset)
+    public function offsetGet($offset): mixed
     {
         if (method_exists($this, 'get' . ucfirst($offset))) {
             return $this->{'get' . ucfirst($offset)}();

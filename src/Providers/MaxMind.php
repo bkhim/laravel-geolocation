@@ -64,10 +64,36 @@ class MaxMind implements LookupInterface
         // Create cache key
         $cacheKey = 'geolocation:maxmind:'.md5($ipAddress);
 
-        // Check cache first
-        if ( ! is_null($data = $this->cache->get($cacheKey))) {
+        // Check if caching is enabled before attempting to cache
+        if (!config('geolocation.cache.enabled', true)) {
+            $data = $this->fetchGeolocationData($ipAddress);
             return new GeolocationDetails($data);
         }
+
+        $cacheTtl = config('geolocation.cache.ttl', 86400);
+
+        try {
+            $data = $this->cache->remember($cacheKey, $cacheTtl, function () use ($ipAddress) {
+                return $this->fetchGeolocationData($ipAddress);
+            });
+
+            return new GeolocationDetails($data);
+        } catch (GeolocationException $e) {
+            throw $e;
+        } catch (\Exception $e) {
+            throw new GeolocationException("Unexpected error: ".$e->getMessage(), $e->getCode(), $e);
+        }
+    }
+
+    /**
+     * Fetch geolocation data from MaxMind database.
+     *
+     * @param string $ipAddress
+     * @return array
+     * @throws GeolocationException
+     */
+    protected function fetchGeolocationData(string $ipAddress): array
+    {
 
         try {
             // Query MaxMind database
@@ -106,16 +132,7 @@ class MaxMind implements LookupInterface
             // Calculate timezone offset if timezone is available
             $data['timezoneOffset'] = $this->calculateTimezoneOffset($data['timezone']);
 
-            // Cache the result
-            if (config('geolocation.cache.enabled', true)) {
-                $this->cache->put(
-                    $cacheKey,
-                    $data,
-                    config('geolocation.cache.ttl', 86400)
-                );
-            }
-
-            return new GeolocationDetails($data);
+            return $data;
 
         } catch (AddressNotFoundException $e) {
             throw new GeolocationException("IP address not found in database: {$ipAddress}");

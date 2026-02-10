@@ -52,11 +52,37 @@ class IpGeolocation implements LookupInterface
         // Use client IP if none provided
         $ipAddress = $ipAddress ?: request()->ip();
 
-        $cacheKey = 'geolocation:ipgeolocation:'.md5($ipAddress ?? 'current');
-
-        if ( ! is_null($data = $this->cache->get($cacheKey))) {
+        // Check if caching is enabled before attempting to cache
+        if (!config('geolocation.cache.enabled', true)) {
+            $data = $this->fetchGeolocationData($ipAddress);
             return new GeolocationDetails($data);
         }
+
+        $cacheKey = 'geolocation:ipgeolocation:'.md5($ipAddress ?? 'current');
+        $cacheTtl = config('geolocation.cache.ttl', 86400);
+
+        try {
+            $data = $this->cache->remember($cacheKey, $cacheTtl, function () use ($ipAddress) {
+                return $this->fetchGeolocationData($ipAddress);
+            });
+
+            return new GeolocationDetails($data);
+        } catch (GeolocationException $e) {
+            throw $e;
+        } catch (\Exception $e) {
+            throw new GeolocationException("Unexpected error: ".$e->getMessage(), $e->getCode(), $e);
+        }
+    }
+
+    /**
+     * Fetch geolocation data from IPGeolocation API.
+     *
+     * @param string|null $ipAddress
+     * @return array
+     * @throws GeolocationException
+     */
+    protected function fetchGeolocationData($ipAddress): array
+    {
 
         $apiKey = config('geolocation.providers.ipgeolocation.api_key');
 
@@ -157,13 +183,7 @@ class IpGeolocation implements LookupInterface
                 'hostname' => $data['hostname'] ?? null
             ];
 
-            $this->cache->put(
-                $cacheKey,
-                $transformedData,
-                config('geolocation.cache.ttl', 86400)
-            );
-
-            return new GeolocationDetails($transformedData);
+            return $transformedData;
 
         } catch (\Illuminate\Http\Client\RequestException $e) {
             throw new GeolocationException("IPGeolocation API request failed: " . $e->getMessage());

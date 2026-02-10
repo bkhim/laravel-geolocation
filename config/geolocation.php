@@ -224,6 +224,12 @@ return [
     | API rate limit usage. This is especially useful for frequently
     | requested IP addresses.
     |
+    | Cache Best Practices:
+    | - Use Redis or Memcached for production environments
+    | - Consider using cache tags for easier cache invalidation
+    | - Set appropriate TTL based on your data freshness requirements
+    | - Monitor cache hit rates and adjust TTL accordingly
+    |
     | Note: The cache key includes the IP address and provider name to
     |       avoid conflicts between different providers.
     |
@@ -233,11 +239,26 @@ return [
         'enabled' => env('GEOLOCATION_CACHE_ENABLED', true),
 
         // Time-to-live for cached results (in seconds)
-        // Default: 86400 seconds (24 hours)
+        // Recommended: 3600 (1 hour) to 86400 (24 hours) for most use cases
+        // IP geolocation data doesn't change frequently
         'ttl' => env('GEOLOCATION_CACHE_TTL', 86400),
 
-        // Optional: Specify a custom cache store
+        // Optional: Specify a custom cache store (redis, memcached, database, etc.)
+        // Null uses the default cache store from config/cache.php
+        // For production, consider using Redis or Memcached for better performance
         'store' => env('GEOLOCATION_CACHE_STORE', null),
+
+        // Optional: Cache key prefix to avoid conflicts with other cached data
+        // This will be prepended to all cache keys (e.g., 'myapp:geolocation:ipinfo:...')
+        'prefix' => env('GEOLOCATION_CACHE_PREFIX', 'geolocation'),
+
+        // Optional: Enable cache tags for easier bulk cache invalidation
+        // Note: Only supported by Redis and Memcached cache drivers
+        // When enabled, you can flush all geolocation cache with: Cache::tags(['geolocation'])->flush()
+        'tags' => [
+            'enabled' => env('GEOLOCATION_CACHE_TAGS_ENABLED', false),
+            'names' => ['geolocation', 'ip-lookup'],
+        ],
     ],
 
     /*

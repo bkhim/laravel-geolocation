@@ -28,7 +28,26 @@ class GeolocationServiceProvider extends ServiceProvider
 
         $this->app->singleton('geolocation', function ($app) {
             $cacheStore = config('geolocation.cache.store');
-            $cacheRepository = $cacheStore ? $app['cache']->store($cacheStore) : $app['cache']->driver();
+
+            try {
+                $cacheRepository = $cacheStore ? $app['cache']->store($cacheStore) : $app['cache']->driver();
+
+                // Validate cache store exists and is working
+                if ($cacheStore && !$cacheRepository) {
+                    throw new \InvalidArgumentException(
+                        "Cache store '{$cacheStore}' is not configured. Please check your cache configuration."
+                    );
+                }
+
+            } catch (\Exception $e) {
+                // Log cache configuration issue but don't fail the service
+                if ($app->bound('log')) {
+                    $app['log']->warning("Geolocation cache configuration issue: " . $e->getMessage());
+                }
+
+                // Fallback to default cache driver
+                $cacheRepository = $app['cache']->driver();
+            }
 
             return new \Bkhim\Geolocation\GeolocationManager(
                 config('geolocation'),
@@ -68,6 +87,7 @@ class GeolocationServiceProvider extends ServiceProvider
         if ($this->app->runningInConsole()) {
             $this->commands([
                 \Bkhim\Geolocation\Console\GeolocationCommand::class,
+                \Bkhim\Geolocation\Console\CacheCommand::class,
             ]);
         }
 
