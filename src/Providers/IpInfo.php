@@ -53,6 +53,9 @@ class IpInfo implements LookupInterface
             throw new GeolocationException("Invalid IP address: {$ipAddress}");
         }
 
+        // Use client IP if none provided
+        $ipAddress = $ipAddress ?: request()->ip();
+
         // Check if caching is enabled before attempting to cache
         if (!config('geolocation.cache.enabled', true)) {
             $data = $this->fetchGeolocationData($ipAddress);
