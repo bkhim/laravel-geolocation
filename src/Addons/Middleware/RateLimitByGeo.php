@@ -50,7 +50,11 @@ class RateLimitByGeo
             // If lookup fails, continue with unknown country default
         }
 
-        $countryCode = $location->country_code ?? $location->country ?? 'unknown';
+        if ($location && method_exists($location, 'getCountryCode')) {
+            $countryCode = $location->getCountryCode() ?? 'unknown';
+        } else {
+            $countryCode = $location->country_code ?? $location->country ?? 'unknown';
+        }
 
         // Get specific limit for country or use default
         $limits       = config('geolocation.addons.rate_limiting.limits', []);

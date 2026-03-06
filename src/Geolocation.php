@@ -29,7 +29,7 @@ class Geolocation extends Facade
      */
     public static function countries($locale = null)
     {
-        return static::$app['translator']->get('geolocation::countries', [], $locale);
+        return trans('geolocation::countries', [], $locale);
     }
 
     /**

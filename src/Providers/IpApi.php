@@ -64,6 +64,21 @@ class IpApi implements LookupInterface
             return new GeolocationDetails($data);
         }
 
+        $data = $this->fetchGeolocationData($ipAddress);
+        $this->cache->put($cacheKey, $data, config('geolocation.cache.ttl', 86400));
+
+        return new GeolocationDetails($data);
+    }
+
+    /**
+     * Fetch geolocation data from ipapi.co API.
+     *
+     * @param string|null $ipAddress
+     * @return array
+     * @throws GeolocationException
+     */
+    protected function fetchGeolocationData($ipAddress): array
+    {
         // Build endpoint URL
         $endpoint = static::BASEURL;
 

@@ -144,3 +144,72 @@ it('transforms all response fields correctly', function () {
         ->and($details->getCurrencyCode())->toBe('USD')
         ->and($details->getCurrency())->toBe('US Dollar');
 });
+
+it('skips cache when caching is disabled', function () {
+    $this->app['config']->set('geolocation.cache.enabled', false);
+    
+    Http::fake([
+        '*' => Http::response([
+            'ip' => '8.8.8.8',
+            'city' => 'Mountain View',
+            'country_code' => 'US',
+            'latitude' => 37.386,
+            'longitude' => -122.084,
+        ]),
+    ]);
+
+    $cache = Cache::driver();
+    $provider = new IpApi($cache);
+
+    $details = $provider->lookup('8.8.8.8');
+
+    expect($details->getCity())->toBe('Mountain View');
+    
+    Http::assertSent(function ($request) {
+        return true;
+    });
+});
+
+it('respects include_timezone config option', function () {
+    $this->app['config']->set('geolocation.providers.ipapi.include_timezone', false);
+    
+    Http::fake([
+        '*' => Http::response([
+            'ip' => '8.8.8.8',
+            'city' => 'Mountain View',
+            'country_code' => 'US',
+            'latitude' => 37.386,
+            'longitude' => -122.084,
+            'utc_offset' => '-0800',
+        ]),
+    ]);
+
+    $cache = Cache::driver();
+    $provider = new IpApi($cache);
+
+    $details = $provider->lookup('8.8.8.8');
+
+    expect($details->getTimezoneOffset())->toBeNull();
+});
+
+it('calculates timezone offset when include_timezone is true', function () {
+    $this->app['config']->set('geolocation.providers.ipapi.include_timezone', true);
+    
+    Http::fake([
+        '*' => Http::response([
+            'ip' => '8.8.8.8',
+            'city' => 'Mountain View',
+            'country_code' => 'US',
+            'latitude' => 37.386,
+            'longitude' => -122.084,
+            'utc_offset' => '-0800',
+        ]),
+    ]);
+
+    $cache = Cache::driver();
+    $provider = new IpApi($cache);
+
+    $details = $provider->lookup('8.8.8.8');
+
+    expect($details->getTimezoneOffset())->toEqual(-8);
+});

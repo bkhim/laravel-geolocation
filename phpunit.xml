@@ -1,23 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/9.3/phpunit.xsd"
-         bootstrap="vendor/autoload.php"
-         colors="true"
-         executionOrder="depends,defects"
-         forceCoversAnnotation="false"
-         beStrictAboutCoversAnnotation="false"
-         beStrictAboutOutputDuringTests="true"
-         beStrictAboutTodoAnnotatedTests="true"
-         processIsolation="false"
-         stopOnFailure="true"
-         verbose="false">
-
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/12.5/phpunit.xsd" bootstrap="vendor/autoload.php" colors="true" executionOrder="depends,defects" beStrictAboutOutputDuringTests="true" processIsolation="false" stopOnFailure="true" cacheDirectory=".phpunit.cache" requireCoverageMetadata="false" beStrictAboutCoverageMetadata="false">
   <testsuites>
     <testsuite name="GeoLocation Test Suite">
       <directory suffix="Test.php">./tests</directory>
     </testsuite>
   </testsuites>
-
   <php>
     <env name="GEOLOCATION_IPINFO_ACCESS_TOKEN" value="758524cdce39c8"/>
     <env name="GEOLOCATION_CACHE_TTL" value="4096"/>

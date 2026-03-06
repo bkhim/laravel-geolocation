@@ -331,3 +331,29 @@ it('converts to string', function () {
 
     expect((string) $details)->toContain('Mountain View');
 });
+
+it('parses country and countrycode correctly', function () {
+    $data = [
+        'ip' => '8.8.8.8',
+        'country' => 'United States',
+        'countryCode' => 'US',
+    ];
+
+    $details = new GeolocationDetails($data);
+
+    expect($details->getCountryCode())->toBe('US')
+        ->and($details->getCountry())->toBe('United States');
+});
+
+it('handles country data with separate countrycode field', function () {
+    $data = [
+        'ip' => '8.8.8.8',
+        'city' => 'Mountain View',
+        'country' => 'US',
+        'countryCode' => 'US',
+    ];
+
+    $details = new GeolocationDetails($data);
+
+    expect($details->getCountryCode())->toBe('US');
+});

@@ -136,3 +136,48 @@ it('calculates timezone offset correctly', function () {
     expect($details->getTimezone())->toBe('America/Los_Angeles')
         ->and($details->getTimezoneOffset())->toBeNumeric();
 });
+
+it('uses client IP when none provided', function () {
+    Http::fake([
+        '*' => Http::response([
+            'ip' => '127.0.0.1',
+            'city' => 'Test City',
+            'country_code' => 'US',
+            'loc' => '0,0',
+        ]),
+    ]);
+
+    $cache = Cache::driver();
+    $provider = new IpInfo($cache);
+
+    $this->app['config']->set('geolocation.cache.enabled', false);
+    
+    $details = $provider->lookup();
+
+    expect($details->getIp())->toBe('127.0.0.1');
+});
+
+it('handles currency code correctly from ipinfo response', function () {
+    Cache::flush();
+    
+    Http::fake([
+        '*' => Http::response([
+            'ip' => '8.8.8.8',
+            'city' => 'Mountain View',
+            'country_code' => 'US',
+            'loc' => '37.386,-122.084',
+            'currency' => 'USD',
+        ]),
+    ]);
+
+    config(['geolocation.cache.enabled' => false]);
+    
+    $cache = Cache::driver();
+    $provider = new IpInfo($cache);
+    
+    $details = $provider->lookup('8.8.8.8');
+
+    expect($details->getCurrencyCode())->toBe('USD')
+        ->and($details->getCurrency())->toBeNull()
+        ->and($details->getCurrencySymbol())->toBeNull();
+});

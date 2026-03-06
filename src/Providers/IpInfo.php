@@ -136,8 +136,10 @@ class IpInfo implements LookupInterface
             $data['continentCode'] = $data['continent_code'] ?? null;
 
             // Currency information (if available)
-            $data['currency'] = $data['currency'] ?? null;
-            $data['currencyCode'] = $data['currency'] ?? null;
+            // IpInfo returns currency code (e.g., "USD") in the 'currency' field
+            $currencyCode = $data['currency'] ?? null;
+            $data['currency'] = null; // IpInfo doesn't provide currency name
+            $data['currencyCode'] = $currencyCode;
             $data['currencySymbol'] = null; // IpInfo doesn't provide symbol directly
 
             // ISP and network information

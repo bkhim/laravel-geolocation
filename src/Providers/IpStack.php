@@ -18,8 +18,8 @@ class IpStack implements LookupInterface
     /**
      * @const Define the base URL for IPStack API.
      */
-    const BASEURL = 'http://api.ipstack.com';
-    const BASEURL_SECURE = 'https://api.ipstack.com';
+    const BASEURL = 'https://api.ipstack.com';
+    const BASEURL_INSECURE = 'http://api.ipstack.com';
 
     /**
      * @var \Illuminate\Contracts\Cache\Repository
@@ -44,7 +44,7 @@ class IpStack implements LookupInterface
     protected function getBaseUrl(): string
     {
         $secure = config('geolocation.providers.ipstack.secure', true);
-        return $secure ? self::BASEURL_SECURE : self::BASEURL;
+        return $secure ? self::BASEURL : self::BASEURL_INSECURE;
     }
 
     /**
@@ -70,7 +70,7 @@ class IpStack implements LookupInterface
             return new GeolocationDetails($data);
         }
 
-        $cacheKey = 'geolocation:ipstack:'.md5($ipAddress);
+        $cacheKey = 'geolocation:ipstack:'.md5($ipAddress ?? 'current');
         $cacheTtl = config('geolocation.cache.ttl', 86400);
 
         try {
