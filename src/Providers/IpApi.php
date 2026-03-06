@@ -118,7 +118,7 @@ class IpApi implements LookupInterface
                 'latitude' => isset($data['latitude']) ? (float) $data['latitude'] : null,
                 'longitude' => isset($data['longitude']) ? (float) $data['longitude'] : null,
                 'timezone' => $data['timezone'] ?? null,
-                'timezoneOffset' => null, // Calculate from UTC offset if available
+                'timezoneOffset' => null, // Calculated below if utc_offset is available
                 'currency' => $data['currency_name'] ?? null,
                 'currencyCode' => $data['currency'] ?? null,
                 'currencySymbol' => null, // ipapi.co doesn't provide currency symbol
@@ -137,8 +137,9 @@ class IpApi implements LookupInterface
                 'hostname' => null // Not provided by ipapi.co
             ];
 
-            // Calculate timezone offset if utc_offset is available
-            if (!empty($data['utc_offset'])) {
+            // Calculate timezone offset if timezone is available and config allows
+            $includeTimezone = config('geolocation.providers.ipapi.include_timezone', true);
+            if ($includeTimezone && !empty($data['utc_offset'])) {
                 // Convert "+0200" or "-0500" format to hours
                 $offset = $data['utc_offset'];
                 if (preg_match('/([+-])(\d{2})(\d{2})/', $offset, $matches)) {
