@@ -52,6 +52,12 @@ class IpApi implements LookupInterface
         // Use client IP if none provided
         $ipAddress = $ipAddress ?: request()->ip();
 
+        // Check if caching is enabled before attempting to cache
+        if (!config('geolocation.cache.enabled', true)) {
+            $data = $this->fetchGeolocationData($ipAddress);
+            return new GeolocationDetails($data);
+        }
+
         $cacheKey = 'geolocation:ipapi:'.md5($ipAddress ?? 'current');
 
         if ( ! is_null($data = $this->cache->get($cacheKey))) {
