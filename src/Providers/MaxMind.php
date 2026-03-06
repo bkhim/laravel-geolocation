@@ -102,9 +102,9 @@ class MaxMind implements LookupInterface
             // Prepare response data (matching IpInfo format)
             $data = [
                 'ip'          => $ipAddress,
-                'city'        => $record->city->name ?? 'Unknown',
-                'region'      => $record->mostSpecificSubdivision->name ?? 'Unknown',
-                'country'     => $record->country->name ?? 'Unknown',
+                'city'        => $record->city->name ?? null,
+                'region'      => $record->mostSpecificSubdivision->name ?? null,
+                'country'     => $record->country->name ?? null,
                 'countryCode' => $record->country->isoCode ?? 'XX',
                 'latitude'    => $record->location->latitude ?? 0,
                 'longitude'   => $record->location->longitude ?? 0,

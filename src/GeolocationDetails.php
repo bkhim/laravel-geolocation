@@ -625,7 +625,7 @@ class GeolocationDetails implements \JsonSerializable, Arrayable, \ArrayAccess
 
             if (property_exists($this, $key)) {
                 if ($key === 'country') {
-                    $this->countryCode = $value;
+                    $this->countryCode = $data['countryCode'] ?? null;
                     $this->{$key} = $this->formatCountry($value);
                 } else {
                     $this->{$key} = $value;
