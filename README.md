@@ -62,13 +62,34 @@ Install the package via Composer:
 composer require bkhim/laravel-geolocation
 ```
 
-The package uses Laravel's auto-discovery to register the service provider and facades. For manual registration (optional), add the following to `config/app.php`:
+The package uses Laravel's auto-discovery to register the service provider and facades. For manual registration (optional):
+
+**For Laravel 10 and earlier**, add to `config/app.php`:
 
 ```php
 'providers' => [
     Bkhim\Geolocation\GeolocationServiceProvider::class,
 ],
 
+'aliases' => [
+    'Geolocation' => Bkhim\Geolocation\Geolocation::class,
+    'IpAnonymizer' => Bkhim\Geolocation\Facades\IpAnonymizer::class,
+    'LocationConsentManager' => Bkhim\Geolocation\Facades\LocationConsentManager::class,
+],
+```
+
+**For Laravel 11+**, add the service provider to `bootstrap/providers.php`:
+
+```php
+return [
+    // Other service providers...
+    Bkhim\Geolocation\GeolocationServiceProvider::class,
+];
+```
+
+And add aliases to `config/app.php`:
+
+```php
 'aliases' => [
     'Geolocation' => Bkhim\Geolocation\Geolocation::class,
     'IpAnonymizer' => Bkhim\Geolocation\Facades\IpAnonymizer::class,
