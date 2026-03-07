@@ -114,7 +114,7 @@ class IpInfo implements LookupInterface
                 throw new GeolocationException($errorMessage);
             }
             $data = $response->json();
-            if ( ! isset($data['ip']) || ! isset($data['country_code'])) {
+            if ( ! isset($data['ip']) || ! (isset($data['country_code']) || isset($data['country']))) {
                 throw new GeolocationException("Incomplete geolocation data received from API");
             }
             if (isset($data['loc'])) {
@@ -127,6 +127,7 @@ class IpInfo implements LookupInterface
 
             // Map IpInfo response to standard format
             $data['countryCode'] = $data['country_code'] ?? $data['country'] ?? null;
+            $data['country'] = $data['countryCode']; // Ensure country field is set with country code
             $data['timezone'] = $data['timezone'] ?? null;
             $data['postalCode'] = $data['postal'] ?? null;
             $data['org'] = $data['org'] ?? null;

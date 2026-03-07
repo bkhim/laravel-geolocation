@@ -68,7 +68,8 @@ return [
         | IpInfo Provider Configuration
         |----------------------------------------------------------------------
         |
-        | IpInfo is a free IP geolocation API with generous rate limits.
+        | IpInfo offers multiple plans: Lite (free, unlimited requests, country/continent only),
+        | Core ($49/mo, full geolocation data), Plus ($74/mo, privacy detection).
         | You can get an API token from https://ipinfo.io/
         |
         | Required: access_token (get from https://ipinfo.io/account/token)
@@ -124,7 +125,8 @@ return [
         |
         | IPStack provides IP geolocation data through a RESTful API.
         | You can get a free API key from https://ipstack.com/
-        | Free tier includes 10,000 requests per month.
+        | Free tier includes 100 requests per month with HTTPS support.
+        | Paid plans offer higher limits and comprehensive data (Basic: $12.99/mo, Professional: $59.99/mo, Professional Plus: $99.99/mo).
         |
         | Required: access_key (get from https://ipstack.com/dashboard)
         |
@@ -135,8 +137,7 @@ return [
             // Your IPStack API access key
             'access_key' => env('GEOLOCATION_IPSTACK_ACCESS_KEY', null),
 
-            // Additional options
-            'secure' => env('IPSTACK_SECURE', true),
+
         ],
 
         /*
@@ -145,14 +146,18 @@ return [
         |----------------------------------------------------------------------
         |
         | IPGeolocation provides comprehensive IP geolocation data including
-        | timezone, ISP, and security information through a RESTful API.
+        | timezone, ISP, security, company, and abuse contact information through a RESTful API.
         | You can get a free API key from https://ipgeolocation.io/
         |
         | API Plans:
-        | - Free: City-level geolocation, country details, currency (1,000 req/month)
-        | - Standard: Everything in Free + hostname, ASN, ISP info (50,000 req/month)
-        | - Security: Everything in Standard + security checks, threat score
-        | - Advance: Everything in Security + accuracy radius, deeper network data
+        | - Free: 1,000 requests/month (API credits) - location essentials, country metadata, ASN basics, currency, time zone
+        | - Starter ($19/mo): 150K credits - hostname, connection type, routing, basic security
+        | - Core ($29/mo): 250K credits - company data, ASN details, multi-language support
+        | - Plus ($49/mo): 500K credits - security detection, abuse contact, user agent data
+        | - Pro ($79/mo): 1M credits - bulk lookup, higher accuracy, priority support
+        | - Business ($129/mo): 2M credits - extra API keys, dedicated APIs (ASN, Abuse, Security)
+        | - Premium ($249/mo): 5M credits - enterprise-grade features, custom integrations
+        | - Enterprise: Custom pricing and volume
         |
         | Required: api_key (get from https://ipgeolocation.io/dashboard)
         |
@@ -178,24 +183,27 @@ return [
         | ipapi.co Provider Configuration
         |----------------------------------------------------------------------
         |
-        | ipapi.co provides a simple, free IP geolocation API with no API key
-        | required. It supports both IPv4 and IPv6 addresses and provides
-        | comprehensive location data including timezone and ISP information.
+        | ipapi.co provides a comprehensive IP geolocation API with no API key
+        | required for the free tier. It supports both IPv4 and IPv6 addresses
+        | and provides extensive location data including city, region, country,
+        | postal code, latitude/longitude, timezone, currency, languages, ASN,
+        | and organization information.
         |
         | Features:
-        | - No API key required (30,000 requests/month free)
+        | - No API key required for free tier (30,000 requests/month)
+        | - Multiple paid plans available ($12-$159+/month)
         | - IPv4 & IPv6 support
-        | - Multiple output formats (JSON, XML, CSV, YAML)
-        | - Comprehensive location data
+        | - HTTPS/SSL encryption for all requests
+        | - Comprehensive location data even on free tier
         | - ASN and organization information
-        | - HTTPS support
+        | - Transparent pricing with annual discounts
         |
         */
         'ipapi' => [
             'driver' => 'ipapi',
 
             // No configuration needed - free tier provides 30K requests/month
-            // without requiring an API key
+            // Paid plans available for higher volumes and production use
         ],
 
         /*

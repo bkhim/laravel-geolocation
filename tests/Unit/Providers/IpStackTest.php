@@ -116,8 +116,8 @@ it('handles timezone offset calculation', function () {
     expect($details->getTimezoneOffset())->toEqual(-8);
 });
 
-it('uses https endpoint by default', function () {
-    $this->app['config']->set('geolocation.providers.ipstack.secure', true);
+it('always uses https endpoint', function () {
+    config(['geolocation.cache.enabled' => false]);
     
     Http::fake([
         '*' => Http::response([
@@ -130,8 +130,6 @@ it('uses https endpoint by default', function () {
 
     $cache = Cache::driver();
     $provider = new IpStack($cache);
-    
-    $this->app['config']->set('geolocation.cache.enabled', false);
 
     $provider->lookup('8.8.8.8');
 
@@ -140,26 +138,4 @@ it('uses https endpoint by default', function () {
     });
 });
 
-it('uses http endpoint when secure is disabled', function () {
-    $this->app['config']->set('geolocation.providers.ipstack.secure', false);
-    
-    Http::fake([
-        '*' => Http::response([
-            'ip' => '8.8.8.8',
-            'country_code' => 'US',
-            'latitude' => 0,
-            'longitude' => 0,
-        ]),
-    ]);
 
-    $cache = Cache::driver();
-    $provider = new IpStack($cache);
-    
-    $this->app['config']->set('geolocation.cache.enabled', false);
-
-    $provider->lookup('8.8.8.8');
-
-    Http::assertSent(function ($request) {
-        return str_starts_with($request->url(), 'http://');
-    });
-});

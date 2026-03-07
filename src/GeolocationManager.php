@@ -4,7 +4,7 @@ namespace Bkhim\Geolocation;
 
 use GeoIp2\Database\Reader;
 use GuzzleHttp\Client;
-use Illuminate\Cache\CacheManager;
+use Illuminate\Contracts\Cache\Repository;
 use Illuminate\Support\Str;
 use InvalidArgumentException;
 use MaxMind\Db\Reader\InvalidDatabaseException;
@@ -30,7 +30,7 @@ class GeolocationManager
     protected $providers = [];
 
     /**
-     * @var CacheManager
+     * @var Repository
      */
     protected $cacheProvider;
 

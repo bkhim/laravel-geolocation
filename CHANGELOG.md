@@ -1,5 +1,31 @@
 # Changelog
 
+
+## [v4.0.7] - 2026-03-07
+
+### Bug Fixes
+- Fixed IpInfo provider validation - now accepts both `country` and `country_code` fields from API
+- Fixed MaxMind provider `country` field mapping - now returns ISO code instead of country name
+- Fixed MaxMind provider security fields (`isMobile`, `isProxy`) using correct property names
+- Fixed cache race condition in IpApi provider using atomic `cache->remember()`
+- Fixed type hint in GeolocationManager - now uses `Illuminate\Contracts\Cache\Repository` interface
+
+### Code Quality
+- Standardized internal country field mapping across all providers (country field now contains ISO code)
+- Updated IPStack documentation with correct free tier limits (100 requests/month)
+- Updated IPGeolocation documentation with current pricing and feature information
+- Removed deprecated `IPSTACK_SECURE` configuration (HTTPS now supported on all tiers)
+- Improved country code transformation consistency in GeolocationDetails
+
+### Documentation
+- Updated README with accurate provider pricing, features, and limitations
+- Added Laravel 11+ service provider registration instructions
+- Fixed IPStack free tier documentation (100 requests/month, not 10,000)
+- Updated IPGeolocation pricing and feature matrix
+
+---
+
+
 ## [v4.0.2] - 2026-02-08
 
 ### Bug Fixes
@@ -270,7 +296,7 @@ echo (string) $details;                 // NEW: String casting
 - Support for IPv4 and IPv6 addresses across all new providers
 
 ### Providers Overview
-- **IPStack**: Free (10K req/month), Basic, Professional, Enterprise tiers with HTTPS support on paid plans
+- **IPStack**: Free (100 req/month), Basic ($12.99/mo), Professional ($59.99/mo), Professional Plus ($99.99/mo) tiers with HTTPS support on paid plans
 - **IPGeolocation**: Free (1K req/month), Standard (50K), Security, Advanced tiers with 12 language support
 - **ipapi.co**: Completely free for 30k lookups per month with comprehensive location data and no API key requirements
 

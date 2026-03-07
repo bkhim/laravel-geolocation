@@ -60,14 +60,19 @@ class IpApi implements LookupInterface
 
         $cacheKey = 'geolocation:ipapi:'.md5($ipAddress ?? 'current');
 
-        if ( ! is_null($data = $this->cache->get($cacheKey))) {
+        $cacheTtl = config('geolocation.cache.ttl', 86400);
+
+        try {
+            $data = $this->cache->remember($cacheKey, $cacheTtl, function () use ($ipAddress) {
+                return $this->fetchGeolocationData($ipAddress);
+            });
+
             return new GeolocationDetails($data);
+        } catch (GeolocationException $e) {
+            throw $e;
+        } catch (\Exception $e) {
+            throw new GeolocationException("Unexpected error: ".$e->getMessage(), $e->getCode(), $e);
         }
-
-        $data = $this->fetchGeolocationData($ipAddress);
-        $this->cache->put($cacheKey, $data, config('geolocation.cache.ttl', 86400));
-
-        return new GeolocationDetails($data);
     }
 
     /**

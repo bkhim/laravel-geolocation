@@ -19,7 +19,6 @@ class IpStack implements LookupInterface
      * @const Define the base URL for IPStack API.
      */
     const BASEURL = 'https://api.ipstack.com';
-    const BASEURL_INSECURE = 'http://api.ipstack.com';
 
     /**
      * @var \Illuminate\Contracts\Cache\Repository
@@ -37,14 +36,13 @@ class IpStack implements LookupInterface
     }
 
     /**
-     * Get the appropriate base URL based on configuration.
+     * Get the base URL for IPStack API (always HTTPS).
      *
      * @return string
      */
     protected function getBaseUrl(): string
     {
-        $secure = config('geolocation.providers.ipstack.secure', true);
-        return $secure ? self::BASEURL : self::BASEURL_INSECURE;
+        return self::BASEURL;
     }
 
     /**

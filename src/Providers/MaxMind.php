@@ -104,7 +104,7 @@ class MaxMind implements LookupInterface
                 'ip'          => $ipAddress,
                 'city'        => $record->city->name ?? null,
                 'region'      => $record->mostSpecificSubdivision->name ?? null,
-                'country'     => $record->country->name ?? null,
+                'country'     => $record->country->isoCode ?? 'XX',
                 'countryCode' => $record->country->isoCode ?? 'XX',
                 'latitude'    => $record->location->latitude ?? 0,
                 'longitude'   => $record->location->longitude ?? 0,
@@ -121,8 +121,8 @@ class MaxMind implements LookupInterface
                 'asn'         => isset($record->traits->autonomousSystemNumber) ? 'AS' . $record->traits->autonomousSystemNumber : null,
                 'asnName'     => $record->traits->autonomousSystemOrganization ?? null,
                 'connectionType' => $record->traits->connectionType ?? null,
-                'isMobile'    => isset($record->traits->isMobile) ? (bool) $record->traits->isMobile : null,
-                'isProxy'     => isset($record->traits->isAnonymousProxy) ? (bool) $record->traits->isAnonymousProxy : null,
+                'isMobile'    => null, // Not available in MaxMind databases
+                'isProxy'     => isset($record->traits->isAnonymous) ? (bool) $record->traits->isAnonymous : null,
                 'isCrawler'   => null, // Not available in MaxMind
                 'isTor'       => isset($record->traits->isTorExitNode) ? (bool) $record->traits->isTorExitNode : null,
                 'hostname'    => null, // Not available in basic MaxMind database

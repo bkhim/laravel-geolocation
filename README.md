@@ -125,13 +125,23 @@ GEOLOCATION_RETRY_ATTEMPTS=2
 GEOLOCATION_RETRY_DELAY=100
 
 # IpInfo Configuration
+# Get your token from: https://ipinfo.io/account/token
+# Free (Lite) plan: Unlimited requests, country/continent data only
+# Core plan ($49/mo): Full geolocation data (city, region, coordinates, timezone, postal)
+# Plus plan ($74/mo): Additional privacy detection, accuracy radius, change tracking
 GEOLOCATION_IPINFO_ACCESS_TOKEN=your_token_here
 
 # IPStack Configuration
+# Get your API key from: https://ipstack.com/dashboard
+# Free tier: 100 requests/month with HTTPS support
+# Paid plans: Higher limits and comprehensive data (Basic: $12.99/mo, Professional: $59.99/mo, Professional Plus: $99.99/mo)
 GEOLOCATION_IPSTACK_ACCESS_KEY=your_api_key_here
-IPSTACK_SECURE=true
+
 
 # IPGeolocation Configuration
+# Get your API key from: https://ipgeolocation.io/dashboard
+# Free tier: 1,000 requests/month (API credits)
+# Paid plans offer higher limits and additional features (security, hostname, useragent, multi-language, company data)
 GEOLOCATION_IPGEOLOCATION_API_KEY=your_api_key_here
 IPGEOLOCATION_LANGUAGE=en
 IPGEOLOCATION_INCLUDE_HOSTNAME=false
@@ -139,6 +149,9 @@ IPGEOLOCATION_INCLUDE_SECURITY=false
 IPGEOLOCATION_INCLUDE_USERAGENT=false
 
 # MaxMind Configuration
+# Download free GeoLite2 database from: https://dev.maxmind.com/geoip/geolite2-free-geolocation-data
+# Or purchase GeoIP2 database for higher accuracy
+# Requires local database file - no API rate limits, works offline
 MAXMIND_DATABASE_PATH=/path/to/GeoLite2-City.mmdb
 MAXMIND_LICENSE_KEY=your_license_key
 
@@ -155,18 +168,20 @@ Choose the driver that fits your needs:
 
 | Provider | Free Tier | API Key Required | HTTPS | Special Features |
 |----------|-----------|------------------|-------|------------------|
-| **ipapi.co** | ✅ 30K/month | ❌ No | ✅ Yes | No API key needed, IPv4/IPv6 |
-| **IpInfo** | ✅ 50K/month | ✅ Yes | ✅ Yes | Popular, reliable, generous free tier |
-| **IPStack** | ✅ 10K/month | ✅ Yes | 💰 Paid only | Multiple tiers, comprehensive data |
-| **IPGeolocation** | ✅ 1K/month | ✅ Yes | ✅ Yes | 12 languages, security features |
+| **ipapi.co** | ✅ 30K/month* | ❌ No | ✅ Yes | No API key required, comprehensive data, paid plans available |
+| **IpInfo** | ✅ Unlimited (Lite) | ✅ Yes | ✅ Yes | Lite plan (country only), paid plans for full location data |
+| **IPStack** | ✅ 100/month | ✅ Yes | ✅ Yes | Comprehensive data, paid plans available |
+| **IPGeolocation** | ✅ 1K/month | ✅ Yes | ✅ Yes | Security detection, company data, multi-language, paid plans available |
 | **MaxMind** | ✅ Local DB | ❌ No | N/A | Privacy-focused, fastest, offline |
 
+
+
 **Recommendation by Use Case**:
-- **Getting Started**: Use **ipapi.co** (no setup required)
-- **Production Apps**: Use **IpInfo** (reliable with generous limits)
-- **High Volume**: Use **MaxMind** (local database, no API limits)
-- **Advanced Features**: Use **IPGeolocation** (security data, translations)
-- **Enterprise**: Use **IPStack** (comprehensive data, support)
+- **Getting Started**: Use **ipapi.co** (no API key, full geolocation data on free tier) or **IpInfo Lite** (unlimited requests, country-level only)
+- **Production Apps**: Use **ipapi.co paid plans** (scalable, comprehensive data) or **IpInfo Core/Plus** (advanced features)
+- **High Volume**: Use **MaxMind** (local database, no API limits) or **ipapi.co Enterprise** (high-volume API)
+- **Advanced Features**: Use **IPGeolocation** (security data, translations) or **IpInfo Plus** (privacy detection)
+- **Enterprise**: Use **IPStack** (comprehensive data), **IPGeolocation Enterprise** (security & compliance), or **ipapi.co Custom** (tailored solutions)
 
 ## Usage
 
@@ -506,20 +521,25 @@ use Illuminate\Foundation\Configuration\Middleware;
 ### Provider-Specific Issues
 
 #### IPStack
-- **HTTPS Error**: Free tier only supports HTTP. Upgrade to paid plan for HTTPS
-- **Rate Limit**: Free tier limited to 10,000 requests/month
+- **HTTPS Support**: All tiers (free and paid) support HTTPS connections
+- **Rate Limit**: Free tier limited to 100 requests/month
 
 #### IPGeolocation
-- **Language Support**: Multi-language responses require paid plans
-- **Security Features**: Advanced features (hostname, security) require appropriate plan tiers
+- **Rate Limit**: Free tier limited to 1,000 requests/month (API credits). Paid plans start at 150K credits/month.
+- **Feature Tiers**: Hostname, security detection, user agent, company data, abuse contact, and multi-language responses require paid plans.
+- **API Credits**: Each API call consumes credits based on data returned. Monitor usage via IPGeolocation dashboard.
+- **Configuration**: Ensure `IPGEOLOCATION_INCLUDE_HOSTNAME`, `IPGEOLOCATION_INCLUDE_SECURITY`, `IPGEOLOCATION_INCLUDE_USERAGENT` are set correctly for your plan.
 
 #### IpInfo
-- **Rate Limit**: Free tier limited to 50,000 requests/month
+- **Data Limitations**: Free (Lite) tier provides only country and continent data. Upgrade to Core/Plus for city-level geolocation, coordinates, timezone, and postal code.
 - **API Token**: Ensure your token is valid and active
+- **Plan Features**: Different plans offer different data fields. Check your plan capabilities at [ipinfo.io/pricing](https://ipinfo.io/pricing)
 
 #### ipapi.co
-- **No Configuration**: This provider requires no setup - if it's not working, check your internet connection
-- **Rate Limits**: May apply for extremely high volume usage
+- **No Configuration**: This provider requires no API key or setup
+- **HTTPS Support**: All requests use secure HTTPS connections
+- **Rate Limits**: Free tier includes 30,000 requests per month
+- **IPv4/IPv6 Support**: Both IP address formats are supported
 
 ### MaxMind Database Issues
 
