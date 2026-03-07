@@ -457,6 +457,50 @@ GEOLOCATION_MIDDLEWARE_ENABLED=true
 GEOLOCATION_RATE_LIMITING_ENABLED=true
 ```
 
+The package registers the following middleware aliases:
+
+- `geo.allow` - Allow access only from specific countries/continents
+- `geo.deny` - Deny access from specific countries/continents  
+- `geo.ratelimit` - Rate limit requests based on country
+
+#### Using Middleware in Routes
+
+```php
+// Allow only US and Canada
+Route::get('/us-only', function () {
+    return 'US and Canada only';
+})->middleware('geo.allow:US,CA');
+
+// Deny specific countries
+Route::get('/no-china', function () {
+    return 'Not available in China';
+})->middleware('geo.deny:CN');
+
+// Rate limit by country
+Route::get('/api/data', function () {
+    return ['data' => 'sensitive'];
+})->middleware('geo.ratelimit:100,1'); // 100 requests per minute
+```
+
+#### Laravel 11+ Middleware Registration
+
+For Laravel 11+, you may need to manually register middleware aliases in `bootstrap/app.php`:
+
+```php
+use Illuminate\Foundation\Configuration\Middleware;
+
+// Inside the bootstrap/app.php file
+->withMiddleware(function (Middleware $middleware) {
+    $middleware->alias([
+        'geo.allow' => \Bkhim\Geolocation\Addons\Middleware\GeoMiddleware::class,
+        'geo.deny' => \Bkhim\Geolocation\Addons\Middleware\GeoMiddleware::class,
+        'geo.ratelimit' => \Bkhim\Geolocation\Addons\Middleware\RateLimitByGeo::class,
+    ]);
+})
+```
+
+**Note for Laravel 11+**: When manually registering middleware aliases in `bootstrap/app.php`, set `GEOLOCATION_MIDDLEWARE_ENABLED=false` in your `.env` file to prevent duplicate registration from the package's service provider.
+
 ## Troubleshooting
 
 ### Provider-Specific Issues

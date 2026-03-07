@@ -6,7 +6,7 @@
     </testsuite>
   </testsuites>
   <php>
-    <env name="GEOLOCATION_IPINFO_ACCESS_TOKEN" value="758524cdce39c8"/>
+    <env name="GEOLOCATION_IPINFO_ACCESS_TOKEN" value=""/>
     <env name="GEOLOCATION_CACHE_TTL" value="4096"/>
     <env name="GEOLOCATION_DRIVER" value="ipinfo"/>
     <env name="MAXMIND_DATABASE_PATH" value="storage/app/geoip/test.mmdb"/>
