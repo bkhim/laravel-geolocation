@@ -260,4 +260,52 @@ class GeolocationManager
     {
         return $this->lookup($ip);
     }
+
+    /**
+     * Lookup geolocation data with fallback support.
+     *
+     * If the primary provider fails, tries fallback providers in order.
+     *
+     * @param  string|null  $ip
+     * @param  string  $responseFilter
+     * @return \Bkhim\Geolocation\GeolocationDetails
+     * @throws \Bkhim\Geolocation\GeolocationException
+     */
+    public function lookup($ipAddress = null, $responseFilter = 'geo'): GeolocationDetails
+    {
+        $fallbackEnabled = $this->config['fallback']['enabled'] ?? false;
+        $fallbackOrder = $this->config['fallback']['order'] ?? [];
+        $maxAttempts = $this->config['fallback']['max_attempts'] ?? 2;
+
+        if (!$fallbackEnabled || empty($fallbackOrder)) {
+            return $this->driver()->lookup($ipAddress, $responseFilter);
+        }
+
+        $providers = array_merge([$this->getDefaultDriver()], $fallbackOrder);
+        $providers = array_unique($providers);
+        $attempts = 0;
+        $lastException = null;
+
+        foreach ($providers as $provider) {
+            if ($attempts >= $maxAttempts) {
+                break;
+            }
+
+            try {
+                return $this->driver($provider)->lookup($ipAddress, $responseFilter);
+            } catch (\Exception $e) {
+                $lastException = $e;
+                $attempts++;
+
+                if ($this->config['logging']['enabled'] ?? false) {
+                    $logLevel = $this->config['logging']['level_error'] ?? 'error';
+                    logger()->$logLevel("Geolocation provider '{$provider}' failed: " . $e->getMessage());
+                }
+
+                continue;
+            }
+        }
+
+        throw $lastException ?? new GeolocationException('All geolocation providers failed');
+    }
 }
