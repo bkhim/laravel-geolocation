@@ -6,7 +6,7 @@
 
 A modern, comprehensive IP geolocation package for Laravel with support for multiple providers (IpInfo, MaxMind, IPStack, IPGeolocation, ipapi.co). Get accurate visitor location data including city, country, timezone, currency, ISP information, and security detection. Perfect for user personalization, analytics, fraud prevention, and geo-targeting.
 
-> **Release**: v4.0.7 — Stable (2026-03-20). This is a patch release with standardized country mapping, cache race condition fixes, and updated provider documentation. See [CHANGELOG.md](CHANGELOG.md) for details.
+> **Release**: v4.1.0 — Stable (2026-03-20). This release adds modular user traits for geolocation integration, security detection, and personalization features. See [CHANGELOG.md](CHANGELOG.md) for details.
 
 ## Quick Installation
 
@@ -488,6 +488,181 @@ The package includes middleware for geo-based access control and rate limiting. 
 ```env
 GEOLOCATION_MIDDLEWARE_ENABLED=true
 GEOLOCATION_RATE_LIMITING_ENABLED=true
+```
+
+### User Trait Integration
+
+The package provides modular traits for integrating geolocation into your User model. These traits can be used individually or together to add geolocation capabilities to your application.
+
+#### Installation
+
+First, publish the migration for login history tracking:
+
+```bash
+php artisan vendor:publish --provider="Bkhim\Geolocation\GeolocationServiceProvider" --tag="geolocation-migrations"
+php artisan migrate
+```
+
+Then add the traits to your User model:
+
+```php
+use Bkhim\Geolocation\Traits\HasGeolocation;
+use Bkhim\Geolocation\Traits\HasGeolocationSecurity;
+use Bkhim\Geolocation\Traits\HasGeolocationPreferences;
+
+class User extends Authenticatable
+{
+    use HasGeolocation;
+    // use HasGeolocationSecurity; // Uncomment for security features
+    // use HasGeolocationPreferences; // Uncomment for personalization
+}
+```
+
+#### HasGeolocation Trait
+
+The core trait for recording and retrieving user login locations:
+
+```php
+$user = User::find(1);
+
+// Record a login with IP
+$user->recordLoginLocation($request->ip());
+
+// Get last login information
+$lastLogin = $user->getLastLogin();
+echo $lastLogin->country; // "United States"
+
+// Check if login is from a new country
+if ($user->isLoginFromNewCountry($request->ip())) {
+    // Alert user about new country login
+}
+
+// Check if login is from a new city
+if ($user->isLoginFromNewCity($request->ip())) {
+    // Alert user about new city login
+}
+
+// Access login history
+$history = $user->loginHistories()->orderBy('occurred_at', 'desc')->get();
+```
+
+#### HasGeolocationSecurity Trait
+
+Security-focused trait for detecting suspicious logins:
+
+```php
+// Check if MFA is required based on location
+if ($user->requiresMfaDueToLocation($request->ip())) {
+    return redirect()->route('mfa.verify');
+}
+
+// Check if login is high risk (uses configurable scoring)
+if ($user->isHighRiskLogin($request->ip())) {
+    // Trigger additional verification
+}
+
+// Get detailed risk score with breakdown
+$riskAnalysis = $user->getRiskScore($request->ip());
+// Returns: [
+//     'score' => 45,
+//     'is_high_risk' => false,
+//     'threshold' => 70,
+//     'triggers' => ['new_country' => true, 'new_city' => true],
+//     'trusted_country' => false,
+// ]
+
+// Get risk level of last login
+$risk = $user->getLastLoginRiskLevel(); // Returns: 'low', 'high', or 'critical'
+
+// Get count of suspicious logins
+$suspiciousCount = $user->getSuspiciousLoginCount();
+```
+
+**Risk Scoring System**: The trait uses a configurable scoring system to determine high-risk logins:
+
+```php
+// In config/geolocation.php
+'security' => [
+    'high_risk_threshold' => 70, // Score threshold for high risk
+    'trusted_countries' => ['US', 'CA', 'GB'], // Countries that bypass scoring
+    'trusted_ips' => ['192.168.1.1'], // IPs that bypass scoring
+    'rules' => [
+        'proxy' => 40,
+        'tor' => 80,
+        'crawler' => 20,
+        'new_country' => 30,
+        'new_city' => 15,
+    ],
+    'custom_rules' => [
+        // Add custom rule classes: 'App\Rules\HighRiskAsnScore'
+    ],
+],
+```
+
+**Events Fired**: The trait dispatches events for security monitoring:
+
+- `LoginLocationRecorded` - When a login location is recorded
+- `SuspiciousLocationDetected` - When MFA is triggered
+- `HighRiskIpDetected` - When high-risk login is detected
+
+```php
+// Listen for security events
+Event::listen(\Bkhim\Geolocation\Events\HighRiskIpDetected::class, function ($event) {
+    Mail::to($event->user)->send(new SuspiciousLoginAlert($event->loginHistory));
+});
+```
+
+#### HasGeolocationPreferences Trait
+
+Personalization trait for timezone and currency detection:
+
+```php
+// Get user's detected timezone based on last login
+$timezone = $user->getDetectedTimezone(); // "America/New_York"
+
+// Get user's local currency
+$currency = $user->getLocalCurrency(); // "USD"
+
+// Apply timezone to user session
+date_default_timezone_set($user->getDetectedTimezone());
+
+// Format prices in user's currency
+$formatter = new NumberFormatter($user->getLocalCurrency(), NumberFormatter::CURRENCY);
+echo $formatter->formatCurrency(99.99, $user->getLocalCurrency());
+```
+
+#### Configuration
+
+All traits are configurable via `config/geolocation.php`:
+
+```php
+'user_trait' => [
+    'login_history_table' => 'user_login_locations',
+    'cache_logins' => true,
+    'login_cache_ttl' => 3600,
+],
+
+'security' => [
+    'enable_mfa_trigger' => true,
+    'risk_threshold' => 'high', // low, high, critical
+    'high_risk_threshold' => 70,
+    'trusted_countries' => [],
+    'trusted_ips' => [],
+    'rules' => [
+        'proxy' => 40,
+        'tor' => 80,
+        'crawler' => 20,
+        'new_country' => 30,
+        'new_city' => 15,
+    ],
+],
+
+'personalization' => [
+    'enable_timezone_detection' => true,
+    'enable_currency_detection' => true,
+    'default_timezone' => 'UTC',
+    'default_currency' => 'USD',
+],
 ```
 
 The package registers the following middleware aliases:

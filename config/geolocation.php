@@ -346,4 +346,63 @@ return [
         ],
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | User Trait Configuration
+    |--------------------------------------------------------------------------
+    |
+    | Configuration for the geolocation traits that can be applied to the User model.
+    |
+    */
+    'user_trait' => [
+        'enabled' => env('GEOLOCATION_USER_TRAIT_ENABLED', true),
+        'login_history_table' => 'user_login_locations',
+        'login_history_model' => \Bkhim\Geolocation\Models\LoginHistory::class,
+        'cache_ttl' => env('GEOLOCATION_USER_TRAIT_CACHE_TTL', 86400), // seconds
+        'anonymization_mode' => env('GEOLOCATION_ANONYMIZATION_MODE', 'partial'), // none|partial|full
+        'store_ip' => env('GEOLOCATION_STORE_IP', true), // true = masked, false = don't store
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Security Configuration
+    |--------------------------------------------------------------------------
+    |
+    | Configuration for security-related geolocation features.
+    |
+    */
+    'security' => [
+        'enable_mfa_trigger' => env('GEOLOCATION_SECURITY_MFA_ENABLED', true),
+        'risk_threshold' => env('GEOLOCATION_SECURITY_RISK_THRESHOLD', 'high'),
+        
+        // Risk scoring rules for isHighRiskLogin method
+        'high_risk_threshold' => env('GEOLOCATION_SECURITY_HIGH_RISK_THRESHOLD', 70),
+        'rules' => [
+            'proxy' => env('GEOLOCATION_SECURITY_RULE_PROXY', 40),
+            'tor' => env('GEOLOCATION_SECURITY_RULE_TOR', 80),
+            'crawler' => env('GEOLOCATION_SECURITY_RULE_CRAWLER', 20),
+            'new_country' => env('GEOLOCATION_SECURITY_RULE_NEW_COUNTRY', 30),
+            'new_city' => env('GEOLOCATION_SECURITY_RULE_NEW_CITY', 15),
+        ],
+        
+        // Trusted locations that bypass security checks
+        'trusted_countries' => [],
+        'trusted_ips' => [],
+        
+        // Custom risk rule classes (for extensibility)
+        'custom_rules' => [],
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Personalization Configuration
+    |--------------------------------------------------------------------------
+    |
+    | Configuration for personalization-related geolocation features.
+    |
+    */
+    'personalization' => [
+        'enable_currency' => env('GEOLOCATION_PERSONALIZATION_CURRENCY_ENABLED', true),
+        'enable_timezone' => env('GEOLOCATION_PERSONALIZATION_TIMEZONE_ENABLED', true),
+    ],
 ];

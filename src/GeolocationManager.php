@@ -247,4 +247,17 @@ class GeolocationManager
     {
         return $this->provider()->$method(...$parameters);
     }
+
+    /**
+     * Get location details for an IP address.
+     *
+     * Alias for lookup() method for backward compatibility.
+     *
+     * @param  string  $ip
+     * @return \Bkhim\Geolocation\GeolocationDetails
+     */
+    public function getDetails(string $ip): GeolocationDetails
+    {
+        return $this->lookup($ip);
+    }
 }

@@ -1,6 +1,79 @@
 # Changelog
 
 
+## [v4.1.0] - 2026-03-20
+
+### New Features
+
+#### User Trait Integration
+Added modular traits for integrating geolocation into User models:
+
+- **HasGeolocation Trait**: Core functionality for recording and retrieving user login locations
+  - `recordLoginLocation($ip)` - Records a login with IP and geolocation data
+  - `getLastLogin()` - Returns the user's last login record
+  - `getLastLoginCountry()` - Returns the country of the last login
+  - `isLoginFromNewCountry($ip)` - Checks if login is from a new country
+  - `isLoginFromNewCity($ip)` - Checks if login is from a new city
+  - `loginHistories()` - Eloquent relationship to login history
+
+- **HasGeolocationSecurity Trait**: Security-focused features for fraud prevention
+  - `requiresMfaDueToLocation($ip)` - Determines if MFA is required
+  - `isHighRiskLogin($ip)` - Configurable risk scoring system (threshold: 70)
+  - `getRiskScore($ip)` - Returns detailed risk score with breakdown (score, triggers, threshold)
+  - `getSuspiciousLoginCount()` - Returns count of suspicious logins
+  - `getLastLoginRiskLevel()` - Returns 'low', 'high', or 'critical'
+  - Automatic event dispatching for security monitoring
+
+- **HasGeolocationPreferences Trait**: Personalization features
+  - `getDetectedTimezone()` - Detects user's timezone from login history
+  - `getLocalCurrency()` - Returns user's local currency code
+
+- **LoginHistory Model**: Eloquent model for storing login records with fields:
+  - IP address, country, city, timezone, currency
+  - Security flags (is_proxy, is_tor, is_crawler, is_mobile)
+  - Risk score and risk level
+
+#### Events System
+New event classes for security monitoring:
+- `LoginLocationRecorded` - Fired when a login location is recorded
+- `SuspiciousLocationDetected` - Fired when suspicious activity is detected
+- `HighRiskIpDetected` - Fired when high-risk login is detected
+- `GeoBlockedRequest` - Fired when a geo-blocked request is blocked
+
+#### Database Migration
+Added migration for `user_login_locations` table with comprehensive fields for security tracking.
+
+#### Configuration Enhancements
+New configuration sections:
+- `user_trait` - Login history table name and caching options
+- `security` - MFA trigger, risk thresholds, scoring rules, trusted countries/IPs
+- `personalization` - Timezone and currency detection settings
+
+### API Improvements
+- Added `getDetails()` method alias to GeolocationManager for trait compatibility
+
+### Usage Example
+
+```php
+// Add traits to User model
+class User extends Authenticatable
+{
+    use HasGeolocation, HasGeolocationSecurity, HasGeolocationPreferences;
+}
+
+// Record login and check security
+$user->recordLoginLocation($request->ip());
+
+if ($user->isHighRiskLogin($request->ip())) {
+    // Trigger additional verification
+}
+
+// Personalization
+date_default_timezone_set($user->getDetectedTimezone());
+```
+
+---
+
 ## [v4.0.7] - 2026-03-07
 
 ### Bug Fixes
