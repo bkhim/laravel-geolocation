@@ -6,7 +6,25 @@
 
 A modern, comprehensive IP geolocation package for Laravel with support for multiple providers (IpInfo, MaxMind, IPStack, IPGeolocation, ipapi.co). Get accurate visitor location data including city, country, timezone, currency, ISP information, and security detection. Perfect for user personalization, analytics, fraud prevention, and geo-targeting.
 
-> **Release**: v4.0.6 — Stable (2025-12-12). This is a major release with architecture improvements, new drivers, and expanded geolocation features. See [CHANGELOG.md](CHANGELOG.md) for details.
+> **Release**: v4.0.7 — Stable (2026-03-20). This is a patch release with standardized country mapping, cache race condition fixes, and updated provider documentation. See [CHANGELOG.md](CHANGELOG.md) for details.
+
+## Quick Installation
+
+Install the package via Composer:
+
+```bash
+composer require bkhim/laravel-geolocation
+```
+
+The package uses Laravel's auto-discovery to register the service provider and facades automatically.
+
+Publish the configuration file:
+
+```bash
+php artisan vendor:publish --provider="Bkhim\Geolocation\GeolocationServiceProvider"
+```
+
+Set your provider API keys in `.env` and you're ready to use geolocation in your application!
 
 ## Table of Contents
 
