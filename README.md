@@ -4,7 +4,7 @@
 [![License](https://img.shields.io/packagist/l/bkhim/laravel-geolocation.svg)](LICENSE)
 [![PHP Version](https://img.shields.io/packagist/php-v/bkhim/laravel-geolocation.svg)](https://php.net)
 
-A modern, comprehensive IP geolocation package for Laravel with support for multiple providers (IpInfo, MaxMind, IPStack, IPGeolocation, ipapi.co). Get accurate visitor location data including city, country, timezone, currency, ISP information, and security detection. Perfect for user personalization, analytics, fraud prevention, and geo-targeting.
+IP geolocation for Laravel with **built-in fraud prevention and security features**. Detect proxy/VPN/Tor, trigger MFA on suspicious logins, track user login locations with risk scoring, and personalize user experience with timezone and currency detection. Perfect for authentication security, fraud prevention, geo-targeting, and user personalization.
 
 > **Release**: v4.1.0 — Stable (2026-03-20). This release adds modular user traits for geolocation integration, security detection, and personalization features. See [CHANGELOG.md](CHANGELOG.md) for details.
 
@@ -43,27 +43,49 @@ Set your provider API keys in `.env` and you're ready to use geolocation in your
 
 ## Features
 
-- **5 Geolocation Providers**: IpInfo.io, MaxMind GeoIP2, IPStack.com, IPGeolocation.io, and ipapi.co for reliable IP address location lookup
-- **Laravel 10+ Compatible**: Full support for Laravel 10.x through 12.x with modern PHP 8.1+ features
-- **Free & Premium Options**: From completely free IP geolocation to enterprise-grade location services with advanced features
-- **Rich Location Data**: City, region, country, GPS coordinates, timezone, postal codes, currency, and ISP/organization information
-- **Advanced Caching System**: High-performance caching with configurable TTL and provider-specific cache keys for optimal speed
-- **Production-Ready Error Handling**: Comprehensive exception management and IP validation for IPv4 and IPv6 addresses
-- **Multi-language Support**: Country name translations and provider-specific language options for international applications
-- **Security Detection**: Proxy, VPN, Tor, crawler, and mobile device detection for fraud prevention and analytics
-- **Developer-Friendly**: Flexible configuration, Artisan commands, and extensive documentation for rapid integration
-- **Modular Addon Architecture**: GDPR consent management, IP anonymization, rate limiting, and middleware support
-- **Translation Support**: Country names available in multiple languages
+### Geolocation Providers
+- **5 Providers**: IpInfo.io, MaxMind GeoIP2, IPStack.com, IPGeolocation.io, and ipapi.co for reliable IP geolocation
+- **Free & Premium Options**: From completely free IP geolocation to enterprise-grade location services
+
+### Security & Fraud Prevention
+- **Proxy/VPN Detection**: Detect anonymizing services on login
+- **Tor Exit Node Detection**: Identify Tor browser users
+- **Crawler/Bot Detection**: Flag automated access
+- **Configurable Risk Scoring**: Point-based system for threat assessment
+- **MFA Triggers**: Automatically require 2FA on suspicious logins
+- **Security Events**: Laravel events for Slack alerts, email notifications, webhooks
+- **Login Location Tracking**: Record and monitor user login history by country/city
+
+### User Personalization
+- **Timezone Detection**: Automatically detect user timezone from IP
+- **Currency Detection**: Show prices in user's local currency
+- **Geographic Personalization**: Customize content by region
+
+### Developer Experience
+- **Rich Location Data**: City, region, country, GPS coordinates, timezone, postal codes, currency, ISP
+- **Advanced Caching**: Configurable TTL, Redis/Memcached support, cache tags
+- **Provider Fallback**: Automatic failover when primary provider fails
+- **Laravel 10+ Compatible**: Full support for Laravel 10.x through 12.x with PHP 8.1+
+- **Production-Ready**: Comprehensive error handling, IP validation, fallback mechanism
+- **Modular Addons**: GDPR consent management, IP anonymization, geo-blocking middleware, rate limiting
 
 ## Use Cases
 
-This package is perfect for:
+### Security & Authentication
+- **Login Security**: Trigger MFA on suspicious logins (new country, VPN, Tor)
+- **Fraud Prevention**: Detect proxy/VPN/Tor on checkout, login, or account changes
+- **Account Protection**: Monitor login locations and alert on unusual activity
+- **Risk-Based Access Control**: Require additional verification based on risk score
 
-- **User Personalization & Localization**: Currency detection, language localization, timezone handling, regional content
-- **Security & Fraud Prevention**: Proxy/VPN detection, Tor detection, geoblocking, risk assessment
-- **Analytics & Business Intelligence**: Visitor analytics, market analysis, performance monitoring, A/B testing
-- **E-commerce & Marketing**: Geo-targeting, shipping optimization, tax calculation, compliance
-- **Mobile & Device Detection**: Mobile optimization, bot detection, device targeting
+### User Personalization
+- **Timezone Detection**: Display times in user's local timezone automatically
+- **Currency Detection**: Show prices in user's local currency
+- **Regional Content**: Customize content based on user's country/city
+
+### Geo-Targeting & Compliance
+- **Geo-Blocking**: Allow/deny access by country with middleware
+- **GDPR Compliance**: IP anonymization and consent management
+- **E-commerce**: Shipping zones, tax calculation, regional pricing
 
 ## Requirements
 

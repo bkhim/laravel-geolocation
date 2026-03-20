@@ -3,7 +3,9 @@
 
 ## [v4.1.0] - 2026-03-20
 
-### New Features
+### Security & Fraud Prevention Features
+
+This release transforms the package into a **geo-intelligence and security platform** with built-in fraud prevention capabilities.
 
 #### User Trait Integration
 Added modular traits for integrating geolocation into User models:

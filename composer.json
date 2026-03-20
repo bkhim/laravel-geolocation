@@ -1,8 +1,8 @@
 {
   "name": "bkhim/laravel-geolocation",
   "version": "4.1.0",
-  "description": "Modern Laravel geolocation package with 5 providers (IpInfo, MaxMind, IPStack, IPGeolocation, ipapi.co), 25+ data methods, security detection, and production-ready features for Laravel 10-12",
-  "keywords": ["geolocation", "ip", "location", "laravel", "maxmind", "ipinfo", "ipstack", "ipgeolocation", "security", "timezone", "currency", "maps"],
+  "description": "Laravel geolocation with built-in fraud prevention, risk scoring, MFA triggers, and security event monitoring. 5 providers, proxy/VPN/Tor detection, login tracking, timezone/currency personalization for Laravel 10-12",
+  "keywords": ["geolocation", "ip", "location", "laravel", "fraud-prevention", "security", "risk-scoring", "mfa", "proxy-detection", "vpn-detection", "tor", "login-tracking", "timezone", "currency", "maxmind", "ipinfo", "ipstack", "ipgeolocation"],
   "homepage": "https://github.com/bkhim/laravel-geolocation",
   "license": "MIT",
   "authors": [
