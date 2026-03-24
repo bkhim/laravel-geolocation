@@ -23,6 +23,7 @@ jobs:
         uses: shivammathur/setup-php@accd6127cb78bee3e8082180cb391013d204ef9f
         with:
           php-version: ${{ matrix.php-versions }}
+          extensions: fileinfo, bcmath, mbstring, pdo_mysql, curl
           tools: composer
 
       - name: Checkout
