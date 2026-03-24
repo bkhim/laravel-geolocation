@@ -26,6 +26,11 @@
         "pestphp/pest": "^2.0|^3.0",
         "pestphp/pest-plugin-laravel": "^2.0"
     },
+  "autoload": {
+    "psr-4": {
+      "Bkhim\\Geolocation\\": "src/"
+    }
+  },
   "autoload-dev": {
     "psr-4": {
       "Bkhim\\Geolocation\\Tests\\": "tests/"
