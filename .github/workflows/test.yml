@@ -35,4 +35,4 @@ jobs:
         run: composer install --no-progress --prefer-dist --optimize-autoloader
 
       - name: Test with Pest
-        run: vendor/bin/pest --colors=always
+        run: vendor/bin/pest --ci --colors=always
