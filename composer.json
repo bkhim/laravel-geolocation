@@ -1,6 +1,6 @@
 {
   "name": "bkhim/laravel-geolocation",
-  "version": "4.1.1",
+  "version": "4.1.2",
   "description": "Laravel geolocation with built-in fraud prevention, risk scoring, MFA triggers, and security event monitoring. 5 providers, proxy/VPN/Tor detection, login tracking, timezone/currency personalization for Laravel 10-12",
   "keywords": ["geolocation", "ip", "location", "laravel", "fraud-prevention", "security", "risk-scoring", "mfa", "proxy-detection", "vpn-detection", "tor", "login-tracking", "timezone", "currency", "maxmind", "ipinfo", "ipstack", "ipgeolocation"],
   "homepage": "https://github.com/bkhim/laravel-geolocation",
