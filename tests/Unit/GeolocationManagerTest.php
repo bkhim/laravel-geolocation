@@ -4,6 +4,7 @@ use Bkhim\Geolocation\GeolocationManager;
 use Bkhim\Geolocation\GeolocationException;
 use Illuminate\Support\Facades\Cache;
 
+
 it('can instantiate geolocation manager', function () {
     $config = config('geolocation');
     $cache = Cache::driver();
