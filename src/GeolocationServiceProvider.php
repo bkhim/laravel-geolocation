@@ -143,7 +143,7 @@ class GeolocationServiceProvider extends ServiceProvider
                     );
                 }
                 break;
-            // ipapi doesn't require API key
+            // ipapi doesn't require API key - no validation needed
         }
     }
 

@@ -45,7 +45,7 @@ return [
     |
     */
     'drivers' => [
-        'default' => env('GEOLOCATION_DRIVER', 'ipinfo'),
+        'default' => env('GEOLOCATION_DRIVER', 'ipapi'),
     ],
 
     /*
