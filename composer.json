@@ -1,7 +1,7 @@
 {
   "name": "bkhim/laravel-geolocation",
   "version": "4.1.2",
-  "description": "Laravel geolocation with built-in fraud prevention, risk scoring, MFA triggers, and security event monitoring. 5 providers, proxy/VPN/Tor detection, login tracking, timezone/currency personalization for Laravel 10-12",
+  "description": "Laravel geolocation with built-in fraud prevention, risk scoring, MFA triggers, and security event monitoring. 5 providers, proxy/VPN/Tor detection, login tracking, timezone/currency personalization for Laravel 10-13",
   "keywords": ["geolocation", "ip", "location", "laravel", "fraud-prevention", "security", "risk-scoring", "mfa", "proxy-detection", "vpn-detection", "tor", "login-tracking", "timezone", "currency", "maxmind", "ipinfo", "ipstack", "ipgeolocation"],
   "homepage": "https://github.com/bkhim/laravel-geolocation",
   "license": "MIT",
@@ -16,15 +16,14 @@
   "require": {
     "php": "^8.2",
     "ext-openssl": "*",
-    "ext-json": "*",
-    "illuminate/support": "^10.0|^11.0|^12.0",
-    "guzzlehttp/guzzle": "^6.0|^7.0",
+    "illuminate/support": "^12.0|^13.0",
+    "guzzlehttp/guzzle": "^7.5",
     "geoip2/geoip2": "^v3.3.0"
   },
     "require-dev": {
-        "orchestra/testbench": "^6.0|^7.0|^8.0|^9.0",
-        "pestphp/pest": "^2.0|^3.0",
-        "pestphp/pest-plugin-laravel": "^2.0"
+        "orchestra/testbench": "^10.2|^11.0",
+        "pestphp/pest": "^3.8|^4.0",
+        "pestphp/pest-plugin-laravel": "^3.2|^4.0"
     },
   "autoload": {
     "psr-4": {
@@ -40,7 +39,8 @@
     "ext-maxminddb": "For better performance with MaxMind databases"
   },
   "scripts": {
-    "test": "vendor/bin/phpunit"
+    "test": "vendor/bin/pest",
+    "test:phpunit": "vendor/bin/phpunit"
   },
   "conflict": {
     "adrianorsouza/laravel-geolocation": "*"
