@@ -1,8 +1,6 @@
 name: Psalm Security Scan
 
 on:
-  push:
-  pull_request:
   schedule:
     - cron: '55 3 * * SUN'
 

@@ -1,8 +1,6 @@
 name: Tests
 
 on:
-  push:
-  pull_request:
   schedule:
     - cron: '55 3 * * SUN'
 
