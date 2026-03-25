@@ -6,7 +6,7 @@
 
 IP geolocation for Laravel with **built-in fraud prevention and security features**. Detect proxy/VPN/Tor, trigger MFA on suspicious logins, track user login locations with risk scoring, and personalize user experience with timezone and currency detection. Perfect for authentication security, fraud prevention, geo-targeting, and user personalization.
 
-> **Release**: v4.1.0 — Stable (2026-03-20). This release adds modular user traits for geolocation integration, security detection, and personalization features. See [CHANGELOG.md](CHANGELOG.md) for details.
+> **Release**: v4.1.2 — Stable (2026-03-20). This release adds modular user traits for geolocation integration, security detection, and personalization features. See [CHANGELOG.md](CHANGELOG.md) for details.
 
 ## Quick Installation
 
