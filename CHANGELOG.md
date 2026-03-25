@@ -1,5 +1,14 @@
 # Changelog
 
+## [v4.2.0] - 2026-03-25
+
+### Compatibility Updates
+
+- **Laravel 13 Support**: Added full compatibility with Laravel 13.x
+- **PHP Version**: Updated minimum PHP requirement to 8.2
+- **Testbench Update**: Updated orchestra/testbench to support Laravel 13 in dev dependencies
+
+---
 
 ## [v4.1.0] - 2026-03-20
 

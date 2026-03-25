@@ -6,7 +6,7 @@
 
 IP geolocation for Laravel with **built-in fraud prevention and security features**. Detect proxy/VPN/Tor, trigger MFA on suspicious logins, track user login locations with risk scoring, and personalize user experience with timezone and currency detection. Perfect for authentication security, fraud prevention, geo-targeting, and user personalization.
 
-> **Release**: v4.1.2 — Stable (2026-03-20). This release adds modular user traits for geolocation integration, security detection, and personalization features. See [CHANGELOG.md](CHANGELOG.md) for details.
+> **Release**: v4.2.0 — Stable (2026-03-25). This release adds Laravel 13 compatibility. See [CHANGELOG.md](CHANGELOG.md) for details.
 
 ## Quick Installation
 
@@ -65,7 +65,7 @@ Set your provider API keys in `.env` and you're ready to use geolocation in your
 - **Rich Location Data**: City, region, country, GPS coordinates, timezone, postal codes, currency, ISP
 - **Advanced Caching**: Configurable TTL, Redis/Memcached support, cache tags
 - **Provider Fallback**: Automatic failover when primary provider fails
-- **Laravel 10+ Compatible**: Full support for Laravel 10.x through 12.x with PHP 8.1+
+- **Laravel 10+ Compatible**: Full support for Laravel 10.x through 13.x with PHP 8.2+
 - **Production-Ready**: Comprehensive error handling, IP validation, fallback mechanism
 - **Modular Addons**: GDPR consent management, IP anonymization, geo-blocking middleware, rate limiting
 
@@ -89,8 +89,8 @@ Set your provider API keys in `.env` and you're ready to use geolocation in your
 
 ## Requirements
 
-- PHP 8.1 or higher
-- Laravel 10.x, 11.x, or 12.x
+- PHP 8.2 or higher
+- Laravel 10.x, 11.x, 12.x, or 13.x
 - Composer
 - For MaxMind provider: MaxMind GeoLite2 database (free) or GeoIP2 database (paid)
 
