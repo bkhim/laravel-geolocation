@@ -765,6 +765,10 @@ use Illuminate\Foundation\Configuration\Middleware;
 - **Rate Limits**: Free tier includes 30,000 requests per month
 - **IPv4/IPv6 Support**: Both IP address formats are supported
 
+### IP2Location.io
+- **Rate Limit**: Keyless lookup limited to 1,000 requests/day, and free plan limited to 50,000 requests/month
+- **Plan Features**: Some fields or features required higher plan. Check the details at [ip2location.io/pricing](https://www.ip2location.io/pricing)
+
 ### MaxMind Database Issues
 
 ```bash
