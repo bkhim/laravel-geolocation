@@ -188,6 +188,19 @@ class GeolocationManager
         );
     }
 
+    /**
+     * Create IP2Location.io driver instance.
+     *
+     * @param  array $config
+     * @return \Bkhim\Geolocation\Contracts\LookupInterface
+     */
+    protected function createIp2locationioDriver($config)
+    {
+        return new Providers\Ip2Locationio(
+            $this->cacheProvider
+        );
+    }
+
 
     /**
      * Get a provider instance.

@@ -154,7 +154,7 @@ After publishing the configuration, set your environment variables in `.env`. Se
 ### Environment Variables
 
 ```env
-# Default driver (ipapi, ipinfo, ipstack, ipgeolocation, maxmind)
+# Default driver (ipapi, ipinfo, ipstack, ipgeolocation, ip2locationio, maxmind)
 GEOLOCATION_DRIVER=ipapi
 
 # Request & Cache Configuration
@@ -188,6 +188,13 @@ IPGEOLOCATION_INCLUDE_HOSTNAME=false
 IPGEOLOCATION_INCLUDE_SECURITY=false
 IPGEOLOCATION_INCLUDE_USERAGENT=false
 
+# IP2Location.io Configuration
+# Get your API key from: https://ip2location.io/dashboard
+# Free tier: 1,000 requests/day without API key, or 50,000 requests/month with a free API key
+# Paid plans offer higher limits and additional features (proxy & security, continent, currency, geolocation add-on data)
+GEOLOCATION_IP2LOCATIONIO_API_KEY=your_api_key_here
+IP2LOCATIONIO_LANGUAGE=en
+
 # MaxMind Configuration
 # Download free GeoLite2 database from: https://dev.maxmind.com/geoip/geolite2-free-geolocation-data
 # Or purchase GeoIP2 database for higher accuracy
@@ -212,6 +219,7 @@ Choose the driver that fits your needs:
 | **IpInfo** | ✅ Unlimited (Lite) | ✅ Yes | ✅ Yes | Lite plan (country only), paid plans for full location data |
 | **IPStack** | ✅ 100/month | ✅ Yes | ✅ Yes | Comprehensive data, paid plans available |
 | **IPGeolocation** | ✅ 1K/month | ✅ Yes | ✅ Yes | Security detection, company data, multi-language, paid plans available |
+| **IP2Location.io** | ✅ 1K/day, 50k/month | ✅ Yes and ❌ No | ✅ Yes | Keyless API key available, proxy & security, continent, currency, geolocation add-on data, multi-language, paid plans available |
 | **MaxMind** | ✅ Local DB | ❌ No | N/A | Privacy-focused, fastest, offline |
 
 
@@ -220,7 +228,7 @@ Choose the driver that fits your needs:
 - **Getting Started**: Use **ipapi.co** (no API key, full geolocation data on free tier) or **IpInfo Lite** (unlimited requests, country-level only)
 - **Production Apps**: Use **ipapi.co paid plans** (scalable, comprehensive data) or **IpInfo Core/Plus** (advanced features)
 - **High Volume**: Use **MaxMind** (local database, no API limits) or **ipapi.co Enterprise** (high-volume API)
-- **Advanced Features**: Use **IPGeolocation** (security data, translations) or **IpInfo Plus** (privacy detection)
+- **Advanced Features**: Use **IPGeolocation** (security data, translations), **IP2Location.io** (proxy & security, continent, currency, geolocation add-on data, translations) or **IpInfo Plus** (privacy detection)
 - **Enterprise**: Use **IPStack** (comprehensive data), **IPGeolocation Enterprise** (security & compliance), or **ipapi.co Custom** (tailored solutions)
 
 ## Usage
@@ -254,6 +262,7 @@ $ipapiDetails = Geolocation::driver('ipapi')->lookup('8.8.8.8');          // Fre
 $ipinfoDetails = Geolocation::driver('ipinfo')->lookup('8.8.8.8');        // Popular
 $ipstackDetails = Geolocation::driver('ipstack')->lookup('8.8.8.8');      // Feature-rich
 $ipgeoDetails = Geolocation::driver('ipgeolocation')->lookup('8.8.8.8');  // Advanced
+$iplDetails = Geolocation::driver('ip2locationio')->lookup('8.8.8.8');  // Advanced
 $maxmindDetails = Geolocation::driver('maxmind')->lookup('8.8.8.8');      // Local database
 ```
 

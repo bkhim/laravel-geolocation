@@ -205,6 +205,32 @@ return [
             // No configuration needed - free tier provides 30K requests/month
             // Paid plans available for higher volumes and production use
         ],
+		
+
+        /*
+        |----------------------------------------------------------------------
+        | ip2location.io Provider Configuration
+        |----------------------------------------------------------------------
+        |
+        | ip2location.io provides a comprehensive IP geolocation API including 
+        | location & geography, network & connectivity, proxy & security, 
+        | currency & language, and so on. It supportsboth IPv4 and IPv6  
+        | addresses lookup. It can be used without an API key, up to 1,000 
+        | queries daily, or sign up for a free API key to get up to 50,000
+        | queries monthly.
+        |
+        */
+        'ip2locationio' => [
+            'driver' => 'ip2locationio',
+
+            // Your IP2Location.io API key
+            // If not defined, will query without key
+            'api_key' => env('GEOLOCATION_IP2LOCATIONIO_API_KEY', null),
+
+            // Response language for continent, country, region and city name. (paid plans only, except 'en')
+            // Supported: ar, cs, da, de, en, es, et, fi, fr, ga, it, ja, ko, ms, nl, pt, ru, sv, tr, vi, zh-cn, zh-tw
+            'language' => env('IP2LOCATIONIO_LANGUAGE', 'en'),
+        ],
 
         /*
         |----------------------------------------------------------------------
