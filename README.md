@@ -193,7 +193,8 @@ IPGEOLOCATION_INCLUDE_USERAGENT=false
 # Free tier: 1,000 requests/day without API key, or 50,000 requests/month with a free API key
 # Paid plans offer higher limits and additional features (proxy & security, continent, currency, geolocation add-on data)
 GEOLOCATION_IP2LOCATIONIO_API_KEY=your_api_key_here
-IP2LOCATIONIO_LANGUAGE=en
+# Language support is only available on PAID PLANS - free tier only supports 'en'
+GEOLOCATION_IP2LOCATIONIO_LANGUAGE=en
 
 # MaxMind Configuration
 # Download free GeoLite2 database from: https://dev.maxmind.com/geoip/geolite2-free-geolocation-data

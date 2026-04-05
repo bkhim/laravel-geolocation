@@ -1,8 +1,8 @@
 {
   "name": "bkhim/laravel-geolocation",
-  "version": "4.2.0",
-  "description": "Laravel geolocation with built-in fraud prevention, risk scoring, MFA triggers, and security event monitoring. 5 providers, proxy/VPN/Tor detection, login tracking, timezone/currency personalization for Laravel 10-13",
-  "keywords": ["geolocation", "ip", "location", "laravel", "fraud-prevention", "security", "risk-scoring", "mfa", "proxy-detection", "vpn-detection", "tor", "login-tracking", "timezone", "currency", "maxmind", "ipinfo", "ipstack", "ipgeolocation"],
+  "version": "4.3.0",
+  "description": "Laravel geolocation with built-in fraud prevention, risk scoring, MFA triggers, and security event monitoring. 6 providers (IP2Location.io, MaxMind, IpInfo, IpStack, IpApi, IpGeolocation), proxy/VPN/Tor detection, login tracking, timezone/currency personalization for Laravel 10-13",
+  "keywords": ["geolocation", "ip", "location", "laravel", "fraud-prevention", "security", "risk-scoring", "mfa", "proxy-detection", "vpn-detection", "tor", "login-tracking", "timezone", "currency", "maxmind", "ipinfo", "ipstack", "ipgeolocation", "ip2location"],
   "homepage": "https://github.com/bkhim/laravel-geolocation",
   "license": "MIT",
   "authors": [
