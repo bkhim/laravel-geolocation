@@ -1,5 +1,67 @@
 # Changelog
 
+## [v4.3.0] - 2026-04-05
+
+### New Provider: IP2Location.io
+
+Added **IP2Location.io** as the 6th geolocation provider with comprehensive feature support and flexible pricing options.
+
+#### Key Features
+- **Free Tier Available**: 1,000 requests/day without API key, or 50,000 requests/month with free API key
+- **Comprehensive Data**: Full geolocation data including coordinates, timezone, postal codes
+- **Security Features**: Basic proxy detection (advanced security features available in paid plans)
+- **Network Intelligence**: ASN information, ISP details, connection type detection
+- **Mobile Detection**: Advanced mobile carrier detection using MCC/MNC codes
+- **Multi-language Support**: 22 supported languages for location names (paid plans only)
+
+#### Configuration
+```env
+# IP2Location.io Configuration
+GEOLOCATION_IP2LOCATIONIO_API_KEY=your_api_key_here
+GEOLOCATION_IP2LOCATIONIO_LANGUAGE=en
+```
+
+#### API Response Fields Supported
+- **Location**: IP, country (name + code), region, city, coordinates, postal code
+- **Timezone**: UTC offset with proper DST handling
+- **Network**: ASN (with AS prefix), AS name, ISP information
+- **Connection**: Connection type mapping (dialup, broadband, corporate, datacenter, satellite)
+- **Security**: Basic proxy detection (is_proxy field)
+- **Mobile**: Intelligent mobile detection based on MCC/MNC/carrier data
+
+#### Implementation Quality
+- **Production Ready**: Comprehensive error handling with specific HTTP status code responses
+- **Robust Testing**: 12 test cases with 31 assertions including real API integration tests  
+- **Field Consistency**: ASN format standardized with 'AS' prefix to match other providers
+- **Cache Integration**: Full Laravel cache support with configurable TTL
+- **Documentation**: Complete environment variable documentation and usage examples
+
+#### Usage Example
+```php
+// Using IP2Location.io provider
+config(['geolocation.driver' => 'ip2locationio']);
+
+$location = app('geolocation')->lookup('8.8.8.8');
+echo $location->getCountry(); // "United States of America"
+echo $location->getAsn();     // "AS15169" (with standardized AS prefix)
+echo $location->isProxy();    // false
+```
+
+#### Pricing Tiers
+- **Free**: 1,000 requests/day (no signup) or 50,000/month (with free account)
+- **Paid Plans**: Enhanced features including advanced security, fraud scoring, detailed proxy analysis
+
+### Bug Fixes
+- **IP2Location.io Translation Handling**: Fixed error 10004 ("Translation is not available with your plan") by intelligently skipping language parameter for free tier accounts and implementing automatic retry without translation when error occurs
+
+### Code Quality Improvements
+- **Standardized Naming**: All provider classes now follow strict PascalCase convention
+- **Environment Variables**: Consistent `GEOLOCATION_` prefix across all provider configurations  
+- **Error Handling**: Enhanced error handling patterns with specific HTTP status codes
+- **Test Coverage**: Added real API integration testing capabilities
+
+---
+
 ## [v4.2.0] - 2026-03-25
 
 ### Compatibility Updates

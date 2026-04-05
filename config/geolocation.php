@@ -206,6 +206,35 @@ return [
             // Paid plans available for higher volumes and production use
         ],
 
+
+        /*
+        |----------------------------------------------------------------------
+        | ip2location.io Provider Configuration
+        |----------------------------------------------------------------------
+        |
+        | ip2location.io provides a comprehensive IP geolocation API including
+        | location & geography, network & connectivity, proxy & security,
+        | currency & language, and so on. It supportsboth IPv4 and IPv6
+        | addresses lookup. It can be used without an API key, up to 1,000
+        | queries daily, or sign up for a free API key to get up to 50,000
+        | queries monthly.
+        |
+        */
+        'ip2locationio' => [
+            'driver' => 'ip2locationio',
+
+            // Your IP2Location.io API key
+            // If not defined, will query without key
+            'api_key' => env('GEOLOCATION_IP2LOCATIONIO_API_KEY', null),
+
+            // Response language for continent, country, region and city name
+            // NOTE: Translation is only available with PAID PLANS
+            // Free tier only supports 'en' (English) - other languages will cause API errors
+            // Set to null or 'en' for free tier, or upgrade to paid plan for translations
+            // Supported languages: ar, cs, da, de, en, es, et, fi, fr, ga, it, ja, ko, ms, nl, pt, ru, sv, tr, vi, zh-cn, zh-tw
+            'language' => env('GEOLOCATION_IP2LOCATIONIO_LANGUAGE', 'en'),
+        ],
+
         /*
         |----------------------------------------------------------------------
         | Future Provider Example
@@ -374,7 +403,7 @@ return [
     'security' => [
         'enable_mfa_trigger' => env('GEOLOCATION_SECURITY_MFA_ENABLED', true),
         'risk_threshold' => env('GEOLOCATION_SECURITY_RISK_THRESHOLD', 'high'),
-        
+
         // Risk scoring rules for isHighRiskLogin method
         'high_risk_threshold' => env('GEOLOCATION_SECURITY_HIGH_RISK_THRESHOLD', 70),
         'rules' => [
@@ -384,11 +413,11 @@ return [
             'new_country' => env('GEOLOCATION_SECURITY_RULE_NEW_COUNTRY', 30),
             'new_city' => env('GEOLOCATION_SECURITY_RULE_NEW_CITY', 15),
         ],
-        
+
         // Trusted locations that bypass security checks
         'trusted_countries' => [],
         'trusted_ips' => [],
-        
+
         // Custom risk rule classes (for extensibility)
         'custom_rules' => [],
     ],
