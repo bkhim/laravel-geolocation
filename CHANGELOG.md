@@ -6,6 +6,8 @@
 
 Added **IP2Location.io** as the 6th geolocation provider with comprehensive feature support and flexible pricing options.
 
+*Based on the original contribution by [@ooi2018](https://github.com/ooi2018) in [PR #1](https://github.com/bkhim/laravel-geolocation/pull/1), significantly enhanced with additional features, error handling, and production-ready improvements.*
+
 #### Key Features
 - **Free Tier Available**: 1,000 requests/day without API key, or 50,000 requests/month with free API key
 - **Comprehensive Data**: Full geolocation data including coordinates, timezone, postal codes
