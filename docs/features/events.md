@@ -101,7 +101,27 @@ protected $listen = [
 
 | Event | Properties |
 |-------|------------|
-| `HighRiskIpDetected` | `ip`, `riskScore`, `indicators` |
-| `SuspiciousLocationDetected` | `user`, `location`, `reason` |
-| `GeoBlockedRequest` | `request`, `countryCode`, `continentCode` |
-| `LoginLocationRecorded` | `user`, `location` |
+| `HighRiskIpDetected` | `$user`, `$loginHistory` |
+| `SuspiciousLocationDetected` | `$user`, `$loginHistory` |
+| `GeoBlockedRequest` | `$request`, `$countryCode` |
+| `LoginLocationRecorded` | `$user`, `$loginHistory` |
+
+## Event Property Details
+
+### HighRiskIpDetected & SuspiciousLocationDetected
+
+Both events have the same properties:
+
+```php
+$event->user;           // The user model
+$event->loginHistory;   // LoginHistory model with location data
+```
+
+Access location data:
+```php
+$event->loginHistory->ip;
+$event->loginHistory->country_code;
+$event->loginHistory->city;
+$event->loginHistory->is_proxy;
+$event->loginHistory->is_tor;
+```

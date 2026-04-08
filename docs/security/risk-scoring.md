@@ -1,18 +1,98 @@
 # Risk Scoring
 
-Calculate a risk score for user IPs based on multiple factors.
+Calculate a risk score for user IPs based on multiple factors. The package includes built-in support via the `HasGeolocationSecurity` trait.
 
-## Concept
+## Using the Built-in Trait
 
-A risk score helps identify potentially malicious users before they can cause harm. Combine multiple signals:
+Add the trait to your User model:
 
-- Proxy/VPN/Tor detection
-- Geographic anomalies
-- ISP reputation
-- Connection type
--ASN reputation
+```php
+use Bkhim\Geolocation\Traits\HasGeolocationSecurity;
 
-## Simple Risk Score
+class User extends Model
+{
+    use HasGeolocationSecurity;
+}
+```
+
+## Built-in Methods
+
+### `getRiskScore($ip)`
+
+Get a complete risk score breakdown:
+
+```php
+$user = User::find(1);
+$risk = $user->getRiskScore('8.8.8.8');
+
+/*
+Returns:
+[
+    'score' => 30,
+    'is_high_risk' => false,
+    'threshold' => 70,
+    'triggers' => ['proxy' => true],
+    'trusted_country' => false
+]
+*/
+```
+
+### `isHighRiskLogin($ip)`
+
+Quick check if a login is high risk:
+
+```php
+if ($user->isHighRiskLogin($request->ip())) {
+    // Flag this login for review
+}
+```
+
+### `getLastLoginRiskLevel($ip)`
+
+Get risk level as a string:
+
+```php
+$level = $user->getLastLoginRiskLevel('8.8.8.8');
+// Returns: 'low', 'high', or 'critical'
+```
+
+### `requiresMfaDueToLocation($ip)`
+
+Check if MFA should be required:
+
+```php
+if ($user->requiresMfaDueToLocation($request->ip())) {
+    return redirect()->route('mfa.challenge');
+}
+```
+
+## Configuration
+
+Configure risk scoring in `config/geolocation.php`:
+
+```php
+'security' => [
+    'enable_mfa_trigger' => true,
+    'risk_threshold' => 'high', // low, high, critical
+    
+    'high_risk_threshold' => 70, // Score threshold for high risk
+    
+    'rules' => [
+        'proxy' => 40,        // Points for proxy/VPN
+        'tor' => 80,          // Points for Tor
+        'crawler' => 20,      // Points for crawler/bot
+        'new_country' => 30,  // Points for new country
+        'new_city' => 15,     // Points for new city
+    ],
+    
+    // Trusted countries bypass security checks
+    'trusted_countries' => ['US', 'CA', 'GB'],
+],
+```
+
+## Manual Risk Score Calculation
+
+If you need custom scoring without the trait:
 
 ```php
 $details = Geolocation::lookup($request->ip());

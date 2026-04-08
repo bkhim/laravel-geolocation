@@ -325,4 +325,46 @@ class GeolocationManager
         );
     }
 
+    /**
+     * Clear geolocation cache.
+     *
+     * @param  string|null  $ip
+     * @param  string|null  $provider
+     * @return bool
+     */
+    public function clearCache(?string $ip = null, ?string $provider = null): bool
+    {
+        $provider = $provider ?? $this->getDefaultDriver();
+        
+        if ($ip) {
+            $key = $this->getCacheKey($provider, $ip);
+            return $this->cacheProvider->forget($key);
+        }
+        
+        $tagsEnabled = config('geolocation.cache.tags.enabled', false);
+        $tagNames = config('geolocation.cache.tags.names', ['geolocation']);
+        
+        if ($tagsEnabled && method_exists($this->cacheProvider, 'tags')) {
+            return $this->cacheProvider->tags($tagNames)->flush();
+        }
+        
+        return false;
+    }
+
+    /**
+     * Get cache key for an IP address.
+     *
+     * @param  string  $ip
+     * @param  string|null  $provider
+     * @return string
+     */
+    public function getCacheKey(string $ip, ?string $provider = null): string
+    {
+        $provider = $provider ?? $this->getDefaultDriver();
+        $prefix = config('geolocation.cache.prefix', 'geolocation');
+        $hash = md5($ip);
+        
+        return "{$prefix}:{$provider}:{$hash}";
+    }
+
 }

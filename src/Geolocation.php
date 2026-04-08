@@ -13,8 +13,10 @@ use Illuminate\Support\Facades\Facade;
  *
  * @package Bkhim
  *
- * @method static|GeolocationDetails lookup($ipAddress, $responseFilter = 'geo')
- * @method static|LookupInterface driver($name)
+ * @method static GeolocationDetails lookup($ipAddress, $responseFilter = 'geo')
+ * @method static LookupInterface driver($name)
+ * @method static bool clearCache(?string $ip = null, ?string $provider = null)
+ * @method static string getCacheKey(string $ip, ?string $provider = null)
  *
  * @see \Bkhim\Geolocation\Providers\IpInfo
  */
@@ -33,8 +35,34 @@ class Geolocation extends Facade
     }
 
     /**
+     * Clear geolocation cache.
+     *
+     * @param  string|null  $ip
+     * @param  string|null  $provider
+     * @return bool
+     */
+    public static function clearCache(?string $ip = null, ?string $provider = null): bool
+    {
+        return app('geolocation')->clearCache($ip, $provider);
+    }
+
+    /**
+     * Get cache key for an IP address.
+     *
+     * @param  string  $ip
+     * @param  string|null  $provider
+     * @return string
+     */
+    public static function getCacheKey(string $ip, ?string $provider = null): string
+    {
+        return app('geolocation')->getCacheKey($ip, $provider);
+    }
+
+    /**
      * @method static GeolocationDetails lookup($ipAddress, $responseFilter = 'geo')
      * @method static LookupInterface driver($name)
+     * @method static bool clearCache(?string $ip = null, ?string $provider = null)
+     * @method static string getCacheKey(string $ip, ?string $provider = null)
      */
     protected static function getFacadeAccessor()
     {

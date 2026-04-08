@@ -1,85 +1,102 @@
 # Anomaly Detection
 
-Detect unusual location patterns that may indicate fraudulent activity.
+Detect unusual location patterns that may indicate fraudulent activity using the built-in `AnomalyDetector` service.
 
-## Location History Check
-
-Compare current location with historical login locations:
+## Using the Built-in Service
 
 ```php
-class LocationAnomalyDetector
-{
-    public function isAnomalous(string $ip, int $userId): bool
-    {
-        // Get current location
-        $current = Geolocation::lookup($ip);
-        
-        // Get recent login history
-        $recentLogins = LoginHistory::where('user_id', $userId)
-            ->where('created_at', '>', now()->subDays(30))
-            ->get();
-        
-        if ($recentLogins->isEmpty()) {
-            return false; // First login, can't detect anomaly
-        }
-        
-        // Check for unusual country
-        $countries = $recentLogins->pluck('country_code')->unique();
-        if ($countries->count() > 3) {
-            return true; // Too many different countries
-        }
-        
-        // Check for impossible travel
-        foreach ($recentLogins as $login) {
-            if ($this->impossibleTravel($login, $current)) {
-                return true;
-            }
-        }
-        
-        return false;
-    }
-    
-    protected function impossibleTravel(LoginHistory $past, GeolocationDetails $current): bool
-    {
-        // Simple distance check - if > 1000km in < 1 hour, flag it
-        $distance = $this->calculateDistance(
-            $past->latitude, $past->longitude,
-            $current->getLatitude(), $current->getLongitude()
-        );
-        
-        $hours = $past->created_at->diffInHours($current->getCurrentTime() ?? now());
-        
-        return $distance > 1000 && $hours < 1;
-    }
-    
-    protected function calculateDistance(float $lat1, float $lon1, float $lat2, float $lon2): float
-    {
-        // Haversine formula
-        $R = 6371; // Earth's radius in km
-        $dLat = deg2rad($lat2 - $lat1);
-        $dLon = deg2rad($lon2 - $lon1);
-        $a = sin($dLat/2) * sin($dLat/2) +
-            cos(deg2rad($lat1)) * cos(deg2rad($lat2)) *
-            sin($dLon/2) * sin($dLon/2);
-        $c = 2 * atan2(sqrt($a), sqrt(1-$a));
-        return $R * $c;
-    }
+use Bkhim\Geolocation\Services\AnomalyDetector;
+
+$detector = new AnomalyDetector();
+
+// Check if login is anomalous
+if ($detector->isAnomalous($request->ip(), Auth::id())) {
+    // Flag for review or require additional verification
 }
+```
+
+## Quick Checks
+
+### New Country Detection
+
+```php
+$detector = new AnomalyDetector();
+
+if ($detector->isNewCountry($request->ip(), Auth::id())) {
+    // First login from this country - may require verification
+}
+```
+
+### New City Detection
+
+```php
+if ($detector->isNewCity($request->ip(), Auth::id())) {
+    // First login from this city
+}
+```
+
+### Impossible Travel Detection
+
+```php
+$history = $detector->getHistory(Auth::id());
+$lastLogin = $history->first();
+
+$current = Geolocation::lookup($request->ip());
+
+if ($lastLogin && $detector->isImpossibleTravel($lastLogin, $current)) {
+    // User would need to travel impossibly fast between locations
+}
+```
+
+## Detailed Anomaly Report
+
+Get a complete analysis:
+
+```php
+$report = $detector->getAnomalyReport($request->ip(), Auth::id());
+
+/*
+Returns:
+[
+    'is_anomalous' => true,
+    'is_impossible_travel' => true,
+    'is_new_country' => false,
+    'is_new_city' => true,
+    'too_many_countries' => false,
+    'country_count' => 2,
+    'previous_countries' => ['US', 'CA'],
+    'distance_from_last_login' => 4500.5, // km
+    'travel_speed_kmh' => 4500.5 // km/h
+]
+*/
+```
+
+## Configuration
+
+The detector has configurable thresholds:
+
+```php
+$detector = (new AnomalyDetector())
+    ->setMaxSpeed(1000)           // Max km/h (default: 1000)
+    ->setMaxCountries(3)          // Max countries in 30 days (default: 3)
+    ->setHistoryDays(30);         // Days to analyze (default: 30)
 ```
 
 ## Usage in Login Flow
 
 ```php
+use Bkhim\Geolocation\Services\AnomalyDetector;
+use Bkhim\Geolocation\Events\SuspiciousLocationDetected;
+
 public function handleLogin(Request $request)
 {
-    $details = Geolocation::lookup($request->ip());
+    $detector = new AnomalyDetector();
     
-    $detector = new LocationAnomalyDetector();
     if ($detector->isAnomalous($request->ip(), Auth::id())) {
-        // Log for investigation
+        // Log and dispatch event
         event(new SuspiciousLocationDetected(
             Auth::user(), 
-            $details
+            LoginHistory::latest()->first()
         ));
         
         // Require additional verification
@@ -90,9 +107,21 @@ public function handleLogin(Request $request)
 
 ## Detection Patterns
 
-| Pattern | Description | Action |
-|---------|-------------|--------|
-| Impossible Travel | Login from distant locations in short time | Flag for review |
-| New Country | First login from new country | Require verification |
-| Multiple Countries | Logins from 3+ countries in 30 days | Flag for review |
-| High-Risk Location | Login from known high-risk country | Require MFA |
+| Pattern | Method | Description |
+|---------|--------|-------------|
+| Impossible Travel | `isImpossibleTravel()` | Login from distant locations in short time |
+| New Country | `isNewCountry()` | First login from new country |
+| New City | `isNewCity()` | First login from new city |
+| Too Many Countries | `hasTooManyCountries()` | Logins from 3+ countries in 30 days |
+
+## Distance Calculation
+
+The service includes a Haversine formula implementation:
+
+```php
+$distance = $detector->calculateDistance(
+    40.7128, -74.0060,  // New York
+    34.0522, -118.2437  // Los Angeles
+);
+// Returns: ~3940 km
+```

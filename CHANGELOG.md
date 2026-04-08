@@ -1,5 +1,65 @@
 # Changelog
 
+## [v4.3.1] - 2026-04-08
+
+### New Features
+
+#### AnomalyDetector Service
+Added a new `AnomalyDetector` service for detecting fraudulent login attempts based on location history analysis.
+
+**Features:**
+- **Impossible Travel Detection**: Flags logins where user would need to travel faster than physically possible
+- **New Country Detection**: Detects first login from a new country
+- **New City Detection**: Detects first login from a new city
+- **Too Many Countries**: Flags accounts with logins from 3+ countries in 30 days
+- **Detailed Reports**: Get comprehensive anomaly analysis with distances and travel speeds
+- **Configurable Thresholds**: Customize max speed, country limits, and history window
+- **Haversine Formula**: Built-in distance calculation between coordinates
+
+**Usage:**
+```php
+use Bkhim\Geolocation\Services\AnomalyDetector;
+
+$detector = new AnomalyDetector();
+
+// Quick anomaly check
+if ($detector->isAnomalous($request->ip(), Auth::id())) {
+    return redirect()->route('verify.identity');
+}
+
+// Detailed report
+$report = $detector->getAnomalyReport($request->ip(), Auth::id());
+// Returns: is_anomalous, is_impossible_travel, is_new_country, is_new_city, etc.
+```
+
+#### Cache Management Enhancements
+Added programmatic cache management via the Geolocation facade:
+
+- **`Geolocation::clearCache($ip, $provider)`**: Clear cache programmatically
+- **`Geolocation::getCacheKey($ip, $provider)`**: Get cache key for an IP
+
+**Usage:**
+```php
+// Clear all geolocation cache
+Geolocation::clearCache();
+
+// Clear specific IP cache
+Geolocation::clearCache('8.8.8.8');
+
+// Clear specific provider cache
+Geolocation::clearCache(null, 'ipapi');
+
+// Get cache key
+$key = Geolocation::getCacheKey('8.8.8.8');
+```
+
+### Documentation Improvements
+
+- Restructured documentation with dedicated sections for each feature
+- Added comprehensive docs for AnomalyDetector service
+- Updated caching docs with programmatic operations
+- Fixed incorrect documentation that documented non-existent methods
+
 ## [v4.3.0] - 2026-04-05
 
 ### New Provider: IP2Location.io

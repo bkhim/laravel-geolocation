@@ -38,12 +38,12 @@ GEOLOCATION_CACHE_TTL=86400
 Cache keys are automatically generated based on IP address and driver:
 
 ```
-geolocation:{driver}:{ip}
-geolocation:ipapi:8.8.8.8
-geolocation:maxmind:192.168.1.1
+geolocation:{driver}:{md5-ip}
+geolocation:ipapi:a1b2c3d4e5f6...
+geolocation:maxmind:a1b2c3d4e5f6...
 ```
 
-## Manual Cache Operations
+## Programmatic Cache Operations
 
 ```php
 use Bkhim\Geolocation\Facades\Geolocation;
@@ -54,15 +54,41 @@ Geolocation::clearCache();
 // Clear specific IP cache
 Geolocation::clearCache('8.8.8.8');
 
+// Clear specific provider cache
+Geolocation::clearCache(null, 'ipapi');
+
+// Clear specific IP for specific provider
+Geolocation::clearCache('8.8.8.8', 'ipapi');
+
 // Get cache key for an IP
 $key = Geolocation::getCacheKey('8.8.8.8');
+// Returns: "geolocation:ipapi:a1b2c3d4e5f6..."
+
+// Get cache key for specific provider
+$key = Geolocation::getCacheKey('8.8.8.8', 'maxmind');
+// Returns: "geolocation:maxmind:a1b2c3d4e5f6..."
 ```
 
-## Artisan Commands
+## Console Commands
 
 ```bash
-# Clear geolocation cache
-php artisan geolocation:cache:clear
+# Clear all geolocation cache
+php artisan geolocation:cache clear
+
+# Clear cache for specific provider
+php artisan geolocation:cache clear --provider=ipapi
+
+# Clear specific IP cache for a provider
+php artisan geolocation:cache clear --provider=ipapi --ip=8.8.8.8
+
+# Show cache information
+php artisan geolocation:cache info
+
+# Warm up cache with common IPs
+php artisan geolocation:cache warm-up
+
+# Analyze and optimize cache
+php artisan geolocation:cache optimize
 ```
 
 ## Best Practices
@@ -71,6 +97,7 @@ php artisan geolocation:cache:clear
 2. **Set appropriate TTL** - 24 hours is usually good for geolocation
 3. **Use Redis for high traffic** - Configure Redis cache store
 4. **Clear cache after provider changes** - When switching providers
+5. **Enable cache tags** - For easier cache management (requires Redis/Memcached)
 
 ## Example: Redis Configuration
 
@@ -88,5 +115,9 @@ php artisan geolocation:cache:clear
     'enabled' => true,
     'ttl' => 86400,
     'store' => 'redis', // Use Redis for better performance
+    'tags' => [
+        'enabled' => true,
+        'names' => ['geolocation', 'ip-lookup'],
+    ],
 ],
 ```

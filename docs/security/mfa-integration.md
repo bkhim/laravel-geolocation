@@ -1,8 +1,56 @@
 # MFA Integration
 
-Trigger multi-factor authentication (MFA/2FA) based on geolocation and security signals.
+Trigger multi-factor authentication (MFA/2FA) based on geolocation and security signals. Use the built-in `HasGeolocationSecurity` trait for automatic MFA triggers.
 
-## Basic MFA Trigger
+## Using the Built-in Trait
+
+Add the trait to your User model:
+
+```php
+use Bkhim\Geolocation\Traits\HasGeolocationSecurity;
+
+class User extends Model
+{
+    use HasGeolocationSecurity;
+}
+```
+
+## Built-in MFA Methods
+
+### `requiresMfaDueToLocation($ip)`
+
+Automatically determine if MFA is needed:
+
+```php
+$user = User::find(1);
+
+if ($user->requiresMfaDueToLocation($request->ip())) {
+    return redirect()->route('mfa.challenge');
+}
+```
+
+This method checks:
+- Proxy/VPN detection
+- Tor exit nodes
+- New country login
+- Risk level thresholds (configured in config)
+
+### `isHighRiskLogin($ip)`
+
+Check if a login is high risk:
+
+```php
+if ($user->isHighRiskLogin($request->ip())) {
+    Log::warning('High risk login detected', [
+        'user_id' => $user->id,
+        'ip' => $request->ip(),
+    ]);
+}
+```
+
+## Manual MFA Logic
+
+If you need custom MFA logic without the trait:
 
 ```php
 use Bkhim\Geolocation\Geolocation;

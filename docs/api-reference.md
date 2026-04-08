@@ -22,21 +22,58 @@ $details = Geolocation::driver('ipapi')->lookup('8.8.8.8');
 $details = Geolocation::driver('maxmind')->lookup('8.8.8.8');
 ```
 
-### `clearCache($ip = null)`
+### `clearCache(?string $ip = null, ?string $provider = null)`
 
 Clear geolocation cache.
 
 ```php
+// Clear all geolocation cache
 Geolocation::clearCache();
+
+// Clear specific IP cache
 Geolocation::clearCache('8.8.8.8');
+
+// Clear specific provider cache
+Geolocation::clearCache(null, 'ipapi');
+
+// Clear specific IP for specific provider
+Geolocation::clearCache('8.8.8.8', 'ipapi');
 ```
 
-### `getCacheKey($ip)`
+### `getCacheKey(string $ip, ?string $provider = null)`
 
 Get cache key for an IP.
 
 ```php
 $key = Geolocation::getCacheKey('8.8.8.8');
+// Returns: "geolocation:ipapi:a1b2c3d4e5f6..."
+
+$key = Geolocation::getCacheKey('8.8.8.8', 'maxmind');
+// Returns: "geolocation:maxmind:a1b2c3d4e5f6..."
+```
+
+### Console Commands
+
+Cache management via artisan commands:
+
+```bash
+# Clear all geolocation cache
+php artisan geolocation:cache clear
+
+# Clear specific provider cache
+php artisan geolocation:cache clear --provider=ipapi
+
+# Clear specific IP cache
+php artisan geolocation:cache clear --provider=ipapi --ip=8.8.8.8
+
+# Show cache info
+php artisan geolocation:cache info
+
+# Warm up cache
+php artisan geolocation:cache warm-up
+
+# Optimize cache
+php artisan geolocation:cache optimize
 ```
 
 ---
