@@ -4,6 +4,8 @@ namespace Bkhim\Geolocation;
 
 use Bkhim\Geolocation\Addons\Anonymization\IpAnonymizer;
 use Bkhim\Geolocation\Addons\Gdpr\LocationConsentManager;
+use Bkhim\Geolocation\Contracts\AuditLoggerInterface;
+use Bkhim\Geolocation\Services\AuditLogger;
 use Illuminate\Support\ServiceProvider;
 
 /**
@@ -25,6 +27,8 @@ class GeolocationServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->mergeConfigFrom(__DIR__ . '/../config/geolocation.php', 'geolocation');
+
+        $this->app->singleton(AuditLoggerInterface::class, AuditLogger::class);
 
         $this->app->singleton('geolocation', function ($app) {
             $cacheStore = config('geolocation.cache.store');
@@ -88,6 +92,9 @@ class GeolocationServiceProvider extends ServiceProvider
             $this->commands([
                 \Bkhim\Geolocation\Console\GeolocationCommand::class,
                 \Bkhim\Geolocation\Console\CacheCommand::class,
+                \Bkhim\Geolocation\Console\AuditCommand::class,
+                \Bkhim\Geolocation\Console\UpdateMaxMindCommand::class,
+                \Bkhim\Geolocation\Console\PruneOldDataCommand::class,
             ]);
         }
 
@@ -188,7 +195,32 @@ class GeolocationServiceProvider extends ServiceProvider
             $router = $this->app['router'];
             $router->aliasMiddleware('geo.allow', \Bkhim\Geolocation\Addons\Middleware\GeoMiddleware::class);
             $router->aliasMiddleware('geo.deny', \Bkhim\Geolocation\Addons\Middleware\GeoMiddleware::class);
-            $router->aliasMiddleware('geo.ratelimit', \Bkhim\Geolocation\Addons\Middleware\RateLimitByGeo::class);
+            $router->aliasMiddleware('geo.ratelimit', \Bkhim\Geolocation\Addons\Middleware\GeoRateLimitMiddleware::class);
+            $router->aliasMiddleware('geo.security', \Bkhim\Geolocation\Addons\Middleware\SecurityCheckMiddleware::class);
         }
+
+        // Register GDPR consent routes if enabled
+        $this->registerGdprRoutes();
+    }
+
+    protected function registerGdprRoutes(): void
+    {
+        if (!config('geolocation.addons.gdpr.routes.enabled', false)) {
+            return;
+        }
+
+        $routes = config('geolocation.addons.gdpr.routes', []);
+        $giveRoute = $routes['give'] ?? '/consent/accept';
+        $withdrawRoute = $routes['withdraw'] ?? '/consent/withdraw';
+
+        $this->app['router']->post($giveRoute, function () {
+            app(LocationConsentManager::class)->giveConsent();
+            return response()->json(['success' => true]);
+        })->name('geolocation.consent.give');
+
+        $this->app['router']->post($withdrawRoute, function () {
+            app(LocationConsentManager::class)->withdrawConsent();
+            return response()->json(['success' => true]);
+        })->name('geolocation.consent.withdraw');
     }
 }

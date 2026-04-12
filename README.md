@@ -49,7 +49,7 @@ composer require bkhim/laravel-geolocation
 php artisan vendor:publish --provider="Bkhim\Geolocation\GeolocationServiceProvider"
 ```
 
-## 📚 Documentation
+## Documentation
 
 - [🚀 Getting Started](docs/getting-started/installation.md)
 - [🛡️ Security Features](docs/security/mfa-integration.md)
@@ -59,7 +59,7 @@ php artisan vendor:publish --provider="Bkhim\Geolocation\GeolocationServiceProvi
 - [🧪 Testing](docs/testing.md)
 - [🤝 Contributing](docs/contributing.md)
 
-## 🎯 Use Cases
+## Use Cases
 
 - 🔐 **Login Security** – MFA triggers on suspicious locations
 - 💰 **E-commerce** – Local currency, geo-blocking

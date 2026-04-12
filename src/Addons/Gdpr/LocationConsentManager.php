@@ -9,10 +9,16 @@ class LocationConsentManager
 {
 
     /**
+     * Check if consent is needed for an IP address.
+     *
+     * @param string|null $ip IP address to check (uses request IP if not provided)
+     * @return bool
      * @throws GeolocationException
      */
-    public function needsConsent(string $ip): bool
+    public function needsConsent(?string $ip = null): bool
     {
+        $ip = $ip ?? request()->ip();
+
         $config = config('geolocation.addons.gdpr');
 
         if (!$config['enabled']) {

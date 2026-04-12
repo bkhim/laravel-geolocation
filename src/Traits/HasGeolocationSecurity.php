@@ -4,6 +4,7 @@ namespace Bkhim\Geolocation\Traits;
 
 use Bkhim\Geolocation\Events\HighRiskIpDetected;
 use Bkhim\Geolocation\Events\SuspiciousLocationDetected;
+use Bkhim\Geolocation\GeolocationException;
 use Bkhim\Geolocation\Models\LoginHistory;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Event;
@@ -24,15 +25,17 @@ trait HasGeolocationSecurity
     /**
      * Determine if MFA is required due to location-based security concerns.
      *
-     * @param string $ip IP address to check
+     * @param string|null $ip IP address to check (uses request IP if not provided)
      * @return bool
      */
-    public function requiresMfaDueToLocation(string $ip): bool
+    public function requiresMfaDueToLocation(?string $ip = null): bool
     {
         // Check if MFA trigger is enabled
         if (!config('geolocation.security.enable_mfa_trigger', true)) {
             return false;
         }
+
+        $ip = $ip ?? request()->ip();
 
         $details = app('geolocation')->getDetails($ip);
         $riskLevel = $this->getLastLoginRiskLevel($ip);
@@ -46,22 +49,28 @@ trait HasGeolocationSecurity
     /**
      * Determine if a login is high risk based on configurable rules.
      *
-     * @param string $ip IP address to check
+     * @param  string|null  $ip  IP address to check (uses request IP if not provided)
      * @return bool
+     * @throws GeolocationException
      */
-    public function isHighRiskLogin(string $ip): bool
+    public function isHighRiskLogin(?string $ip = null): bool
     {
+        $ip = $ip ?? request()->ip();
+
         return $this->getRiskScore($ip)['is_high_risk'];
     }
 
     /**
      * Get the risk score breakdown for an IP address.
      *
-     * @param string $ip IP address to check
+     * @param  string|null  $ip  IP address to check (uses request IP if not provided)
      * @return array{score: int, is_high_risk: bool, threshold: int, triggers: array, trusted_country: bool}
+     * @throws GeolocationException
      */
-    public function getRiskScore(string $ip): array
+    public function getRiskScore(?string $ip = null): array
     {
+        $ip = $ip ?? request()->ip();
+
         $details = app('geolocation')->lookup($ip);
         $rules = config('geolocation.security.rules', []);
         $threshold = config('geolocation.security.high_risk_threshold', 70);

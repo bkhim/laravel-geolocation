@@ -1,5 +1,76 @@
 # Changelog
 
+## [v4.4.0] - 2026-04-12
+
+### New Features
+
+#### CLI Security Commands
+Added new artisan commands for security management:
+
+- **`php artisan geolocation:audit`**: Generate security audit report with actionable recommendations
+- **`php artisan geolocation:update-maxmind`**: Auto-update MaxMind database
+- **`php artisan geolocation:prune`**: Prune old login data for GDPR compliance
+
+#### Threat Intelligence Integration
+Added `ThreatIntelligenceService` for IP reputation checking via AbuseIPDB:
+
+```php
+$service = app(\Bkhim\Geolocation\Services\ThreatIntelligenceService::class);
+
+if ($service->isThreat($request->ip())) {
+    // IP has known malicious history
+}
+```
+
+#### IP Blocking System
+Added `IpBlocklist` model for blocking repeat offenders:
+
+```php
+use Bkhim\Geolocation\Models\IpBlocklist;
+
+// Block an IP
+IpBlocklist::block('1.2.3.4', 'Failed login attempts');
+
+// Check if blocked
+if (IpBlocklist::isBlocked($request->ip())) {
+    abort(403);
+}
+```
+
+#### Security Middleware
+Added new middleware for threat blocking:
+
+- **`geo.security`**: Blocks IPs from blocklist or threat intelligence
+- **`geo.ratelimit`**: Country-based rate limiting (fixed implementation)
+
+#### Audit Logging
+Added `AuditLogger` service for PII-compliant security event logging:
+
+```php
+use Bkhim\Geolocation\Contracts\AuditLoggerInterface;
+
+app(AuditLoggerInterface::class)->log('Login attempt', [
+    'user_id' => Auth::id(),
+    'ip' => $request->ip(),
+]);
+```
+
+#### Data Retention
+Added GDPR data retention enforcement:
+
+- `login_history_retention_days` configuration option
+- `php artisan geolocation:prune` command
+
+### Documentation
+- Complete security documentation overhaul
+- New CLI commands reference
+- Updated middleware documentation with new features
+
+### Tests
+- Added 16 new tests for new features
+
+---
+
 ## [v4.3.1] - 2026-04-08
 
 ### New Features

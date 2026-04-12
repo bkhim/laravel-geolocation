@@ -71,6 +71,29 @@ Returns:
 */
 ```
 
+## Audit Logging
+
+You can automatically log anomalies using the `AuditLogger` interface. This is crucial for compliance and security auditing:
+
+```php
+use Bkhim\Geolocation\Contracts\AuditLoggerInterface;
+use Bkhim\Geolocation\Services\AnomalyDetector;
+
+public function handleLogin(Request $request)
+{
+    $detector = new AnomalyDetector();
+    
+    if ($detector->isAnomalous($request->ip(), Auth::id())) {
+        app(AuditLoggerInterface::class)->log('Suspicious login attempt', [
+            'user_id' => Auth::id(),
+            'ip' => $request->ip()
+        ]);
+        
+        return redirect()->route('verify.identity');
+    }
+}
+```
+
 ## Configuration
 
 The detector has configurable thresholds:

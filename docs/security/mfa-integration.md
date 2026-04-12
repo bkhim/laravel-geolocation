@@ -17,14 +17,20 @@ class User extends Model
 
 ## Built-in MFA Methods
 
-### `requiresMfaDueToLocation($ip)`
+### `requiresMfaDueToLocation($ip = null)`
 
-Automatically determine if MFA is needed:
+Automatically determine if MFA is needed. Uses the current request IP if no IP is provided:
 
 ```php
 $user = User::find(1);
 
+// With explicit IP
 if ($user->requiresMfaDueToLocation($request->ip())) {
+    return redirect()->route('mfa.challenge');
+}
+
+// Uses request()->ip() automatically
+if ($user->requiresMfaDueToLocation()) {
     return redirect()->route('mfa.challenge');
 }
 ```
@@ -35,16 +41,22 @@ This method checks:
 - New country login
 - Risk level thresholds (configured in config)
 
-### `isHighRiskLogin($ip)`
+### `isHighRiskLogin($ip = null)`
 
-Check if a login is high risk:
+Check if a login is high risk. Uses the current request IP if no IP is provided:
 
 ```php
+// Explicit IP
 if ($user->isHighRiskLogin($request->ip())) {
     Log::warning('High risk login detected', [
         'user_id' => $user->id,
         'ip' => $request->ip(),
     ]);
+}
+
+// Uses request()->ip() automatically
+if ($user->isHighRiskLogin()) {
+    Log::warning('High risk login detected');
 }
 ```
 
@@ -130,7 +142,9 @@ class MfaDecider
 }
 ```
 
-## Usage in Controller
+## Simplified Usage (Recommended)
+
+Using the `HasGeolocationSecurity` trait, you can use the simplified methods:
 
 ```php
 public function login(Request $request)
@@ -140,15 +154,13 @@ public function login(Request $request)
         'password' => 'required',
     ]);
     
-    $attempts = Cache::get('login_attempts:' . $request->ip(), 0);
+    $user = User::where('email', $request->email)->first();
     
-    $decider = new MfaDecider();
-    
-    if ($decider->requiresMfa($request, $attempts)) {
+    // Check if MFA is required - uses request IP automatically
+    if ($user && $user->requiresMfaDueToLocation()) {
         // Store pending login
         Cache::put('pending_login:' . $request->ip(), [
-            'email' => $request->email,
-            'password' => $request->password,
+            'user_id' => $user->id,
         ], 5);
         
         return redirect()->route('2fa.challenge');
@@ -183,12 +195,189 @@ public function challenge(Request $request)
 }
 ```
 
+## How Risk Scoring Works
+
+The package uses a configurable risk scoring system to determine MFA requirements.
+
+### Risk Score Calculation
+
+The total risk score is calculated by adding points for each triggered condition:
+
+| Condition | Default Score | Config Key |
+|-----------|---------------|-----------|
+| Proxy/VPN | 40 | `geolocation.security.rules.proxy` |
+| Tor exit node | 80 | `geolocation.security.rules.tor` |
+| Crawler/Bot | 20 | `geolocation.security.rules.crawler` |
+| New country | 30 | `geolocation.security.rules.new_country` |
+| New city | 15 | `geolocation.security.rules.new_city` |
+
+### Risk Levels
+
+| Level | Score Range | Trigger |
+|-------|-------------|---------|
+| `low` | 0-2 | No MFA |
+| `high` | 3-69 | Requires MFA if threshold is `high` |
+| `critical` | 70+ | Always requires MFA |
+
+### Decision Flow
+
+```
+requiresMfaDueToLocation($ip)
+    │
+    ├─► Is MFA enabled? (geolocation.security.enable_mfa_trigger)
+    │       └─► No → return false
+    │
+    └─► Calculate risk score:
+            │
+            ├─► Is IP from trusted country? → score = 0
+            │
+            ├─► isProxy()? → +40 points
+            ├─► isTor()? → +80 points
+            ├─► isCrawler()? → +20 points
+            ├─► isNewCountry()? → +30 points
+            ├─► isNewCity()? → +15 points
+            │
+            └─► Custom rules → +custom points
+    │
+    └─► Check against threshold:
+            │   (geolocation.security.risk_threshold = 'high')
+            │
+            └─► risk >= threshold? → return true
+```
+
+### Example Risk Calculations
+
+```php
+$user = User::find(1);
+
+// Login from US (trusted) - no MFA needed
+$details = Geolocation::lookup('8.8.8.8'); // Google DNS in US
+// Score: 0 (trusted country) → No MFA
+
+// Login using Tor from new country
+$details = Geolocation::lookup('1.2.3.4'); // Tor node, NOT in trusted countries
+// Score: 80 (Tor) + 30 (new country) = 110 → Always MFA
+```
+
 ## Configuration
 
+All security settings are in `config/geolocation.php`:
+
+```php
+'security' => [
+    // Enable/disable MFA triggers
+    'enable_mfa_trigger' => env('GEOLOCATION_SECURITY_MFA_ENABLED', true),
+    
+    // Enable/disable IP blocking
+    'enable_blocking' => env('GEOLOCATION_SECURITY_BLOCKING_ENABLED', true),
+    
+    // Risk level threshold: 'low', 'high' (default), or 'critical'
+    'risk_threshold' => env('GEOLOCATION_SECURITY_RISK_THRESHOLD', 'high'),
+    
+    // Score required to be considered high risk
+    'high_risk_threshold' => env('GEOLOCATION_SECURITY_HIGH_RISK_THRESHOLD', 70),
+    
+    // Risk scoring rules (add points for each trigger)
+    'rules' => [
+        'proxy' => env('GEOLOCATION_SECURITY_RULE_PROXY', 40),
+        'tor' => env('GEOLOCATION_SECURITY_RULE_TOR', 80),
+        'crawler' => env('GEOLOCATION_SECURITY_RULE_CRAWLER', 20),
+        'new_country' => env('GEOLOCATION_SECURITY_RULE_NEW_COUNTRY', 30),
+        'new_city' => env('GEOLOCATION_SECURITY_RULE_NEW_CITY', 15),
+    ],
+    
+    // Countries that bypass security checks (score = 0)
+    'trusted_countries' => ['US', 'CA', 'GB'],
+    
+    // IPs that bypass security checks
+    'trusted_ips' => [],
+    
+    // Custom risk rules (class names)
+    'custom_rules' => [],
+],
+```
+
+### Environment Variables
+
 ```env
-# In .env - adjust thresholds
-GEOLOCATION_MFA_PROXY_WEIGHT=30
-GEOLOCATION_MFA_TOR_WEIGHT=50
-GEOLOCATION_MFA_FAILED_ATTEMPTS=3
-GEOLOCATION_MFA_NEW_COUNTRY=true
+# Enable MFA triggers
+GEOLOCATION_SECURITY_MFA_ENABLED=true
+
+# Set threshold (low, high, critical)
+GEOLOCATION_SECURITY_RISK_THRESHOLD=high
+
+# Configure risk scores
+GEOLOCATION_SECURITY_RULE_PROXY=40
+GEOLOCATION_SECURITY_RULE_TOR=80
+GEOLOCATION_SECURITY_RULE_CRAWLER=20
+GEOLOCATION_SECURITY_RULE_NEW_COUNTRY=30
+GEOLOCATION_SECURITY_RULE_NEW_CITY=15
+
+# Trusted countries (comma-separated)
+GEOLOCATION_SECURITY_TRUSTED_COUNTRIES=US,CA,GB
+```
+
+## Getting Risk Details
+
+You can get detailed risk information for debugging:
+
+```php
+$user = User::find(1);
+
+$score = $user->getRiskScore($request->ip());
+/*
+Returns:
+[
+    'score' => 110,
+    'is_high_risk' => true,
+    'threshold' => 70,
+    'triggers' => [
+        'tor' => true,
+        'new_country' => true
+    ],
+    'trusted_country' => false
+]
+*/
+
+// Get risk level
+$level = $user->getLastLoginRiskLevel($request->ip());
+// Returns: 'low', 'high', or 'critical'
+```
+
+## Custom Risk Rules
+
+Add custom risk scoring rules:
+
+```php
+// Create a custom rule class
+namespace App\Security\Rules;
+
+class CustomRiskRule
+{
+    public function score($user, $details): int
+    {
+        $score = 0;
+        
+        // Example: Check for multiple failed logins
+        $failedLogins = $user->failed_logins()
+            ->where('created_at', '>', now()->subHours(24))
+            ->count();
+            
+        if ($failedLogins >= 5) {
+            $score += 25;
+        }
+        
+        return $score;
+    }
+}
+```
+
+Then register in config:
+
+```php
+'security' => [
+    'custom_rules' => [
+        App\Security\Rules\CustomRiskRule::class,
+    ],
+],
 ```

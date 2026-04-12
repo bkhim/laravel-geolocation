@@ -372,6 +372,11 @@ return [
             'consent_cookie' => 'geo_consent',
             'consent_lifetime' => 365, // days
             'banner_view' => 'geolocation::gdpr.banner',
+            'routes' => [
+                'enabled' => false,
+                'give' => '/consent/accept',
+                'withdraw' => '/consent/withdraw',
+            ],
         ],
     ],
 
@@ -387,6 +392,7 @@ return [
         'enabled' => env('GEOLOCATION_USER_TRAIT_ENABLED', true),
         'login_history_table' => 'user_login_locations',
         'login_history_model' => \Bkhim\Geolocation\Models\LoginHistory::class,
+        'login_history_retention_days' => env('GEOLOCATION_LOGIN_RETENTION_DAYS', 30),
         'cache_ttl' => env('GEOLOCATION_USER_TRAIT_CACHE_TTL', 86400), // seconds
         'anonymization_mode' => env('GEOLOCATION_ANONYMIZATION_MODE', 'partial'), // none|partial|full
         'store_ip' => env('GEOLOCATION_STORE_IP', true), // true = masked, false = don't store
@@ -402,6 +408,7 @@ return [
     */
     'security' => [
         'enable_mfa_trigger' => env('GEOLOCATION_SECURITY_MFA_ENABLED', true),
+        'enable_blocking' => env('GEOLOCATION_SECURITY_BLOCKING_ENABLED', true),
         'risk_threshold' => env('GEOLOCATION_SECURITY_RISK_THRESHOLD', 'high'),
 
         // Risk scoring rules for isHighRiskLogin method
@@ -433,5 +440,19 @@ return [
     'personalization' => [
         'enable_currency' => env('GEOLOCATION_PERSONALIZATION_CURRENCY_ENABLED', true),
         'enable_timezone' => env('GEOLOCATION_PERSONALIZATION_TIMEZONE_ENABLED', true),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Threat Intelligence Configuration
+    |--------------------------------------------------------------------------
+    |
+    | Integrate with external threat intelligence feeds for enhanced IP reputation checking.
+    |
+    */
+    'threat_intelligence' => [
+        'enabled' => env('GEOLOCATION_THREAT_INTELLIGENCE_ENABLED', false),
+        'abuseipdb_api_key' => env('ABUSEIPDB_API_KEY'),
+        'min_confidence_score' => env('GEOLOCATION_THREAT_MIN_SCORE', 50),
     ],
 ];

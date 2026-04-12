@@ -27,6 +27,8 @@ Add to `config/app.php`:
     'Geolocation' => Bkhim\Geolocation\Geolocation::class,
     'IpAnonymizer' => Bkhim\Geolocation\Facades\IpAnonymizer::class,
     'LocationConsentManager' => Bkhim\Geolocation\Facades\LocationConsentManager::class,
+    'GeoAnomalyDetector' => Bkhim\Geolocation\Facades\GeoAnomalyDetector::class,
+    'ThreatIntelligence' => Bkhim\Geolocation\Facades\ThreatIntelligence::class,
 ],
 ```
 

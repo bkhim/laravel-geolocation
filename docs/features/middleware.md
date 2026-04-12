@@ -53,7 +53,8 @@ In `app/Http/Kernel.php`:
 protected $middlewareAliases = [
     'geo.allow' => \Bkhim\Geolocation\Addons\Middleware\GeoMiddleware::class,
     'geo.deny' => \Bkhim\Geolocation\Addons\Middleware\GeoMiddleware::class,
-    'geo.ratelimit' => \Bkhim\Geolocation\Addons\Middleware\RateLimitByGeo::class,
+    'geo.ratelimit' => \Bkhim\Geolocation\Addons\Middleware\GeoRateLimitMiddleware::class,
+    'geo.security' => \Bkhim\Geolocation\Addons\Middleware\SecurityCheckMiddleware::class,
 ];
 ```
 
@@ -66,7 +67,8 @@ In `bootstrap/app.php`:
     $middleware->alias([
         'geo.allow' => \Bkhim\Geolocation\Addons\Middleware\GeoMiddleware::class,
         'geo.deny' => \Bkhim\Geolocation\Addons\Middleware\GeoMiddleware::class,
-        'geo.ratelimit' => \Bkhim\Geolocation\Addons\Middleware\RateLimitByGeo::class,
+        'geo.ratelimit' => \Bkhim\Geolocation\Addons\Middleware\GeoRateLimitMiddleware::class,
+        'geo.security' => \Bkhim\Geolocation\Addons\Middleware\SecurityCheckMiddleware::class,
     ]);
 })
 ```
@@ -105,7 +107,7 @@ In `config/geolocation.php`:
 'response_type' => 'json'
 // Returns: {"error": "Access denied from your location", "code": "GEO_BLOCKED"}
 
-// Redirect
+# Redirect
 'response_type' => 'redirect',
 'redirect_to' => '/blocked'
 
@@ -113,3 +115,28 @@ In `config/geolocation.php`:
 'response_type' => 'abort',
 'status_code' => 403
 ```
+
+### GeoSecurity - Threat Blocking
+
+Blocks IPs that are in the blocklist or flagged by threat intelligence.
+
+```php
+// Enable in config/geolocation.php
+'addons' => [
+    'middleware' => [
+        'enabled' => true,
+    ],
+],
+
+// In routes
+Route::middleware('geo.security')->group(function () {
+    Route::post('/login', [AuthController::class, 'login']);
+    Route::post('/checkout', [CheckoutController::class, 'store']);
+});
+```
+
+This middleware:
+- Checks if IP is in the blocklist (`geolocation_ip_blocklist`)
+- Checks AbuseIPDB threat intelligence (if configured)
+- Auto-blocks threats if enabled
+- Returns 403 with JSON error response
