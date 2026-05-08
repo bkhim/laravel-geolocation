@@ -12,7 +12,7 @@ The package tracks IPs that have been flagged for suspicious activity and blocks
 
 ## Database
 
-The blocking feature uses the `geolocation_ip_blocklist` table:
+The blocking feature uses the `geolocation_ip_blocklist` table, created by running `php artisan migrate`:
 
 ```php
 // Created automatically via migration

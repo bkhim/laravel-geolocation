@@ -78,8 +78,13 @@ class GeolocationServiceProvider extends ServiceProvider
             __DIR__ . '/../translations' => resource_path('lang/vendor/geolocation')
         ], 'geolocation-translations');
 
-        // Create and publish storage directory for MaxMind databases
-        $this->publishes([], 'geolocation-storage');
+        // Load migrations from the package directory
+        $this->loadMigrationsFrom(__DIR__ . '/../database/migrations');
+
+        // Publish migrations (so users can customize them by publishing to their app)
+        $this->publishes([
+            __DIR__ . '/../database/migrations/' => database_path('migrations'),
+        ], 'geolocation-migrations');
 
         // Create the directory if it doesn't exist
         $this->ensureStorageDirectoryExists();

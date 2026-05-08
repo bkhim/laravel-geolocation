@@ -80,7 +80,8 @@ use Bkhim\Geolocation\Facades\LocationConsentManager;
 The v4.0 config structure is different. Publish a fresh config:
 
 ```bash
-php artisan vendor:publish --provider="Bkhim\Geolocation\GeolocationServiceProvider" --force
+php artisan vendor:publish --provider="Bkhim\Geolocation\GeolocationServiceProvider" --tag=geolocation-config --force
+php artisan migrate
 ```
 
 ### Provider Keys

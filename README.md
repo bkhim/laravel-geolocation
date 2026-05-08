@@ -46,7 +46,8 @@ if ($details->isProxy() || $details->isTor()) {
 
 ```bash
 composer require bkhim/laravel-geolocation
-php artisan vendor:publish --provider="Bkhim\Geolocation\GeolocationServiceProvider"
+php artisan vendor:publish --provider="Bkhim\Geolocation\GeolocationServiceProvider" --tag=geolocation-config
+php artisan migrate
 ```
 
 ## Documentation

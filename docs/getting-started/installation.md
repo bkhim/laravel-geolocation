@@ -47,10 +47,26 @@ return [
 Publish the configuration file to customize your settings:
 
 ```bash
-php artisan vendor:publish --provider="Bkhim\Geolocation\GeolocationServiceProvider"
+php artisan vendor:publish --provider="Bkhim\Geolocation\GeolocationServiceProvider" --tag=geolocation-config
 ```
 
 This creates `config/geolocation.php` where you can configure providers, caching, and addons.
+
+## Run Migrations
+
+The package includes database tables for security features (login tracking, IP blocklist). Migrations are auto-loaded from the package; no publishing is needed.
+
+```bash
+php artisan migrate
+```
+
+This creates the `user_login_locations` and `geolocation_ip_blocklist` tables.
+
+To customize the migrations before running them, publish with:
+
+```bash
+php artisan vendor:publish --tag=geolocation-migrations
+```
 
 ## Requirements
 
