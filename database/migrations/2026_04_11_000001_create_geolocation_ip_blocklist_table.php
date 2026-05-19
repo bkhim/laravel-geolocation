@@ -8,6 +8,10 @@ return new class extends Migration
 {
     public function up(): void
     {
+        if (Schema::hasTable('geolocation_ip_blocklist')) {
+            return;
+        }
+
         Schema::create('geolocation_ip_blocklist', function (Blueprint $table) {
             $table->id();
             $table->string('ip', 45)->unique();

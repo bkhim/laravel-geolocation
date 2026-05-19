@@ -1,5 +1,11 @@
 # Changelog
 
+## [v4.4.2] - 2026-05-19
+
+### Fixes
+
+- Added `Schema::hasTable()` guards to migration `up()` methods to prevent errors when the table already exists (e.g., from being published alongside auto-loaded migrations or re-running manually).
+
 ## [v4.4.0] - 2026-04-12
 
 ### New Features
