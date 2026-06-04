@@ -26,19 +26,14 @@ GEOLOCATION_LOGIN_RETENTION_DAYS=30
 
 ### 2. Run Migrations
 
-Database tables are auto-loaded from the package. Simply run:
-
-```bash
-php artisan migrate
-```
-
-This creates the `user_login_locations` and `geolocation_ip_blocklist` tables.
-
-To customize the migration files before running, publish them first:
+Publish and run the database migrations:
 
 ```bash
 php artisan vendor:publish --tag=geolocation-migrations
+php artisan migrate
 ```
+
+This creates the `user_login_locations` and `geolocation_ip_blocklist` tables. Edit the published files in `database/migrations/` to customize them before running.
 
 ---
 

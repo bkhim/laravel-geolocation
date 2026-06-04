@@ -54,19 +54,16 @@ This creates `config/geolocation.php` where you can configure providers, caching
 
 ## Run Migrations
 
-The package includes database tables for security features (login tracking, IP blocklist). Migrations are auto-loaded from the package; no publishing is needed.
+The package includes database tables for security features (login tracking, IP blocklist). Publish and run them:
 
 ```bash
+php artisan vendor:publish --tag=geolocation-migrations
 php artisan migrate
 ```
 
 This creates the `user_login_locations` and `geolocation_ip_blocklist` tables.
 
-To customize the migrations before running them, publish with:
-
-```bash
-php artisan vendor:publish --tag=geolocation-migrations
-```
+To customize the migrations, edit them in `database/migrations/` before running `php artisan migrate`.
 
 ## Requirements
 

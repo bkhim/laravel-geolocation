@@ -9,6 +9,9 @@
 ```bash
 composer require bkhim/laravel-geolocation
 php artisan vendor:publish --provider="Bkhim\Geolocation\GeolocationServiceProvider" --tag=geolocation-config
+
+# For security features (login tracking, IP blocking):
+php artisan vendor:publish --tag=geolocation-migrations
 php artisan migrate
 ```
 

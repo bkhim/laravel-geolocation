@@ -1,5 +1,11 @@
 # Changelog
 
+## [v4.4.3] - 2026-05-19
+
+### Changed
+
+- **Migrations are now publish-only** (removed `loadMigrationsFrom`). Users must explicitly publish migration files via `php artisan vendor:publish --tag=geolocation-migrations` before running `php artisan migrate`. This gives applications full control over migration ordering relative to their own migrations, and avoids conflicts when running in environments without a database driver. The `Schema::hasTable()` guards from v4.4.2 still protect against accidental double-execution.
+
 ## [v4.4.2] - 2026-05-19
 
 ### Fixes

@@ -12,10 +12,16 @@ The package tracks IPs that have been flagged for suspicious activity and blocks
 
 ## Database
 
-The blocking feature uses the `geolocation_ip_blocklist` table, created by running `php artisan migrate`:
+The blocking feature uses the `geolocation_ip_blocklist` table. Publish the migration and then run it:
+
+```bash
+php artisan vendor:publish --tag=geolocation-migrations
+php artisan migrate
+```
+
+The schema:
 
 ```php
-// Created automatically via migration
 Schema::create('geolocation_ip_blocklist', function (Blueprint $table) {
     $table->id();
     $table->string('ip', 45)->unique();

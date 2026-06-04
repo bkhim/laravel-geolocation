@@ -78,10 +78,7 @@ class GeolocationServiceProvider extends ServiceProvider
             __DIR__ . '/../translations' => resource_path('lang/vendor/geolocation')
         ], 'geolocation-translations');
 
-        // Load migrations from the package directory
-        $this->loadMigrationsFrom(__DIR__ . '/../database/migrations');
-
-        // Publish migrations (so users can customize them by publishing to their app)
+        // Publish migrations to the application's database/migrations directory
         $this->publishes([
             __DIR__ . '/../database/migrations/' => database_path('migrations'),
         ], 'geolocation-migrations');
