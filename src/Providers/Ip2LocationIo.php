@@ -45,7 +45,7 @@ class Ip2LocationIo implements LookupInterface
      *
      * @throws GeolocationException
      */
-    public function lookup($ipAddress = null, $responseFilter = 'geo'): GeolocationDetails
+    public function lookup(?string $ipAddress = null, string $responseFilter = 'geo'): GeolocationDetails
     {
         if ($ipAddress && ! filter_var($ipAddress, FILTER_VALIDATE_IP)) {
             throw new GeolocationException("Invalid IP address: {$ipAddress}");
@@ -109,7 +109,7 @@ class Ip2LocationIo implements LookupInterface
 
         // Validate language if specified
         if ($language && ! in_array($language, [
-            'ar', 'cs', 'da', 'de', 'en', 'es', 'et', 'fi', 'fr', 'ga', 'it', 'ja', 'ko', 'ms', 'nl', 'pt', 'ru', 'sv', 'tr', 'vi', 'zh-cn', 'zh-tw',
+            'ar', 'cs', 'da', 'de', 'en', 'es', 'et', 'fi', 'fr', 'ga', 'gl', 'it', 'ja', 'ko', 'ms', 'nl', 'pt', 'ru', 'sv', 'tr', 'vi', 'zh-cn', 'zh-tw',
         ])) {
             throw new GeolocationException('Invalid language value. Please refer to the https://www.ip2location.io/ip2location-documentation for the valid language value.');
         }

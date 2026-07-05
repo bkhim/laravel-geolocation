@@ -1,5 +1,40 @@
 # Changelog
 
+## [v4.5.0] - 2026-07-05
+
+### Stability & Quality Release
+
+This release marks the package as **stable** (`minimum-stability` changed to `stable`), with numerous bug fixes, expanded test coverage (149 tests), and type safety improvements across the board.
+
+#### New Features
+- **Continent & region tracking**: Added `continent_code` and `region` columns to `user_login_locations` table (new migration)
+- **Audit log channel config**: Added `logging.audit_channel` configuration option for audit logging
+- **Galician language support**: Added `gl` to IP2Location.io supported languages
+
+#### Bug Fixes
+- **Facade file/class mismatch**: Renamed `AnomalyDetector.php` to `GeoAnomalyDetector.php` to match the class name (PSR-4 compliance)
+- **GeoMiddleware continent lookup crash**: Fixed `$location->continent_code` property access that threw `InvalidArgumentException` on `GeolocationDetails` objects
+- **Implicit nullable deprecation (PHP 8.4+)**: Fixed `int $lifetime = null` to `?int $lifetime = null` in `LocationConsentManager`
+- **Missing config key**: Added `logging.audit_channel` to config and fixed `AuditLogger` reference
+- **Property vs method inconsistency**: Changed `$details->isProxy` / `$details->isTor` property access to method calls in `HasGeolocationSecurity`
+
+#### Type Safety
+- Added `?string` type hints to `$ipAddress` parameter in all 6 provider `lookup()` methods and `LookupInterface`
+- Services `AnomalyDetector` and `ThreatIntelligenceService` now registered as singletons in the service provider
+
+#### Documentation
+- Removed stale internal work-log docs (`COMPLETION_REPORT.md`, `FIXES_AND_TESTS_COMPLETE.md`, `QUICK_REFERENCE.md`, `recommendations.md`)
+- Added stability badge to README
+- Removed obsolete `.travis.yml` (CI is via GitHub Actions)
+
+#### Testing
+- **149 tests passing (278 assertions)**, up from 101
+- Added 23 new tests across traits (10), console commands (5), and middleware (8)
+- Added `HasGeolocationTest` with coverage for login recording, event dispatch, IP anonymization, risk scoring, and MFA triggers
+- Added `GeolocationCommandTest` for artisan commands
+- Added `GeoMiddlewareTest` and `SecurityCheckMiddlewareTest` for middleware behavior
+- Removed empty `HasGeolocationPreferencesTest.php`
+
 ## [v4.4.3] - 2026-05-19
 
 ### Changed

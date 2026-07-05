@@ -51,7 +51,7 @@ class MaxMind implements LookupInterface
      * @return GeolocationDetails
      * @throws GeolocationException
      */
-    public function lookup($ipAddress = null, $responseFilter = 'geo'): GeolocationDetails
+    public function lookup(?string $ipAddress = null, string $responseFilter = 'geo'): GeolocationDetails
     {
         // Validate IP address
         if ($ipAddress && ! filter_var($ipAddress, FILTER_VALIDATE_IP)) {

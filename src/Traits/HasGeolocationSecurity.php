@@ -226,12 +226,12 @@ trait HasGeolocationSecurity
         $riskScore = 0;
 
         // Proxy/VPN detection
-        if ($details->isProxy ?? false) {
+        if ($details->isProxy() ?? false) {
             $riskScore += 3;
         }
 
         // Tor detection
-        if ($details->isTor ?? false) {
+        if ($details->isTor() ?? false) {
             $riskScore += 3;
         }
 

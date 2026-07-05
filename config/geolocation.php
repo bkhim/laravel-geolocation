@@ -231,7 +231,7 @@ return [
             // NOTE: Translation is only available with PAID PLANS
             // Free tier only supports 'en' (English) - other languages will cause API errors
             // Set to null or 'en' for free tier, or upgrade to paid plan for translations
-            // Supported languages: ar, cs, da, de, en, es, et, fi, fr, ga, it, ja, ko, ms, nl, pt, ru, sv, tr, vi, zh-cn, zh-tw
+            // Supported languages: ar, cs, da, de, en, es, et, fi, fr, ga, gl, it, ja, ko, ms, nl, pt, ru, sv, tr, vi, zh-cn, zh-tw
             'language' => env('GEOLOCATION_IP2LOCATIONIO_LANGUAGE', 'en'),
         ],
 
@@ -316,6 +316,9 @@ return [
 
         // Log level for failed requests
         'level_error' => env('GEOLOCATION_LOG_LEVEL_ERROR', 'error'),
+
+        // Log channel for audit logging (defaults to 'stack')
+        'audit_channel' => env('GEOLOCATION_LOG_AUDIT_CHANNEL', 'stack'),
     ],
 
     /*

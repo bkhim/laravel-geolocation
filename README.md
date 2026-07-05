@@ -6,6 +6,7 @@ Detect proxy/VPN/Tor, trigger MFA on suspicious logins, personalize user experie
 [![Latest Version](https://img.shields.io/packagist/v/bkhim/laravel-geolocation.svg)](https://packagist.org/packages/bkhim/laravel-geolocation)
 [![Total Downloads](https://img.shields.io/packagist/dt/bkhim/laravel-geolocation.svg)](https://packagist.org/packages/bkhim/laravel-geolocation)
 [![Tests](https://github.com/bkhim/laravel-geolocation/workflows/Tests/badge.svg)](https://github.com/bkhim/laravel-geolocation/actions)
+[![Stable](https://img.shields.io/badge/status-stable-brightgreen.svg)](https://packagist.org/packages/bkhim/laravel-geolocation)
 [![License](https://img.shields.io/packagist/l/bkhim/laravel-geolocation.svg)](https://github.com/bkhim/laravel-geolocation/blob/main/LICENSE)
 
 ---

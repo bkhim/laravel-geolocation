@@ -54,7 +54,7 @@ class GeoMiddleware
         }
 
         $country = is_callable([$location, 'getCountryCode']) ? $location->getCountryCode() : ($location->country_code ?? $location->country ?? '');
-        $continent = $location->continent_code ?? $location->continent ?? '';
+        $continent = is_callable([$location, 'getContinentCode']) ? $location->getContinentCode() : ($location->continent_code ?? $location->continent ?? '');
 
         return in_array($country, $allowedLocations, true) || in_array($continent, $allowedLocations, true);
     }
@@ -87,7 +87,7 @@ class GeoMiddleware
         }
 
         $country = is_callable([$location, 'getCountryCode']) ? $location->getCountryCode() : ($location->country_code ?? $location->country ?? '');
-        $continent = $location->continent_code ?? $location->continent ?? '';
+        $continent = is_callable([$location, 'getContinentCode']) ? $location->getContinentCode() : ($location->continent_code ?? $location->continent ?? '');
 
         return in_array($country, $deniedLocations, true) || in_array($continent, $deniedLocations, true);
     }

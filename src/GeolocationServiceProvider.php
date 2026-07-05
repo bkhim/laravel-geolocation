@@ -5,7 +5,9 @@ namespace Bkhim\Geolocation;
 use Bkhim\Geolocation\Addons\Anonymization\IpAnonymizer;
 use Bkhim\Geolocation\Addons\Gdpr\LocationConsentManager;
 use Bkhim\Geolocation\Contracts\AuditLoggerInterface;
+use Bkhim\Geolocation\Services\AnomalyDetector;
 use Bkhim\Geolocation\Services\AuditLogger;
+use Bkhim\Geolocation\Services\ThreatIntelligenceService;
 use Illuminate\Support\ServiceProvider;
 
 /**
@@ -58,6 +60,10 @@ class GeolocationServiceProvider extends ServiceProvider
                 $cacheRepository
             );
         });
+
+        // Register shared services
+        $this->app->singleton(AnomalyDetector::class);
+        $this->app->singleton(ThreatIntelligenceService::class);
 
         // Register addons if enabled
         $this->registerAddons();

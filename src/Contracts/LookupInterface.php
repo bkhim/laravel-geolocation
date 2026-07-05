@@ -21,5 +21,5 @@ interface LookupInterface
      *
      * @return \Bkhim\Geolocation\GeolocationDetails
      */
-    public function lookup($ipAddress, $responseFilter = 'geo'): GeolocationDetails;
+    public function lookup(?string $ipAddress = null, string $responseFilter = 'geo'): GeolocationDetails;
 }

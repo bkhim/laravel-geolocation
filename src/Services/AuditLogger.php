@@ -14,7 +14,7 @@ class AuditLogger implements AuditLoggerInterface
             $context['ip'] = substr($context['ip'], 0, 7) . '...';
         }
 
-        Log::channel(config('geolocation.audit_log_channel', 'stack'))
+        Log::channel(config('geolocation.logging.audit_channel', 'stack'))
             ->info("Geolocation Audit: {$event}", $context);
     }
 }

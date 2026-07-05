@@ -43,7 +43,7 @@ class IpApi implements LookupInterface
      * @return GeolocationDetails
      * @throws GeolocationException
      */
-    public function lookup($ipAddress = null, $responseFilter = 'geo'): GeolocationDetails
+    public function lookup(?string $ipAddress = null, string $responseFilter = 'geo'): GeolocationDetails
     {
         if ($ipAddress && ! filter_var($ipAddress, FILTER_VALIDATE_IP)) {
             throw new GeolocationException("Invalid IP address: {$ipAddress}");
