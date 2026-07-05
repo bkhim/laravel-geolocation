@@ -1,6 +1,6 @@
 # Laravel Geolocation Documentation
 
-**IP geolocation + fraud prevention for Laravel.** Detect proxy/VPN/Tor, trigger MFA on suspicious logins, and personalize user experience.
+**The complete global app toolkit for Laravel.** Detect location, personalize experiences, prevent fraud, and secure logins — all in one package.
 
 ---
 
@@ -28,8 +28,11 @@ echo $details->isProxy(); // false
 
 | Feature | Description |
 |---------|-------------|
-| **6 Providers** | One API - switch providers without code changes |
-| **Security First** | Proxy/VPN/Tor detection, MFA triggers, threat intelligence |
+| **6 Providers** | One API — switch providers without code changes |
+| **Location & Timezone** | City, region, coordinates, timezone, currency from any IP |
+| **Fraud Prevention** | Proxy/VPN/Tor detection, risk scoring, threat intelligence |
+| **Login Security** | Track logins, detect new countries/cities, trigger MFA |
+| **Geo-Blocking** | Allow/deny countries and continents via middleware |
 | **Compliance Built-in** | GDPR consent, IP anonymization, audit logging |
 | **CLI Tools** | Security audits, MaxMind updates, data pruning |
 
@@ -37,13 +40,13 @@ echo $details->isProxy(); // false
 
 ## Documentation Sections
 
-### 🚀 Getting Started
+### Getting Started
 
 1. [Installation](getting-started/installation.md) - Install the package
 2. [Configuration](getting-started/configuration.md) - Environment variables
 3. [Quick Start](getting-started/quick-start.md) - Your first lookup
 
-### 🛡️ Security (Recommended)
+### Security (Recommended)
 
 - [Security Overview](security/overview.md) - Complete security guide
 - [Anomaly Detection](security/anomaly-detection.md) - Detect impossible travel, new locations
@@ -52,7 +55,7 @@ echo $details->isProxy(); // false
 - [Threat Intelligence](security/threat-intelligence.md) - AbuseIPDB integration
 - [IP Blocking](security/ip-blocking.md) - Block repeat offenders
 
-### 🌎 Providers
+### Providers
 
 - [Provider Comparison](providers/index.md) - Compare all 6 providers
 - [ipapi.co](providers/ipapi.md) - Free tier, no API key
@@ -62,7 +65,7 @@ echo $details->isProxy(); // false
 - [IPStack](providers/ipstack.md) - Comprehensive data
 - [IPGeolocation](sources/ipgeolocation.md) - Security-focused
 
-### ⚡ Features
+### Features
 
 - [CLI Commands](features/commands.md) - Audit, MaxMind updates, pruning
 - [Middleware](features/middleware.md) - Geo-blocking, rate limiting
@@ -71,13 +74,13 @@ echo $details->isProxy(); // false
 - [Events](features/events.md) - Hook into geolocation events
 - [User Traits](features/user-traits.md) - Model traits for User
 
-### ⚖️ Compliance
+### Compliance
 
 - [GDPR Consent](addons/gdpr-consent.md) - EU privacy compliance
 - [IP Anonymization](addons/ip-anonymization.md) - Privacy-preserving
 - [Rate Limiting](addons/rate-limiting.md) - Country-based limits
 
-### 📚 Reference
+### Reference
 
 - [API Reference](api-reference.md) - Complete method documentation
 - [Contributing](contributing.md) - How to contribute
