@@ -35,7 +35,7 @@ it('geo allow middleware passes for allowed country', function () {
 
     config(['geolocation.cache.enabled' => false]);
 
-    $middleware = new GeoMiddleware();
+    $middleware = new GeoMiddleware;
     $request = Request::create('/test', 'GET', [], [], [], ['REMOTE_ADDR' => '8.8.8.8']);
 
     $response = $middleware->handle($request, function ($req) {
@@ -60,7 +60,7 @@ it('geo deny middleware blocks denied country', function () {
 
     $this->expectException(HttpException::class);
 
-    $middleware = new GeoMiddleware();
+    $middleware = new GeoMiddleware;
     $request = Request::create('/test', 'GET', [], [], [], ['REMOTE_ADDR' => '8.8.8.8']);
 
     $middleware->handle($request, function ($req) {
@@ -82,7 +82,7 @@ it('geo allow middleware blocks disallowed country', function () {
 
     $this->expectException(HttpException::class);
 
-    $middleware = new GeoMiddleware();
+    $middleware = new GeoMiddleware;
     $request = Request::create('/test', 'GET', [], [], [], ['REMOTE_ADDR' => '8.8.8.8']);
 
     $middleware->handle($request, function ($req) {
@@ -91,7 +91,7 @@ it('geo allow middleware blocks disallowed country', function () {
 });
 
 it('geo middleware passes when no locations specified', function () {
-    $middleware = new GeoMiddleware();
+    $middleware = new GeoMiddleware;
     $request = Request::create('/test', 'GET', [], [], [], ['REMOTE_ADDR' => '8.8.8.8']);
 
     $response = $middleware->handle($request, function ($req) {
@@ -113,7 +113,7 @@ it('geo middleware returns json for api requests', function () {
 
     config(['geolocation.cache.enabled' => false]);
 
-    $middleware = new GeoMiddleware();
+    $middleware = new GeoMiddleware;
     $request = Request::create('/api/test', 'GET', [], [], [], ['REMOTE_ADDR' => '8.8.8.8', 'HTTP_ACCEPT' => 'application/json']);
 
     $response = $middleware->handle($request, function ($req) {
@@ -128,7 +128,7 @@ it('security check middleware passes for non-blocked ip', function () {
     config(['geolocation.security.enable_blocking' => true]);
     config(['geolocation.threat_intelligence.enabled' => false]);
 
-    $middleware = new SecurityCheckMiddleware();
+    $middleware = new SecurityCheckMiddleware;
     $request = Request::create('/test', 'GET', [], [], [], ['REMOTE_ADDR' => '8.8.8.8']);
 
     $response = $middleware->handle($request, function ($req) {
@@ -144,7 +144,7 @@ it('security check middleware blocks blocked ip', function () {
 
     IpBlocklist::block('1.2.3.4', 'Test block', now()->addHour()->toDateTime());
 
-    $middleware = new SecurityCheckMiddleware();
+    $middleware = new SecurityCheckMiddleware;
     $request = Request::create('/test', 'GET', [], [], [], ['REMOTE_ADDR' => '1.2.3.4']);
 
     $response = $middleware->handle($request, function ($req) {
@@ -159,7 +159,7 @@ it('security check middleware respects enable_blocking config', function () {
 
     IpBlocklist::block('1.2.3.4', 'Test block', now()->addHour()->toDateTime());
 
-    $middleware = new SecurityCheckMiddleware();
+    $middleware = new SecurityCheckMiddleware;
     $request = Request::create('/test', 'GET', [], [], [], ['REMOTE_ADDR' => '1.2.3.4']);
 
     $response = $middleware->handle($request, function ($req) {

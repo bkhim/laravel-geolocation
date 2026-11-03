@@ -1,7 +1,6 @@
 <?php
 
 use Bkhim\Geolocation\Models\IpBlocklist;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 beforeEach(function () {

@@ -1,7 +1,7 @@
 <?php
 
-use Bkhim\Geolocation\Services\AnomalyDetector;
 use Bkhim\Geolocation\Models\LoginHistory;
+use Bkhim\Geolocation\Services\AnomalyDetector;
 use Illuminate\Support\Facades\Schema;
 
 beforeEach(function () {
@@ -26,7 +26,7 @@ afterEach(function () {
 });
 
 it('calculates distance between two coordinates using haversine', function () {
-    $detector = new AnomalyDetector();
+    $detector = new AnomalyDetector;
 
     $distance = $detector->calculateDistance(
         40.7128, -74.0060,  // New York
@@ -38,13 +38,13 @@ it('calculates distance between two coordinates using haversine', function () {
 });
 
 it('detects too many countries when exceeding limit', function () {
-    $detector = new AnomalyDetector();
+    $detector = new AnomalyDetector;
 
     $history = collect([
-        (object)['country_code' => 'US'],
-        (object)['country_code' => 'CA'],
-        (object)['country_code' => 'MX'],
-        (object)['country_code' => 'GB'],
+        (object) ['country_code' => 'US'],
+        (object) ['country_code' => 'CA'],
+        (object) ['country_code' => 'MX'],
+        (object) ['country_code' => 'GB'],
     ]);
 
     $result = $detector->hasTooManyCountries($history);
@@ -53,11 +53,11 @@ it('detects too many countries when exceeding limit', function () {
 });
 
 it('returns false for countries within limit', function () {
-    $detector = new AnomalyDetector();
+    $detector = new AnomalyDetector;
 
     $history = collect([
-        (object)['country_code' => 'US'],
-        (object)['country_code' => 'CA'],
+        (object) ['country_code' => 'US'],
+        (object) ['country_code' => 'CA'],
     ]);
 
     $result = $detector->hasTooManyCountries($history);
@@ -66,13 +66,13 @@ it('returns false for countries within limit', function () {
 });
 
 it('can configure max countries', function () {
-    $detector = (new AnomalyDetector())->setMaxCountries(5);
+    $detector = (new AnomalyDetector)->setMaxCountries(5);
 
     $history = collect([
-        (object)['country_code' => 'US'],
-        (object)['country_code' => 'CA'],
-        (object)['country_code' => 'MX'],
-        (object)['country_code' => 'GB'],
+        (object) ['country_code' => 'US'],
+        (object) ['country_code' => 'CA'],
+        (object) ['country_code' => 'MX'],
+        (object) ['country_code' => 'GB'],
     ]);
 
     $result = $detector->hasTooManyCountries($history);
@@ -93,7 +93,7 @@ it('saves and retrieves login history for user', function () {
 });
 
 it('detects new country for user', function () {
-    $detector = new AnomalyDetector();
+    $detector = new AnomalyDetector;
 
     LoginHistory::create([
         'user_id' => 1,
@@ -107,7 +107,7 @@ it('detects new country for user', function () {
 });
 
 it('detects new city for user', function () {
-    $detector = new AnomalyDetector();
+    $detector = new AnomalyDetector;
 
     LoginHistory::create([
         'user_id' => 1,

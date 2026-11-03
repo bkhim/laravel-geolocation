@@ -8,11 +8,10 @@ use Illuminate\Contracts\Support\Arrayable;
  * Class GeolocationDetails.
  *
  * @author Adriano Rosa <https://adrianorosa.com>
- * @date 2019-08-13 13:24
  *
- * @package Bkhim\Geolocation
+ * @date 2019-08-13 13:24
  */
-class GeolocationDetails implements \JsonSerializable, Arrayable, \ArrayAccess
+class GeolocationDetails implements \ArrayAccess, \JsonSerializable, Arrayable
 {
     /**
      * @var string
@@ -142,7 +141,7 @@ class GeolocationDetails implements \JsonSerializable, Arrayable, \ArrayAccess
     /**
      * GeolocationDetails constructor.
      *
-     * @param  array $data
+     * @param  array  $data
      */
     public function __construct($data = [])
     {
@@ -221,8 +220,6 @@ class GeolocationDetails implements \JsonSerializable, Arrayable, \ArrayAccess
 
     /**
      * Get the timezone for the IP address.
-     *
-     * @return string|null
      */
     public function getTimezone(): ?string
     {
@@ -231,8 +228,6 @@ class GeolocationDetails implements \JsonSerializable, Arrayable, \ArrayAccess
 
     /**
      * Get the postal code for the IP address.
-     *
-     * @return string|null
      */
     public function getPostalCode(): ?string
     {
@@ -241,8 +236,6 @@ class GeolocationDetails implements \JsonSerializable, Arrayable, \ArrayAccess
 
     /**
      * Get the organization for the IP address.
-     *
-     * @return string|null
      */
     public function getOrg(): ?string
     {
@@ -251,8 +244,6 @@ class GeolocationDetails implements \JsonSerializable, Arrayable, \ArrayAccess
 
     /**
      * Get the timezone offset in hours from UTC.
-     *
-     * @return int|null
      */
     public function getTimezoneOffset(): ?int
     {
@@ -261,8 +252,6 @@ class GeolocationDetails implements \JsonSerializable, Arrayable, \ArrayAccess
 
     /**
      * Get the currency name for the IP address location.
-     *
-     * @return string|null
      */
     public function getCurrency(): ?string
     {
@@ -271,8 +260,6 @@ class GeolocationDetails implements \JsonSerializable, Arrayable, \ArrayAccess
 
     /**
      * Get the currency code for the IP address location.
-     *
-     * @return string|null
      */
     public function getCurrencyCode(): ?string
     {
@@ -281,8 +268,6 @@ class GeolocationDetails implements \JsonSerializable, Arrayable, \ArrayAccess
 
     /**
      * Get the currency symbol for the IP address location.
-     *
-     * @return string|null
      */
     public function getCurrencySymbol(): ?string
     {
@@ -291,8 +276,6 @@ class GeolocationDetails implements \JsonSerializable, Arrayable, \ArrayAccess
 
     /**
      * Get the continent name for the IP address location.
-     *
-     * @return string|null
      */
     public function getContinent(): ?string
     {
@@ -301,8 +284,6 @@ class GeolocationDetails implements \JsonSerializable, Arrayable, \ArrayAccess
 
     /**
      * Get the continent code for the IP address location.
-     *
-     * @return string|null
      */
     public function getContinentCode(): ?string
     {
@@ -311,8 +292,6 @@ class GeolocationDetails implements \JsonSerializable, Arrayable, \ArrayAccess
 
     /**
      * Get the ISP for the IP address.
-     *
-     * @return string|null
      */
     public function getIsp(): ?string
     {
@@ -321,8 +300,6 @@ class GeolocationDetails implements \JsonSerializable, Arrayable, \ArrayAccess
 
     /**
      * Get the ASN for the IP address.
-     *
-     * @return string|null
      */
     public function getAsn(): ?string
     {
@@ -331,8 +308,6 @@ class GeolocationDetails implements \JsonSerializable, Arrayable, \ArrayAccess
 
     /**
      * Get the ASN organization name for the IP address.
-     *
-     * @return string|null
      */
     public function getAsnName(): ?string
     {
@@ -341,8 +316,6 @@ class GeolocationDetails implements \JsonSerializable, Arrayable, \ArrayAccess
 
     /**
      * Get the connection type for the IP address.
-     *
-     * @return string|null
      */
     public function getConnectionType(): ?string
     {
@@ -351,8 +324,6 @@ class GeolocationDetails implements \JsonSerializable, Arrayable, \ArrayAccess
 
     /**
      * Check if the IP address is from a mobile connection.
-     *
-     * @return bool|null
      */
     public function isMobile(): ?bool
     {
@@ -361,8 +332,6 @@ class GeolocationDetails implements \JsonSerializable, Arrayable, \ArrayAccess
 
     /**
      * Check if the IP address is from a proxy.
-     *
-     * @return bool|null
      */
     public function isProxy(): ?bool
     {
@@ -371,8 +340,6 @@ class GeolocationDetails implements \JsonSerializable, Arrayable, \ArrayAccess
 
     /**
      * Check if the IP address is from a crawler/bot.
-     *
-     * @return bool|null
      */
     public function isCrawler(): ?bool
     {
@@ -381,8 +348,6 @@ class GeolocationDetails implements \JsonSerializable, Arrayable, \ArrayAccess
 
     /**
      * Check if the IP address is from a Tor exit node.
-     *
-     * @return bool|null
      */
     public function isTor(): ?bool
     {
@@ -391,8 +356,6 @@ class GeolocationDetails implements \JsonSerializable, Arrayable, \ArrayAccess
 
     /**
      * Get the hostname for the IP address.
-     *
-     * @return string|null
      */
     public function getHostname(): ?string
     {
@@ -401,39 +364,33 @@ class GeolocationDetails implements \JsonSerializable, Arrayable, \ArrayAccess
 
     /**
      * Get formatted full address string.
-     *
-     * @return string|null
      */
     public function getFormattedAddress(): ?string
     {
         $parts = array_filter([
             $this->city,
             $this->region,
-            $this->country
+            $this->country,
         ]);
 
-        return !empty($parts) ? implode(', ', $parts) : null;
+        return ! empty($parts) ? implode(', ', $parts) : null;
     }
 
     /**
      * Get short formatted address string.
-     *
-     * @return string|null
      */
     public function getShortAddress(): ?string
     {
         $parts = array_filter([
             $this->city,
-            $this->countryCode
+            $this->countryCode,
         ]);
 
-        return !empty($parts) ? implode(', ', $parts) : null;
+        return ! empty($parts) ? implode(', ', $parts) : null;
     }
 
     /**
      * Get full address including postal code.
-     *
-     * @return string|null
      */
     public function getFullAddress(): ?string
     {
@@ -441,20 +398,18 @@ class GeolocationDetails implements \JsonSerializable, Arrayable, \ArrayAccess
             $this->city,
             $this->region,
             $this->postalCode,
-            $this->countryCode
+            $this->countryCode,
         ]);
 
-        return !empty($addressParts) ? implode(', ', $addressParts) : null;
+        return ! empty($addressParts) ? implode(', ', $addressParts) : null;
     }
 
     /**
      * Get Google Maps link for the coordinates.
-     *
-     * @return string|null
      */
     public function getGoogleMapsLink(): ?string
     {
-        if (!$this->latitude || !$this->longitude) {
+        if (! $this->latitude || ! $this->longitude) {
             return null;
         }
 
@@ -463,12 +418,10 @@ class GeolocationDetails implements \JsonSerializable, Arrayable, \ArrayAccess
 
     /**
      * Get OpenStreetMap link for the coordinates.
-     *
-     * @return string|null
      */
     public function getOpenStreetMapLink(): ?string
     {
-        if (!$this->latitude || !$this->longitude) {
+        if (! $this->latitude || ! $this->longitude) {
             return null;
         }
 
@@ -477,12 +430,10 @@ class GeolocationDetails implements \JsonSerializable, Arrayable, \ArrayAccess
 
     /**
      * Get Apple Maps link for the coordinates.
-     *
-     * @return string|null
      */
     public function getAppleMapsLink(): ?string
     {
-        if (!$this->latitude || !$this->longitude) {
+        if (! $this->latitude || ! $this->longitude) {
             return null;
         }
 
@@ -491,8 +442,6 @@ class GeolocationDetails implements \JsonSerializable, Arrayable, \ArrayAccess
 
     /**
      * Get country flag emoji.
-     *
-     * @return string|null
      */
     public function getCountryFlag(): ?string
     {
@@ -501,12 +450,10 @@ class GeolocationDetails implements \JsonSerializable, Arrayable, \ArrayAccess
 
     /**
      * Get country flag emoji.
-     *
-     * @return string|null
      */
     public function getCountryFlagEmoji(): ?string
     {
-        if (!$this->countryCode || strlen($this->countryCode) !== 2) {
+        if (! $this->countryCode || strlen($this->countryCode) !== 2) {
             return null;
         }
 
@@ -518,32 +465,28 @@ class GeolocationDetails implements \JsonSerializable, Arrayable, \ArrayAccess
             'F' => '🇫', 'G' => '🇬', 'H' => '🇭', 'I' => '🇮', 'J' => '🇯',
             'K' => '🇰', 'L' => '🇱', 'M' => '🇲', 'N' => '🇳', 'O' => '🇴',
             'P' => '🇵', 'Q' => '🇶', 'R' => '🇷', 'S' => '🇸', 'T' => '🇹',
-            'U' => '🇺', 'V' => '🇻', 'W' => '🇼', 'X' => '🇽', 'Y' => '🇾', 'Z' => '🇿'
+            'U' => '🇺', 'V' => '🇻', 'W' => '🇼', 'X' => '🇽', 'Y' => '🇾', 'Z' => '🇿',
         ];
 
         $first = $regionalIndicators[$countryCode[0]] ?? '';
         $second = $regionalIndicators[$countryCode[1]] ?? '';
 
-        return $first && $second ? $first . $second : null;
+        return $first && $second ? $first.$second : null;
     }
 
     /**
      * Check if the location data is valid/complete.
-     *
-     * @return bool
      */
     public function isValid(): bool
     {
-        return !empty($this->ip) &&
-               !empty($this->countryCode) &&
-               !empty($this->latitude) &&
-               !empty($this->longitude);
+        return ! empty($this->ip) &&
+               ! empty($this->countryCode) &&
+               ! empty($this->latitude) &&
+               ! empty($this->longitude);
     }
 
     /**
      * Check if IP is IPv4.
-     *
-     * @return bool
      */
     public function isIPv4(): bool
     {
@@ -552,8 +495,6 @@ class GeolocationDetails implements \JsonSerializable, Arrayable, \ArrayAccess
 
     /**
      * Check if IP is IPv6.
-     *
-     * @return bool
      */
     public function isIPv6(): bool
     {
@@ -563,23 +504,23 @@ class GeolocationDetails implements \JsonSerializable, Arrayable, \ArrayAccess
     /**
      * Get country flag URL from flagcdn.com.
      *
-     * @param int $width Width of the flag image (default: 320)
-     * @return string|null
+     * @param  int  $width  Width of the flag image (default: 320)
      */
     public function getCountryFlagUrl(int $width = 320): ?string
     {
-        if (!$this->countryCode) {
+        if (! $this->countryCode) {
             return null;
         }
 
         $code = strtolower($this->countryCode);
+
         return "https://flagcdn.com/w{$width}/{$code}.png";
     }
 
     /**
      * Parses the raw response.
      *
-     * @param  mixed $data
+     * @param  mixed  $data
      */
     protected function parse($data): void
     {
@@ -608,7 +549,7 @@ class GeolocationDetails implements \JsonSerializable, Arrayable, \ArrayAccess
         }
 
         // Ensure we have an array to work with
-        if (!is_array($data)) {
+        if (! is_array($data)) {
             return;
         }
 
@@ -619,7 +560,7 @@ class GeolocationDetails implements \JsonSerializable, Arrayable, \ArrayAccess
 
         foreach ((array) $data as $key => $value) {
             // Skip null keys or non-string keys
-            if (!is_string($key) || $key === '') {
+            if (! is_string($key) || $key === '') {
                 continue;
             }
 
@@ -641,11 +582,11 @@ class GeolocationDetails implements \JsonSerializable, Arrayable, \ArrayAccess
     /**
      * Parses the coordinates values into latitude and longitude.
      *
-     * @param  string $value
+     * @param  string  $value
      */
     protected function formatCoordinates($value): void
     {
-        if (!is_string($value) || empty($value) || !str_contains($value, ',')) {
+        if (! is_string($value) || empty($value) || ! str_contains($value, ',')) {
             return;
         }
 
@@ -659,7 +600,7 @@ class GeolocationDetails implements \JsonSerializable, Arrayable, \ArrayAccess
         $longitude = trim($coordinates[1]);
 
         // Validate that the coordinates are numeric
-        if (!is_numeric($latitude) || !is_numeric($longitude)) {
+        if (! is_numeric($latitude) || ! is_numeric($longitude)) {
             return;
         }
 
@@ -670,13 +611,12 @@ class GeolocationDetails implements \JsonSerializable, Arrayable, \ArrayAccess
     /**
      * Format the country name.
      *
-     * @param  string $countryCode
-     *
+     * @param  string  $countryCode
      * @return string
      */
     protected function formatCountry($countryCode)
     {
-        if (empty($countryCode) || !is_string($countryCode)) {
+        if (empty($countryCode) || ! is_string($countryCode)) {
             return $countryCode ?? '';
         }
 
@@ -697,13 +637,12 @@ class GeolocationDetails implements \JsonSerializable, Arrayable, \ArrayAccess
 
         // Fallback: Use a built-in array or return the code
         $builtInCountries = $this->getBuiltInCountries();
+
         return $builtInCountries[$countryCode] ?? $countryCode;
     }
 
     /**
      * Get built-in country mappings as fallback.
-     *
-     * @return array
      */
     private function getBuiltInCountries(): array
     {
@@ -740,28 +679,24 @@ class GeolocationDetails implements \JsonSerializable, Arrayable, \ArrayAccess
             'EG' => 'Egypt',
             'NG' => 'Nigeria',
             'KE' => 'Kenya',
-            'TZ' => 'Tanzania'
+            'TZ' => 'Tanzania',
         ];
     }
 
     /**
      * Check if timezone data is available.
-     *
-     * @return bool
      */
     public function hasTimezone(): bool
     {
-        return !empty($this->timezone);
+        return ! empty($this->timezone);
     }
 
     /**
      * Get current time in the IP's timezone.
-     *
-     * @return \DateTime|null
      */
     public function getCurrentTime(): ?\DateTime
     {
-        if (!$this->timezone) {
+        if (! $this->timezone) {
             return null;
         }
 
@@ -774,13 +709,10 @@ class GeolocationDetails implements \JsonSerializable, Arrayable, \ArrayAccess
 
     /**
      * Convert a datetime to the IP's timezone.
-     *
-     * @param \DateTimeInterface $dateTime
-     * @return \DateTime|null
      */
     public function convertToLocalTime(\DateTimeInterface $dateTime): ?\DateTime
     {
-        if (!$this->timezone) {
+        if (! $this->timezone) {
             return null;
         }
 
@@ -839,13 +771,14 @@ class GeolocationDetails implements \JsonSerializable, Arrayable, \ArrayAccess
     /**
      * Magic getter for convenience.
      *
-     * @param string $name
+     * @param  string  $name
      * @return mixed
+     *
      * @throws \InvalidArgumentException
      */
     public function __get($name)
     {
-        $method = 'get' . ucfirst($name);
+        $method = 'get'.ucfirst($name);
         if (method_exists($this, $method)) {
             return $this->$method();
         }
@@ -859,8 +792,6 @@ class GeolocationDetails implements \JsonSerializable, Arrayable, \ArrayAccess
 
     /**
      * String representation.
-     *
-     * @return string
      */
     public function __toString(): string
     {
@@ -870,24 +801,22 @@ class GeolocationDetails implements \JsonSerializable, Arrayable, \ArrayAccess
     /**
      * ArrayAccess implementation - check if offset exists.
      *
-     * @param mixed $offset
-     * @return bool
+     * @param  mixed  $offset
      */
     public function offsetExists($offset): bool
     {
-        return isset($this->$offset) || method_exists($this, 'get' . ucfirst($offset));
+        return isset($this->$offset) || method_exists($this, 'get'.ucfirst($offset));
     }
 
     /**
      * ArrayAccess implementation - get offset.
      *
     /**
-     * @return mixed
      */
     public function offsetGet($offset): mixed
     {
-        if (method_exists($this, 'get' . ucfirst($offset))) {
-            return $this->{'get' . ucfirst($offset)}();
+        if (method_exists($this, 'get'.ucfirst($offset))) {
+            return $this->{'get'.ucfirst($offset)}();
         }
 
         return $this->$offset ?? null;
@@ -896,8 +825,9 @@ class GeolocationDetails implements \JsonSerializable, Arrayable, \ArrayAccess
     /**
      * ArrayAccess implementation - set offset (immutable).
      *
-     * @param mixed $offset
-     * @param mixed $value
+     * @param  mixed  $offset
+     * @param  mixed  $value
+     *
      * @throws \RuntimeException
      */
     public function offsetSet($offset, $value): void
@@ -908,7 +838,8 @@ class GeolocationDetails implements \JsonSerializable, Arrayable, \ArrayAccess
     /**
      * ArrayAccess implementation - unset offset (immutable).
      *
-     * @param mixed $offset
+     * @param  mixed  $offset
+     *
      * @throws \RuntimeException
      */
     public function offsetUnset($offset): void

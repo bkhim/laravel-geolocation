@@ -8,8 +8,6 @@ use Illuminate\Queue\SerializesModels;
 
 /**
  * Class LoginLocationRecorded.
- *
- * @package Bkhim\Geolocation\Events
  */
 class LoginLocationRecorded
 {
@@ -28,8 +26,6 @@ class LoginLocationRecorded
     /**
      * Create a new event instance.
      *
-     * @param  mixed  $user
-     * @param  \Bkhim\Geolocation\Models\LoginHistory  $loginHistory
      * @return void
      */
     public function __construct(mixed $user, LoginHistory $loginHistory)

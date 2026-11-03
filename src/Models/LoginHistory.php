@@ -7,8 +7,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * Class LoginHistory.
- *
- * @package Bkhim\Geolocation\Models
  */
 class LoginHistory extends Model
 {

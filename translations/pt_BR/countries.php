@@ -245,5 +245,5 @@ return [
     'VG' => 'Virgens Britânicas, Ilhas',
     'WF' => 'Wallis e Futuna',
     'ZM' => 'Zâmbia',
-    'ZW' => 'Zimbabwe'
+    'ZW' => 'Zimbabwe',
 ];

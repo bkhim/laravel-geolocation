@@ -2,9 +2,11 @@
 
 namespace Bkhim\Geolocation\Tests;
 
-use Orchestra\Testbench\TestCase as BaseTestCase;
 use Bkhim\Geolocation\GeolocationServiceProvider;
+use GeoIp2\Database\Reader;
+use GeoIp2\Model\City;
 use Illuminate\Support\Facades\Http;
+use Orchestra\Testbench\TestCase as BaseTestCase;
 
 abstract class TestCase extends BaseTestCase
 {
@@ -32,8 +34,8 @@ abstract class TestCase extends BaseTestCase
 
         // Create the test file if it doesn't exist
         $testDbPath = storage_path('app/geoip/test.mmdb');
-        if (!file_exists($testDbPath)) {
-            if (!file_exists(dirname($testDbPath))) {
+        if (! file_exists($testDbPath)) {
+            if (! file_exists(dirname($testDbPath))) {
                 mkdir(dirname($testDbPath), 0755, true);
             }
             file_put_contents($testDbPath, 'TEST_MAXMIND_DATABASE');
@@ -43,7 +45,6 @@ abstract class TestCase extends BaseTestCase
     protected function setUp(): void
     {
         parent::setUp();
-
 
         app('cache')->flush();
     }
@@ -57,11 +58,11 @@ abstract class TestCase extends BaseTestCase
             'country' => 'United States',
             'loc' => '37.3860,-122.0838',
             'org' => 'AS15169 Google LLC',
-            'timezone' => 'America/Los_Angeles'
+            'timezone' => 'America/Los_Angeles',
         ];
 
         Http::fake([
-            "ipinfo.io/{$ip}/json" => Http::response($response)
+            "ipinfo.io/{$ip}/json" => Http::response($response),
         ]);
     }
 
@@ -70,7 +71,7 @@ abstract class TestCase extends BaseTestCase
         $databasePath = storage_path('app/geoip/test.mmdb');
 
         // Create a minimal test database if it doesn't exist
-        if (!file_exists($databasePath)) {
+        if (! file_exists($databasePath)) {
             file_put_contents($databasePath, 'MAXMIND_TEST_DATABASE');
         }
 
@@ -79,16 +80,16 @@ abstract class TestCase extends BaseTestCase
 
     protected function mockMaxMindReader($ip = '8.8.8.8', $data = null)
     {
-        $mockReader = $this->mock(\GeoIp2\Database\Reader::class);
+        $mockReader = $this->mock(Reader::class);
 
         $recordData = $data ?? [
             'city' => ['name' => 'Mountain View'],
             'mostSpecificSubdivision' => ['name' => 'California'],
             'country' => ['name' => 'United States', 'isoCode' => 'US'],
-            'location' => ['latitude' => 37.3860, 'longitude' => -122.0838]
+            'location' => ['latitude' => 37.3860, 'longitude' => -122.0838],
         ];
 
-        $mockRecord = new \GeoIp2\Model\City($recordData);
+        $mockRecord = new City($recordData);
 
         $mockReader->shouldReceive('city')
             ->with($ip)

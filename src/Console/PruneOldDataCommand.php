@@ -8,6 +8,7 @@ use Illuminate\Console\Command;
 class PruneOldDataCommand extends Command
 {
     protected $signature = 'geolocation:prune {--dry-run : Show what would be deleted without deleting}';
+
     protected $description = 'Prune old login history data for GDPR compliance';
 
     public function handle(): int
@@ -19,6 +20,7 @@ class PruneOldDataCommand extends Command
 
         if ($toDelete === 0) {
             $this->info("No records older than {$retentionDays} days to prune.");
+
             return 0;
         }
 
@@ -26,10 +28,11 @@ class PruneOldDataCommand extends Command
 
         if ($this->option('dry-run')) {
             $this->line("Dry run - would delete {$toDelete} records.");
+
             return 0;
         }
 
-        if (!$this->confirm("Delete {$toDelete} records?")) {
+        if (! $this->confirm("Delete {$toDelete} records?")) {
             return 1;
         }
 

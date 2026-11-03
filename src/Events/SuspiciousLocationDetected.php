@@ -8,8 +8,6 @@ use Illuminate\Queue\SerializesModels;
 
 /**
  * Class SuspiciousLocationDetected.
- *
- * @package Bkhim\Geolocation\Events
  */
 class SuspiciousLocationDetected
 {
@@ -28,8 +26,6 @@ class SuspiciousLocationDetected
     /**
      * Create a new event instance.
      *
-     * @param  mixed  $user
-     * @param  \Bkhim\Geolocation\Models\LoginHistory  $loginHistory
      * @return void
      */
     public function __construct(mixed $user, LoginHistory $loginHistory)

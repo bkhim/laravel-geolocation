@@ -4,6 +4,14 @@ namespace Bkhim\Geolocation;
 
 use Bkhim\Geolocation\Addons\Anonymization\IpAnonymizer;
 use Bkhim\Geolocation\Addons\Gdpr\LocationConsentManager;
+use Bkhim\Geolocation\Addons\Middleware\GeoMiddleware;
+use Bkhim\Geolocation\Addons\Middleware\GeoRateLimitMiddleware;
+use Bkhim\Geolocation\Addons\Middleware\SecurityCheckMiddleware;
+use Bkhim\Geolocation\Console\AuditCommand;
+use Bkhim\Geolocation\Console\CacheCommand;
+use Bkhim\Geolocation\Console\GeolocationCommand;
+use Bkhim\Geolocation\Console\PruneOldDataCommand;
+use Bkhim\Geolocation\Console\UpdateMaxMindCommand;
 use Bkhim\Geolocation\Contracts\AuditLoggerInterface;
 use Bkhim\Geolocation\Services\AnomalyDetector;
 use Bkhim\Geolocation\Services\AuditLogger;
@@ -14,21 +22,17 @@ use Illuminate\Support\ServiceProvider;
  * Class GeolocationServiceProvider.
  *
  * @author Adriano Rosa <https://adrianorosa.com>
- * @date 2019-08-13 10:04
  *
- * @package Bkhim
+ * @date 2019-08-13 10:04
  */
 class GeolocationServiceProvider extends ServiceProvider
 {
-
     /**
      * Register any application services.
-     *
-     * @return void
      */
     public function register(): void
     {
-        $this->mergeConfigFrom(__DIR__ . '/../config/geolocation.php', 'geolocation');
+        $this->mergeConfigFrom(__DIR__.'/../config/geolocation.php', 'geolocation');
 
         $this->app->singleton(AuditLoggerInterface::class, AuditLogger::class);
 
@@ -39,7 +43,7 @@ class GeolocationServiceProvider extends ServiceProvider
                 $cacheRepository = $cacheStore ? $app['cache']->store($cacheStore) : $app['cache']->driver();
 
                 // Validate cache store exists and is working
-                if ($cacheStore && !$cacheRepository) {
+                if ($cacheStore && ! $cacheRepository) {
                     throw new \InvalidArgumentException(
                         "Cache store '{$cacheStore}' is not configured. Please check your cache configuration."
                     );
@@ -48,14 +52,14 @@ class GeolocationServiceProvider extends ServiceProvider
             } catch (\Exception $e) {
                 // Log cache configuration issue but don't fail the service
                 if ($app->bound('log')) {
-                    $app['log']->warning("Geolocation cache configuration issue: " . $e->getMessage());
+                    $app['log']->warning('Geolocation cache configuration issue: '.$e->getMessage());
                 }
 
                 // Fallback to default cache driver
                 $cacheRepository = $app['cache']->driver();
             }
 
-            return new \Bkhim\Geolocation\GeolocationManager(
+            return new GeolocationManager(
                 config('geolocation'),
                 $cacheRepository
             );
@@ -76,33 +80,33 @@ class GeolocationServiceProvider extends ServiceProvider
 
         // Publish config file
         $this->publishes([
-            __DIR__ . '/../config/geolocation.php' => config_path('geolocation.php'),
+            __DIR__.'/../config/geolocation.php' => config_path('geolocation.php'),
         ], 'geolocation-config');
 
         // Publish translations
         $this->publishes([
-            __DIR__ . '/../translations' => resource_path('lang/vendor/geolocation')
+            __DIR__.'/../translations' => resource_path('lang/vendor/geolocation'),
         ], 'geolocation-translations');
 
         // Publish migrations to the application's database/migrations directory
         $this->publishes([
-            __DIR__ . '/../database/migrations/' => database_path('migrations'),
+            __DIR__.'/../database/migrations/' => database_path('migrations'),
         ], 'geolocation-migrations');
 
         // Create the directory if it doesn't exist
         $this->ensureStorageDirectoryExists();
 
         // Load translations
-        $this->loadTranslationsFrom(__DIR__ . '/../translations', 'geolocation');
+        $this->loadTranslationsFrom(__DIR__.'/../translations', 'geolocation');
 
         // Register console commands
         if ($this->app->runningInConsole()) {
             $this->commands([
-                \Bkhim\Geolocation\Console\GeolocationCommand::class,
-                \Bkhim\Geolocation\Console\CacheCommand::class,
-                \Bkhim\Geolocation\Console\AuditCommand::class,
-                \Bkhim\Geolocation\Console\UpdateMaxMindCommand::class,
-                \Bkhim\Geolocation\Console\PruneOldDataCommand::class,
+                GeolocationCommand::class,
+                CacheCommand::class,
+                AuditCommand::class,
+                UpdateMaxMindCommand::class,
+                PruneOldDataCommand::class,
             ]);
         }
 
@@ -112,7 +116,6 @@ class GeolocationServiceProvider extends ServiceProvider
     /**
      * Validate package configuration.
      *
-     * @return void
      * @throws \InvalidArgumentException
      */
     protected function validateConfiguration(): void
@@ -121,7 +124,7 @@ class GeolocationServiceProvider extends ServiceProvider
         $providers = config('geolocation.providers', []);
 
         // Validate default driver is configured
-        if (!array_key_exists($driver, $providers)) {
+        if (! array_key_exists($driver, $providers)) {
             throw new \InvalidArgumentException(
                 "Default geolocation driver '{$driver}' is not configured in config('geolocation.providers')"
             );
@@ -158,7 +161,7 @@ class GeolocationServiceProvider extends ServiceProvider
                     );
                 }
                 break;
-            // ipapi doesn't require API key - no validation needed
+                // ipapi doesn't require API key - no validation needed
         }
     }
 
@@ -166,7 +169,7 @@ class GeolocationServiceProvider extends ServiceProvider
     {
         $storagePath = storage_path('app/geoip');
 
-        if (!file_exists($storagePath)) {
+        if (! file_exists($storagePath)) {
             mkdir($storagePath, 0755, true);
         }
     }
@@ -184,14 +187,14 @@ class GeolocationServiceProvider extends ServiceProvider
         // Anonymization
         if (config('geolocation.addons.anonymization.enabled')) {
             $this->app->singleton(IpAnonymizer::class, function ($app) {
-                return new IpAnonymizer();
+                return new IpAnonymizer;
             });
         }
 
         // GDPR
         if (config('geolocation.addons.gdpr.enabled')) {
             $this->app->singleton(LocationConsentManager::class, function ($app) {
-                return new LocationConsentManager();
+                return new LocationConsentManager;
             });
         }
     }
@@ -201,10 +204,10 @@ class GeolocationServiceProvider extends ServiceProvider
         // Register middleware
         if (config('geolocation.addons.middleware.enabled')) {
             $router = $this->app['router'];
-            $router->aliasMiddleware('geo.allow', \Bkhim\Geolocation\Addons\Middleware\GeoMiddleware::class);
-            $router->aliasMiddleware('geo.deny', \Bkhim\Geolocation\Addons\Middleware\GeoMiddleware::class);
-            $router->aliasMiddleware('geo.ratelimit', \Bkhim\Geolocation\Addons\Middleware\GeoRateLimitMiddleware::class);
-            $router->aliasMiddleware('geo.security', \Bkhim\Geolocation\Addons\Middleware\SecurityCheckMiddleware::class);
+            $router->aliasMiddleware('geo.allow', GeoMiddleware::class);
+            $router->aliasMiddleware('geo.deny', GeoMiddleware::class);
+            $router->aliasMiddleware('geo.ratelimit', GeoRateLimitMiddleware::class);
+            $router->aliasMiddleware('geo.security', SecurityCheckMiddleware::class);
         }
 
         // Register GDPR consent routes if enabled
@@ -213,7 +216,7 @@ class GeolocationServiceProvider extends ServiceProvider
 
     protected function registerGdprRoutes(): void
     {
-        if (!config('geolocation.addons.gdpr.routes.enabled', false)) {
+        if (! config('geolocation.addons.gdpr.routes.enabled', false)) {
             return;
         }
 
@@ -223,11 +226,13 @@ class GeolocationServiceProvider extends ServiceProvider
 
         $this->app['router']->post($giveRoute, function () {
             app(LocationConsentManager::class)->giveConsent();
+
             return response()->json(['success' => true]);
         })->name('geolocation.consent.give');
 
         $this->app['router']->post($withdrawRoute, function () {
             app(LocationConsentManager::class)->withdrawConsent();
+
             return response()->json(['success' => true]);
         })->name('geolocation.consent.withdraw');
     }

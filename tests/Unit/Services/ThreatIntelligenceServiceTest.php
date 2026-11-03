@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Config;
 it('returns null when no api key configured', function () {
     Config::set('geolocation.threat_intelligence.abuseipdb_api_key', null);
 
-    $service = new ThreatIntelligenceService();
+    $service = new ThreatIntelligenceService;
     $result = $service->checkIp('1.2.3.4');
 
     expect($result)->toBeNull();
@@ -20,7 +20,7 @@ it('uses cache when available', function () {
         ->once()
         ->andReturn(['abuseConfidenceScore' => 75]);
 
-    $service = new ThreatIntelligenceService();
+    $service = new ThreatIntelligenceService;
     $result = $service->checkIp('1.2.3.4');
 
     expect($result['abuseConfidenceScore'])->toBe(75);
@@ -34,7 +34,7 @@ it('is threat returns true when above threshold', function () {
         ->once()
         ->andReturn(['abuseConfidenceScore' => 75]);
 
-    $service = new ThreatIntelligenceService();
+    $service = new ThreatIntelligenceService;
     $result = $service->isThreat('1.2.3.4');
 
     expect($result)->toBeTrue();
@@ -48,7 +48,7 @@ it('is threat returns false when below threshold', function () {
         ->once()
         ->andReturn(['abuseConfidenceScore' => 25]);
 
-    $service = new ThreatIntelligenceService();
+    $service = new ThreatIntelligenceService;
     $result = $service->isThreat('1.2.3.4');
 
     expect($result)->toBeFalse();

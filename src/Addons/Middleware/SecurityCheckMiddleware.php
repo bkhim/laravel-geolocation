@@ -2,6 +2,7 @@
 
 namespace Bkhim\Geolocation\Addons\Middleware;
 
+use Bkhim\Geolocation\Contracts\AuditLoggerInterface;
 use Bkhim\Geolocation\Models\IpBlocklist;
 use Bkhim\Geolocation\Services\ThreatIntelligenceService;
 use Closure;
@@ -22,7 +23,7 @@ class SecurityCheckMiddleware
         }
 
         if ($this->isThreat($ip)) {
-            app(\Bkhim\Geolocation\Contracts\AuditLoggerInterface::class)->log('Threat detected', [
+            app(AuditLoggerInterface::class)->log('Threat detected', [
                 'ip' => $ip,
                 'path' => $request->path(),
             ]);
@@ -37,7 +38,7 @@ class SecurityCheckMiddleware
 
     protected function isBlocked(string $ip): bool
     {
-        if (!config('geolocation.security.enable_blocking', true)) {
+        if (! config('geolocation.security.enable_blocking', true)) {
             return false;
         }
 
@@ -46,11 +47,12 @@ class SecurityCheckMiddleware
 
     protected function isThreat(string $ip): bool
     {
-        if (!config('geolocation.threat_intelligence.enabled', false)) {
+        if (! config('geolocation.threat_intelligence.enabled', false)) {
             return false;
         }
 
         $service = app(ThreatIntelligenceService::class);
+
         return $service->isThreat($ip);
     }
 }

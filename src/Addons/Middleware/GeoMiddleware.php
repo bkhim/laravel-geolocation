@@ -9,17 +9,16 @@ use Illuminate\Http\Request;
 
 class GeoMiddleware
 {
-
     /**
      * @throws GeolocationException
      */
     public function handle(Request $request, Closure $next, $type = 'allow', $locations = null)
     {
-        if ( ! $locations) {
+        if (! $locations) {
             return $next($request);
         }
 
-        $locations    = explode(',', $locations);
+        $locations = explode(',', $locations);
         $userLocation = null;
 
         try {
@@ -29,12 +28,13 @@ class GeoMiddleware
             if ($type === 'allow') {
                 return $this->denyAccess($request);
             }
+
             return $next($request);
         }
 
         if ($type === 'allow') {
             // Allow only specific countries/continents
-            if ( ! $this->isAllowed($userLocation, $locations)) {
+            if (! $this->isAllowed($userLocation, $locations)) {
                 return $this->denyAccess($request);
             }
         } elseif ($type === 'deny') {
@@ -49,7 +49,7 @@ class GeoMiddleware
 
     protected function isAllowed($location, array $allowedLocations): bool
     {
-        if (!$location) {
+        if (! $location) {
             return false;
         }
 
@@ -69,7 +69,7 @@ class GeoMiddleware
         if ($request->expectsJson() || $responseType === 'json') {
             return response()->json([
                 'error' => 'Access denied from your location',
-                'code'  => 'GEO_BLOCKED'
+                'code' => 'GEO_BLOCKED',
             ], $statusCode);
         }
 
@@ -82,7 +82,7 @@ class GeoMiddleware
 
     protected function isDenied($location, array $deniedLocations): bool
     {
-        if (!$location) {
+        if (! $location) {
             return false;
         }
 
@@ -91,5 +91,4 @@ class GeoMiddleware
 
         return in_array($country, $deniedLocations, true) || in_array($continent, $deniedLocations, true);
     }
-
 }

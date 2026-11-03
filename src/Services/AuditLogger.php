@@ -11,7 +11,7 @@ class AuditLogger implements AuditLoggerInterface
     {
         // Ensure PII is masked, especially IPs
         if (isset($context['ip'])) {
-            $context['ip'] = substr($context['ip'], 0, 7) . '...';
+            $context['ip'] = substr($context['ip'], 0, 7).'...';
         }
 
         Log::channel(config('geolocation.logging.audit_channel', 'stack'))

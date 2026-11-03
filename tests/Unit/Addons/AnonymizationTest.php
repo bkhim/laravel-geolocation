@@ -12,7 +12,7 @@ it('anonymizes ipv4 addresses', function () {
         ],
     ]);
 
-    $anonymizer = new IpAnonymizer();
+    $anonymizer = new IpAnonymizer;
 
     $anonymized = $anonymizer->anonymize('8.8.8.1');
 
@@ -29,7 +29,7 @@ it('preserves local ips when configured', function () {
         ],
     ]);
 
-    $anonymizer = new IpAnonymizer();
+    $anonymizer = new IpAnonymizer;
 
     // Local IP should not be anonymized
     $anonymized = $anonymizer->anonymize('192.168.1.1');
@@ -46,7 +46,7 @@ it('does not anonymize when not in gdpr countries', function () {
         ],
     ]);
 
-    $anonymizer = new IpAnonymizer();
+    $anonymizer = new IpAnonymizer;
 
     // Should not anonymize IPs not in GDPR countries
     // (In real implementation, would check geolocation first)
@@ -65,7 +65,7 @@ it('anonymizes with different ipv4 masks', function () {
         ],
     ]);
 
-    $anonymizer = new IpAnonymizer();
+    $anonymizer = new IpAnonymizer;
 
     $anonymized = $anonymizer->anonymize('8.8.8.1');
 
@@ -83,7 +83,7 @@ it('identifies local ipv4 addresses', function () {
         ],
     ]);
 
-    $anonymizer = new IpAnonymizer();
+    $anonymizer = new IpAnonymizer;
 
     // Test various local IP ranges
     expect($anonymizer->anonymize('127.0.0.1'))->toBe('127.0.0.1');
@@ -102,7 +102,7 @@ it('handles ipv6 addresses', function () {
         ],
     ]);
 
-    $anonymizer = new IpAnonymizer();
+    $anonymizer = new IpAnonymizer;
 
     $result = $anonymizer->anonymize('2001:4860:4860::8888');
 
@@ -121,7 +121,7 @@ it('returns original ip for invalid ip', function () {
         ],
     ]);
 
-    $anonymizer = new IpAnonymizer();
+    $anonymizer = new IpAnonymizer;
 
     $result = $anonymizer->anonymize('invalid-ip');
 
@@ -138,7 +138,7 @@ it('handles wildcard gdpr countries config', function () {
         ],
     ]);
 
-    $anonymizer = new IpAnonymizer();
+    $anonymizer = new IpAnonymizer;
 
     $result = $anonymizer->anonymize('8.8.8.1');
 

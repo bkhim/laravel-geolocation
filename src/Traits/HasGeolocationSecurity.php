@@ -3,20 +3,16 @@
 namespace Bkhim\Geolocation\Traits;
 
 use Bkhim\Geolocation\Events\HighRiskIpDetected;
+use Bkhim\Geolocation\Events\LoginLocationRecorded;
 use Bkhim\Geolocation\Events\SuspiciousLocationDetected;
 use Bkhim\Geolocation\GeolocationException;
-use Bkhim\Geolocation\Models\LoginHistory;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Event;
-use Illuminate\Support\Str;
 
 /**
  * Trait HasGeolocationSecurity
  *
  * Security-focused geolocation functionality for detecting suspicious logins
  * and triggering security events like MFA requirements.
- *
- * @package Bkhim\Geolocation\Traits
  */
 trait HasGeolocationSecurity
 {
@@ -25,13 +21,12 @@ trait HasGeolocationSecurity
     /**
      * Determine if MFA is required due to location-based security concerns.
      *
-     * @param string|null $ip IP address to check (uses request IP if not provided)
-     * @return bool
+     * @param  string|null  $ip  IP address to check (uses request IP if not provided)
      */
     public function requiresMfaDueToLocation(?string $ip = null): bool
     {
         // Check if MFA trigger is enabled
-        if (!config('geolocation.security.enable_mfa_trigger', true)) {
+        if (! config('geolocation.security.enable_mfa_trigger', true)) {
             return false;
         }
 
@@ -50,7 +45,7 @@ trait HasGeolocationSecurity
      * Determine if a login is high risk based on configurable rules.
      *
      * @param  string|null  $ip  IP address to check (uses request IP if not provided)
-     * @return bool
+     *
      * @throws GeolocationException
      */
     public function isHighRiskLogin(?string $ip = null): bool
@@ -65,6 +60,7 @@ trait HasGeolocationSecurity
      *
      * @param  string|null  $ip  IP address to check (uses request IP if not provided)
      * @return array{score: int, is_high_risk: bool, threshold: int, triggers: array, trusted_country: bool}
+     *
      * @throws GeolocationException
      */
     public function getRiskScore(?string $ip = null): array
@@ -122,7 +118,7 @@ trait HasGeolocationSecurity
                     $additionalScore = $rule->score($this, $details);
                     $score += $additionalScore;
                     if ($additionalScore > 0) {
-                        $triggers['custom_' . class_basename($ruleClass)] = true;
+                        $triggers['custom_'.class_basename($ruleClass)] = true;
                     }
                 }
             }
@@ -141,7 +137,6 @@ trait HasGeolocationSecurity
      * Evaluate risk details and return a score.
      *
      * @param  mixed  $details
-     * @return int
      */
     protected function evaluateRiskDetails($details): int
     {
@@ -184,8 +179,6 @@ trait HasGeolocationSecurity
 
     /**
      * Get the count of suspicious logins for the user.
-     *
-     * @return int
      */
     public function getSuspiciousLoginCount(): int
     {
@@ -203,14 +196,14 @@ trait HasGeolocationSecurity
     /**
      * Get the risk level of the last login.
      *
-     * @param string|null $ip Optional IP to check (uses last login IP if not provided)
+     * @param  string|null  $ip  Optional IP to check (uses last login IP if not provided)
      * @return string low|high|critical
      */
     public function getLastLoginRiskLevel(?string $ip = null): string
     {
-        if (!$ip) {
+        if (! $ip) {
             $lastLogin = $this->getLastLogin();
-            if (!$lastLogin) {
+            if (! $lastLogin) {
                 return 'low';
             }
             $ip = $lastLogin->ip;
@@ -253,9 +246,8 @@ trait HasGeolocationSecurity
     /**
      * Check if the risk level is at least the specified level.
      *
-     * @param string $currentLevel Current risk level
-     * @param string $thresholdLevel Threshold risk level
-     * @return bool
+     * @param  string  $currentLevel  Current risk level
+     * @param  string  $thresholdLevel  Threshold risk level
      */
     protected function isRiskLevelAtLeast(string $currentLevel, string $thresholdLevel): bool
     {
@@ -278,26 +270,26 @@ trait HasGeolocationSecurity
         });
 
         // Listen for login location recorded events to check for suspicious activity
-        \Illuminate\Support\Facades\Event::listen(
-            \Bkhim\Geolocation\Events\LoginLocationRecorded::class,
-            function (\Bkhim\Geolocation\Events\LoginLocationRecorded $event) {
-                /** @var \Bkhim\Geolocation\Traits\HasGeolocationSecurity $user */
+        Event::listen(
+            LoginLocationRecorded::class,
+            function (LoginLocationRecorded $event) {
+                /** @var HasGeolocationSecurity $user */
                 $user = $event->user;
                 $loginHistory = $event->loginHistory;
 
                 // Check if this login requires MFA
                 if ($user instanceof self && $user->requiresMfaDueToLocation($loginHistory->ip)) {
                     // Fire suspicious location detected event
-                    \Illuminate\Support\Facades\Event::dispatch(
-                        new \Bkhim\Geolocation\Events\SuspiciousLocationDetected($user, $loginHistory)
+                    Event::dispatch(
+                        new SuspiciousLocationDetected($user, $loginHistory)
                     );
                 }
 
                 // Check if IP is high risk using the new method
                 if ($user instanceof self && $user->isHighRiskLogin($loginHistory->ip)) {
                     // Fire high risk IP detected event
-                    \Illuminate\Support\Facades\Event::dispatch(
-                        new \Bkhim\Geolocation\Events\HighRiskIpDetected($user, $loginHistory)
+                    Event::dispatch(
+                        new HighRiskIpDetected($user, $loginHistory)
                     );
                 }
             }

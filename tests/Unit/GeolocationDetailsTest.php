@@ -242,7 +242,7 @@ it('gets current time in timezone', function () {
     $details = new GeolocationDetails($data);
     $currentTime = $details->getCurrentTime();
 
-    expect($currentTime)->toBeInstanceOf(\DateTime::class);
+    expect($currentTime)->toBeInstanceOf(DateTime::class);
     expect($currentTime->getTimezone()->getName())->toBe('America/Los_Angeles');
 });
 
@@ -253,10 +253,10 @@ it('converts datetime to local timezone', function () {
     ];
 
     $details = new GeolocationDetails($data);
-    $utcTime = new \DateTime('2024-01-01 12:00:00', new \DateTimeZone('UTC'));
+    $utcTime = new DateTime('2024-01-01 12:00:00', new DateTimeZone('UTC'));
     $localTime = $details->convertToLocalTime($utcTime);
 
-    expect($localTime)->toBeInstanceOf(\DateTime::class);
+    expect($localTime)->toBeInstanceOf(DateTime::class);
     expect($localTime->getTimezone()->getName())->toBe('America/Los_Angeles');
 });
 

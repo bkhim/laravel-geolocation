@@ -5,12 +5,16 @@ namespace Bkhim\Geolocation\Providers;
 use Bkhim\Geolocation\Contracts\LookupInterface;
 use Bkhim\Geolocation\GeolocationDetails;
 use Bkhim\Geolocation\GeolocationException;
+use Illuminate\Contracts\Cache\Repository;
 use Illuminate\Contracts\Cache\Repository as CacheRepository;
+use Illuminate\Http\Client\RequestException;
+use Illuminate\Support\Facades\Http;
 
 /**
  * Class IpApi.
  *
  * @author Blancos Khim <https://www.briankimathi.com>
+ *
  * @date 2025-12-08
  */
 class IpApi implements LookupInterface
@@ -21,14 +25,12 @@ class IpApi implements LookupInterface
     const BASEURL = 'https://ipapi.co';
 
     /**
-     * @var \Illuminate\Contracts\Cache\Repository
+     * @var Repository
      */
     protected $cache;
 
     /**
      * IpApi constructor.
-     *
-     * @param  CacheRepository  $cache
      */
     public function __construct(CacheRepository $cache)
     {
@@ -38,9 +40,6 @@ class IpApi implements LookupInterface
     /**
      * Lookup geolocation data for an IP address.
      *
-     * @param  string|null  $ipAddress
-     * @param  string  $responseFilter
-     * @return GeolocationDetails
      * @throws GeolocationException
      */
     public function lookup(?string $ipAddress = null, string $responseFilter = 'geo'): GeolocationDetails
@@ -53,8 +52,9 @@ class IpApi implements LookupInterface
         $ipAddress = $ipAddress ?: request()->ip();
 
         // Check if caching is enabled before attempting to cache
-        if (!config('geolocation.cache.enabled', true)) {
+        if (! config('geolocation.cache.enabled', true)) {
             $data = $this->fetchGeolocationData($ipAddress);
+
             return new GeolocationDetails($data);
         }
 
@@ -71,15 +71,15 @@ class IpApi implements LookupInterface
         } catch (GeolocationException $e) {
             throw $e;
         } catch (\Exception $e) {
-            throw new GeolocationException("Unexpected error: ".$e->getMessage(), $e->getCode(), $e);
+            throw new GeolocationException('Unexpected error: '.$e->getMessage(), $e->getCode(), $e);
         }
     }
 
     /**
      * Fetch geolocation data from ipapi.co API.
      *
-     * @param string|null $ipAddress
-     * @return array
+     * @param  string|null  $ipAddress
+     *
      * @throws GeolocationException
      */
     protected function fetchGeolocationData($ipAddress): array
@@ -94,23 +94,23 @@ class IpApi implements LookupInterface
         $endpoint .= '/json/';
 
         try {
-            $response = \Illuminate\Support\Facades\Http::timeout(config('geolocation.timeout', 5))
+            $response = Http::timeout(config('geolocation.timeout', 5))
                 ->withHeaders([
                     'User-Agent' => 'Laravel-Geolocation-Package/1.0',
-                    'Accept' => 'application/json'
+                    'Accept' => 'application/json',
                 ])
                 ->get($endpoint);
 
             $statusCode = $response->status();
 
             if ($statusCode !== 200) {
-                $errorMessage = match($statusCode) {
-                    400 => "Bad Request - Invalid IP address format",
-                    403 => "Authentication Failed - Rate limit exceeded",
-                    404 => "URL Not Found - Invalid endpoint",
-                    405 => "Method Not Allowed",
-                    429 => "Quota exceeded - Too many requests",
-                    500 => "ipapi.co server error",
+                $errorMessage = match ($statusCode) {
+                    400 => 'Bad Request - Invalid IP address format',
+                    403 => 'Authentication Failed - Rate limit exceeded',
+                    404 => 'URL Not Found - Invalid endpoint',
+                    405 => 'Method Not Allowed',
+                    429 => 'Quota exceeded - Too many requests',
+                    500 => 'ipapi.co server error',
                     default => "API returned HTTP error: {$statusCode}"
                 };
                 throw new GeolocationException($errorMessage);
@@ -124,8 +124,8 @@ class IpApi implements LookupInterface
                 throw new GeolocationException("ipapi.co API error: {$reason}");
             }
 
-            if ( ! isset($data['ip'])) {
-                throw new GeolocationException("Incomplete geolocation data received from ipapi.co API");
+            if (! isset($data['ip'])) {
+                throw new GeolocationException('Incomplete geolocation data received from ipapi.co API');
             }
 
             // Transform ipapi.co response to our standard format
@@ -154,12 +154,12 @@ class IpApi implements LookupInterface
                 'isProxy' => null, // Not provided by ipapi.co
                 'isCrawler' => null, // Not provided by ipapi.co
                 'isTor' => null, // Not provided by ipapi.co
-                'hostname' => null // Not provided by ipapi.co
+                'hostname' => null, // Not provided by ipapi.co
             ];
 
             // Calculate timezone offset if timezone is available and config allows
             $includeTimezone = config('geolocation.providers.ipapi.include_timezone', true);
-            if ($includeTimezone && !empty($data['utc_offset'])) {
+            if ($includeTimezone && ! empty($data['utc_offset'])) {
                 // Convert "+0200" or "-0500" format to hours
                 $offset = $data['utc_offset'];
                 if (preg_match('/([+-])(\d{2})(\d{2})/', $offset, $matches)) {
@@ -172,10 +172,10 @@ class IpApi implements LookupInterface
 
             return $transformedData;
 
-        } catch (\Illuminate\Http\Client\RequestException $e) {
-            throw new GeolocationException("ipapi.co API request failed: " . $e->getMessage());
+        } catch (RequestException $e) {
+            throw new GeolocationException('ipapi.co API request failed: '.$e->getMessage());
         } catch (\Exception $e) {
-            throw new GeolocationException("Unexpected error: ".$e->getMessage(), $e->getCode(), $e);
+            throw new GeolocationException('Unexpected error: '.$e->getMessage(), $e->getCode(), $e);
         }
     }
 }

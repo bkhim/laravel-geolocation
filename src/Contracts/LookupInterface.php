@@ -8,18 +8,10 @@ use Bkhim\Geolocation\GeolocationDetails;
  * LookupInterface.
  *
  * @author Adriano Rosa <https://adrianorosa.com>
- * @date 2019-08-13 17:50
  *
- * @package Bkhim\Geolocation
+ * @date 2019-08-13 17:50
  */
 interface LookupInterface
 {
-    /**
-     * @param  string $ipAddress
-     *
-     * @param  string $responseFilter
-     *
-     * @return \Bkhim\Geolocation\GeolocationDetails
-     */
     public function lookup(?string $ipAddress = null, string $responseFilter = 'geo'): GeolocationDetails;
 }

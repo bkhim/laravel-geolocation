@@ -7,12 +7,11 @@ use Bkhim\Geolocation\GeolocationException;
 
 class LocationConsentManager
 {
-
     /**
      * Check if consent is needed for an IP address.
      *
-     * @param string|null $ip IP address to check (uses request IP if not provided)
-     * @return bool
+     * @param  string|null  $ip  IP address to check (uses request IP if not provided)
+     *
      * @throws GeolocationException
      */
     public function needsConsent(?string $ip = null): bool
@@ -21,7 +20,7 @@ class LocationConsentManager
 
         $config = config('geolocation.addons.gdpr');
 
-        if (!$config['enabled']) {
+        if (! $config['enabled']) {
             return false;
         }
 
@@ -40,10 +39,11 @@ class LocationConsentManager
     public function hasGivenConsent(): bool
     {
         $cookieName = config('geolocation.addons.gdpr.consent_cookie', 'geo_consent');
+
         return request()->cookie($cookieName) === 'accepted';
     }
 
-    public function giveConsent(int $lifetime = null): void
+    public function giveConsent(?int $lifetime = null): void
     {
         $config = config('geolocation.addons.gdpr');
         $lifetime = $lifetime ?? $config['consent_lifetime'] ?? 365;
@@ -63,14 +63,14 @@ class LocationConsentManager
 
     protected function isInRegion($location, string $region): bool
     {
-        if (!$location) {
+        if (! $location) {
             return false;
         }
 
         $regions = [
-            'EU' => ['AT','BE','BG','HR','CY','CZ','DK','EE','FI','FR','DE','GR','HU','IE','IT','LV','LT','LU','MT','NL','PL','PT','RO','SK','SI','ES','SE'],
-            'EEA' => ['IS','LI','NO'],
-            'GDPR' => ['AT','BE','BG','HR','CY','CZ','DK','EE','FI','FR','DE','GR','HU','IE','IT','LV','LT','LU','MT','NL','PL','PT','RO','SK','SI','ES','SE','GB','IS','LI','NO'],
+            'EU' => ['AT', 'BE', 'BG', 'HR', 'CY', 'CZ', 'DK', 'EE', 'FI', 'FR', 'DE', 'GR', 'HU', 'IE', 'IT', 'LV', 'LT', 'LU', 'MT', 'NL', 'PL', 'PT', 'RO', 'SK', 'SI', 'ES', 'SE'],
+            'EEA' => ['IS', 'LI', 'NO'],
+            'GDPR' => ['AT', 'BE', 'BG', 'HR', 'CY', 'CZ', 'DK', 'EE', 'FI', 'FR', 'DE', 'GR', 'HU', 'IE', 'IT', 'LV', 'LT', 'LU', 'MT', 'NL', 'PL', 'PT', 'RO', 'SK', 'SI', 'ES', 'SE', 'GB', 'IS', 'LI', 'NO'],
         ];
 
         return in_array($location->countryCode ?? '', $regions[$region] ?? []);

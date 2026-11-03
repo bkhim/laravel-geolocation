@@ -6,7 +6,7 @@ class IpAnonymizer
 {
     public function anonymize(string $ip): string
     {
-        if (!$this->shouldAnonymize($ip)) {
+        if (! $this->shouldAnonymize($ip)) {
             return $ip;
         }
 

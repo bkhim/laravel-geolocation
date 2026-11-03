@@ -147,7 +147,7 @@ it('transforms all response fields correctly', function () {
 
 it('skips cache when caching is disabled', function () {
     $this->app['config']->set('geolocation.cache.enabled', false);
-    
+
     Http::fake([
         '*' => Http::response([
             'ip' => '8.8.8.8',
@@ -164,7 +164,7 @@ it('skips cache when caching is disabled', function () {
     $details = $provider->lookup('8.8.8.8');
 
     expect($details->getCity())->toBe('Mountain View');
-    
+
     Http::assertSent(function ($request) {
         return true;
     });
@@ -172,7 +172,7 @@ it('skips cache when caching is disabled', function () {
 
 it('respects include_timezone config option', function () {
     $this->app['config']->set('geolocation.providers.ipapi.include_timezone', false);
-    
+
     Http::fake([
         '*' => Http::response([
             'ip' => '8.8.8.8',
@@ -194,7 +194,7 @@ it('respects include_timezone config option', function () {
 
 it('calculates timezone offset when include_timezone is true', function () {
     $this->app['config']->set('geolocation.providers.ipapi.include_timezone', true);
-    
+
     Http::fake([
         '*' => Http::response([
             'ip' => '8.8.8.8',

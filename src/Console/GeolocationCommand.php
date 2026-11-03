@@ -4,13 +4,12 @@ namespace Bkhim\Geolocation\Console;
 
 use Bkhim\Geolocation\Geolocation;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Cache;
 
 /**
  * Class GeolocationCommand.
  *
  * @author Brian Kimathi <https://briankimathi.com>
- *
- * @package Bkhim\Geolocation\Console
  */
 class GeolocationCommand extends Command
 {
@@ -40,6 +39,7 @@ class GeolocationCommand extends Command
         // Show cache info if requested
         if ($this->option('show-cache-info')) {
             $this->showCacheInfo();
+
             return;
         }
 
@@ -50,7 +50,7 @@ class GeolocationCommand extends Command
 
         $ipAddress = $this->option('ip');
 
-        $this->info("Looking up geolocation data for IP: " . ($ipAddress ?: 'current IP'));
+        $this->info('Looking up geolocation data for IP: '.($ipAddress ?: 'current IP'));
 
         $startTime = microtime(true);
 
@@ -74,10 +74,11 @@ class GeolocationCommand extends Command
 
             // Show cache status
             $cacheEnabled = config('geolocation.cache.enabled', true);
-            $this->info("Cache status: " . ($cacheEnabled ? 'enabled' : 'disabled'));
+            $this->info('Cache status: '.($cacheEnabled ? 'enabled' : 'disabled'));
 
         } catch (\Exception $e) {
-            $this->error("Geolocation lookup failed: " . $e->getMessage());
+            $this->error('Geolocation lookup failed: '.$e->getMessage());
+
             return 1;
         }
     }
@@ -96,8 +97,8 @@ class GeolocationCommand extends Command
             ['Setting', 'Value'],
             [
                 ['Enabled', $cacheConfig['enabled'] ? 'Yes' : 'No'],
-                ['TTL', $cacheConfig['ttl'] . ' seconds (' . gmdate('H:i:s', $cacheConfig['ttl']) . ')'],
-                ['Store', $cacheConfig['store'] ?: 'Default (' . config('cache.default') . ')'],
+                ['TTL', $cacheConfig['ttl'].' seconds ('.gmdate('H:i:s', $cacheConfig['ttl']).')'],
+                ['Store', $cacheConfig['store'] ?: 'Default ('.config('cache.default').')'],
                 ['Prefix', $cacheConfig['prefix'] ?? 'geolocation'],
                 ['Tags Enabled', ($cacheConfig['tags']['enabled'] ?? false) ? 'Yes' : 'No'],
                 ['Tag Names', implode(', ', $cacheConfig['tags']['names'] ?? [])],
@@ -118,10 +119,10 @@ class GeolocationCommand extends Command
             $tags = $cacheConfig['tags']['names'] ?? ['geolocation'];
 
             try {
-                \Illuminate\Support\Facades\Cache::tags($tags)->flush();
+                Cache::tags($tags)->flush();
                 $this->info('Tagged cache cleared successfully');
             } catch (\Exception $e) {
-                $this->error('Failed to clear tagged cache: ' . $e->getMessage());
+                $this->error('Failed to clear tagged cache: '.$e->getMessage());
             }
         } else {
             $this->warn('Cache tags are disabled. Cannot safely clear cache without affecting other data.');

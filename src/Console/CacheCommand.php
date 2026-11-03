@@ -9,8 +9,6 @@ use Illuminate\Support\Facades\Cache;
  * Class CacheCommand
  *
  * Console command for managing geolocation cache data following Laravel best practices.
- *
- * @package Bkhim\Geolocation\Console
  */
 class CacheCommand extends Command
 {
@@ -53,7 +51,8 @@ class CacheCommand extends Command
 
             default:
                 $this->error("Unknown action: {$action}");
-                $this->info("Available actions: clear, info, warm-up, optimize");
+                $this->info('Available actions: clear, info, warm-up, optimize');
+
                 return 1;
         }
     }
@@ -86,16 +85,18 @@ class CacheCommand extends Command
     protected function clearSpecificCache(string $provider, string $ip): int
     {
         $prefix = config('geolocation.cache.prefix', 'geolocation');
-        $cacheKey = "{$prefix}:{$provider}:" . md5($ip);
+        $cacheKey = "{$prefix}:{$provider}:".md5($ip);
 
         $this->info("Clearing cache for {$provider} provider and IP {$ip}...");
 
         try {
             Cache::forget($cacheKey);
-            $this->info("Cache cleared successfully");
+            $this->info('Cache cleared successfully');
+
             return 0;
         } catch (\Exception $e) {
-            $this->error("Failed to clear cache: " . $e->getMessage());
+            $this->error('Failed to clear cache: '.$e->getMessage());
+
             return 1;
         }
     }
@@ -114,16 +115,19 @@ class CacheCommand extends Command
 
             try {
                 Cache::tags($tags)->flush();
-                $this->info("Provider cache cleared successfully using tags");
+                $this->info('Provider cache cleared successfully using tags');
+
                 return 0;
             } catch (\Exception $e) {
-                $this->error("Failed to clear provider cache: " . $e->getMessage());
+                $this->error('Failed to clear provider cache: '.$e->getMessage());
+
                 return 1;
             }
         }
 
-        $this->warn("Cache tags are not enabled. Cannot clear provider-specific cache safely.");
-        $this->info("Consider enabling cache tags in your configuration for better cache management.");
+        $this->warn('Cache tags are not enabled. Cannot clear provider-specific cache safely.');
+        $this->info('Consider enabling cache tags in your configuration for better cache management.');
+
         return 1;
     }
 
@@ -142,9 +146,11 @@ class CacheCommand extends Command
             try {
                 Cache::tags($tags)->flush();
                 $this->info('All geolocation cache cleared successfully using tags');
+
                 return 0;
             } catch (\Exception $e) {
-                $this->error('Failed to clear cache using tags: ' . $e->getMessage());
+                $this->error('Failed to clear cache using tags: '.$e->getMessage());
+
                 return 1;
             }
         }
@@ -187,7 +193,7 @@ class CacheCommand extends Command
             ['Setting', 'Value', 'Description'],
             [
                 ['Enabled', $cacheConfig['enabled'] ? 'Yes' : 'No', 'Whether caching is active'],
-                ['TTL', $cacheConfig['ttl'] . 's (' . $this->formatDuration($cacheConfig['ttl']) . ')', 'Cache lifetime'],
+                ['TTL', $cacheConfig['ttl'].'s ('.$this->formatDuration($cacheConfig['ttl']).')', 'Cache lifetime'],
                 ['Store', $cacheStore, 'Cache driver being used'],
                 ['Prefix', $cacheConfig['prefix'] ?? 'geolocation', 'Cache key prefix'],
                 ['Tags Enabled', ($cacheConfig['tags']['enabled'] ?? false) ? 'Yes' : 'No', 'Cache tags for bulk operations'],
@@ -211,7 +217,7 @@ class CacheCommand extends Command
                 ]
             );
         } catch (\Exception $e) {
-            $this->error('Error checking cache driver: ' . $e->getMessage());
+            $this->error('Error checking cache driver: '.$e->getMessage());
         }
 
         return 0;
@@ -246,7 +252,7 @@ class CacheCommand extends Command
                 $progressBar->advance();
             } catch (\Exception $e) {
                 $this->line(''); // New line after progress bar
-                $this->warn("Failed to warm up cache for {$ip}: " . $e->getMessage());
+                $this->warn("Failed to warm up cache for {$ip}: ".$e->getMessage());
                 $progressBar->advance();
             }
         }
@@ -276,9 +282,9 @@ class CacheCommand extends Command
         if (in_array($cacheDriver, ['file', 'database'])) {
             $recommendations[] = [
                 'area' => 'Cache Driver',
-                'issue' => 'Using ' . $cacheDriver . ' driver',
+                'issue' => 'Using '.$cacheDriver.' driver',
                 'recommendation' => 'Consider using Redis or Memcached for better performance',
-                'priority' => 'High'
+                'priority' => 'High',
             ];
         }
 
@@ -287,26 +293,26 @@ class CacheCommand extends Command
         if ($ttl < 3600) {
             $recommendations[] = [
                 'area' => 'TTL',
-                'issue' => 'Short TTL (' . $this->formatDuration($ttl) . ')',
+                'issue' => 'Short TTL ('.$this->formatDuration($ttl).')',
                 'recommendation' => 'Consider increasing TTL to 1-24 hours for geolocation data',
-                'priority' => 'Medium'
+                'priority' => 'Medium',
             ];
         } elseif ($ttl > 604800) {
             $recommendations[] = [
                 'area' => 'TTL',
-                'issue' => 'Very long TTL (' . $this->formatDuration($ttl) . ')',
+                'issue' => 'Very long TTL ('.$this->formatDuration($ttl).')',
                 'recommendation' => 'Consider shorter TTL (1-7 days) for more current data',
-                'priority' => 'Low'
+                'priority' => 'Low',
             ];
         }
 
         // Check cache tags
-        if (!($cacheConfig['tags']['enabled'] ?? false)) {
+        if (! ($cacheConfig['tags']['enabled'] ?? false)) {
             $recommendations[] = [
                 'area' => 'Cache Tags',
                 'issue' => 'Cache tags disabled',
                 'recommendation' => 'Enable cache tags for easier cache management',
-                'priority' => 'Medium'
+                'priority' => 'Medium',
             ];
         }
 
@@ -314,7 +320,7 @@ class CacheCommand extends Command
         if (empty($recommendations)) {
             $this->info('✅ Cache configuration looks optimal!');
         } else {
-            $this->warn('Found ' . count($recommendations) . ' optimization opportunities:');
+            $this->warn('Found '.count($recommendations).' optimization opportunities:');
             $this->line('');
             $this->table(
                 ['Area', 'Issue', 'Recommendation', 'Priority'],
@@ -333,11 +339,11 @@ class CacheCommand extends Command
         if ($seconds < 60) {
             return "{$seconds}s";
         } elseif ($seconds < 3600) {
-            return round($seconds / 60, 1) . 'm';
+            return round($seconds / 60, 1).'m';
         } elseif ($seconds < 86400) {
-            return round($seconds / 3600, 1) . 'h';
+            return round($seconds / 3600, 1).'h';
         } else {
-            return round($seconds / 86400, 1) . 'd';
+            return round($seconds / 86400, 1).'d';
         }
     }
 }

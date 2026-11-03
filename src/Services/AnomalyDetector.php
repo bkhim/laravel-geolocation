@@ -13,8 +13,6 @@ use Illuminate\Support\Collection;
  * Detects unusual location patterns that may indicate fraudulent activity.
  * Features include impossible travel detection, new country/city detection,
  * and location history analysis.
- *
- * @package Bkhim\Geolocation\Services
  */
 class AnomalyDetector
 {
@@ -36,9 +34,8 @@ class AnomalyDetector
     /**
      * Check if a login from an IP is anomalous for a user.
      *
-     * @param string $ip IP address to check
-     * @param int $userId User ID to check history for
-     * @return bool
+     * @param  string  $ip  IP address to check
+     * @param  int  $userId  User ID to check history for
      */
     public function isAnomalous(string $ip, int $userId): bool
     {
@@ -65,14 +62,13 @@ class AnomalyDetector
     /**
      * Check for impossible travel between two locations.
      *
-     * @param LoginHistory $past Past login record
-     * @param GeolocationDetails $current Current location
-     * @param int|null $hours Time window in hours (defaults to login interval)
-     * @return bool
+     * @param  LoginHistory  $past  Past login record
+     * @param  GeolocationDetails  $current  Current location
+     * @param  int|null  $hours  Time window in hours (defaults to login interval)
      */
     public function isImpossibleTravel(LoginHistory $past, GeolocationDetails $current, ?int $hours = null): bool
     {
-        if (!$past->latitude || !$past->longitude || !$current->getLatitude() || !$current->getLongitude()) {
+        if (! $past->latitude || ! $past->longitude || ! $current->getLatitude() || ! $current->getLongitude()) {
             return false;
         }
 
@@ -92,10 +88,10 @@ class AnomalyDetector
     /**
      * Calculate distance between two coordinates using Haversine formula.
      *
-     * @param float $lat1 Latitude of point 1
-     * @param float $lon1 Longitude of point 1
-     * @param float $lat2 Latitude of point 2
-     * @param float $lon2 Longitude of point 2
+     * @param  float  $lat1  Latitude of point 1
+     * @param  float  $lon1  Longitude of point 1
+     * @param  float  $lat2  Latitude of point 2
+     * @param  float  $lon2  Longitude of point 2
      * @return float Distance in kilometers
      */
     public function calculateDistance(float $lat1, float $lon1, float $lat2, float $lon2): float
@@ -117,50 +113,47 @@ class AnomalyDetector
     /**
      * Check if this is a login from a new country for the user.
      *
-     * @param string $ip IP address to check
-     * @param int $userId User ID
-     * @return bool
+     * @param  string  $ip  IP address to check
+     * @param  int  $userId  User ID
      */
     public function isNewCountry(string $ip, int $userId): bool
     {
         $current = Geolocation::lookup($ip);
         $currentCountry = $current->getCountryCode();
 
-        if (!$currentCountry) {
+        if (! $currentCountry) {
             return false;
         }
 
         $previousCountries = $this->getUniqueCountries($userId);
 
-        return !$previousCountries->contains($currentCountry);
+        return ! $previousCountries->contains($currentCountry);
     }
 
     /**
      * Check if this is a login from a new city for the user.
      *
-     * @param string $ip IP address to check
-     * @param int $userId User ID
-     * @return bool
+     * @param  string  $ip  IP address to check
+     * @param  int  $userId  User ID
      */
     public function isNewCity(string $ip, int $userId): bool
     {
         $current = Geolocation::lookup($ip);
         $currentCity = $current->getCity();
 
-        if (!$currentCity) {
+        if (! $currentCity) {
             return false;
         }
 
         $previousCities = $this->getUniqueCities($userId);
 
-        return !$previousCities->contains($currentCity);
+        return ! $previousCities->contains($currentCity);
     }
 
     /**
      * Check if user has logged in from too many different countries.
      *
-     * @param Collection|array $history Login history
-     * @return bool
+     * @param  Collection|array  $history  Login history
      */
     public function hasTooManyCountries($history): bool
     {
@@ -178,8 +171,7 @@ class AnomalyDetector
     /**
      * Get user's login history within the configured time window.
      *
-     * @param int $userId User ID
-     * @return Collection
+     * @param  int  $userId  User ID
      */
     public function getHistory(int $userId): Collection
     {
@@ -192,8 +184,7 @@ class AnomalyDetector
     /**
      * Get unique countries from user's login history.
      *
-     * @param int $userId User ID
-     * @return Collection
+     * @param  int  $userId  User ID
      */
     public function getUniqueCountries(int $userId): Collection
     {
@@ -207,8 +198,7 @@ class AnomalyDetector
     /**
      * Get unique cities from user's login history.
      *
-     * @param int $userId User ID
-     * @return Collection
+     * @param  int  $userId  User ID
      */
     public function getUniqueCities(int $userId): Collection
     {
@@ -222,8 +212,8 @@ class AnomalyDetector
     /**
      * Get detailed anomaly report for a login.
      *
-     * @param string $ip IP address
-     * @param int $userId User ID
+     * @param  string  $ip  IP address
+     * @param  int  $userId  User ID
      * @return array{
      *     is_anomalous: bool,
      *     is_impossible_travel: bool,
@@ -275,37 +265,31 @@ class AnomalyDetector
 
     /**
      * Set maximum speed in km/h for travel validation.
-     *
-     * @param int $speed
-     * @return self
      */
     public function setMaxSpeed(int $speed): self
     {
         $this->maxSpeedKmh = $speed;
+
         return $this;
     }
 
     /**
      * Set maximum number of countries allowed in history period.
-     *
-     * @param int $count
-     * @return self
      */
     public function setMaxCountries(int $count): self
     {
         $this->maxCountries = $count;
+
         return $this;
     }
 
     /**
      * Set the number of days to analyze for history.
-     *
-     * @param int $days
-     * @return self
      */
     public function setHistoryDays(int $days): self
     {
         $this->historyDays = $days;
+
         return $this;
     }
 }

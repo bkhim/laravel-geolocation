@@ -5,6 +5,7 @@ use Bkhim\Geolocation\Models\LoginHistory;
 use Bkhim\Geolocation\Traits\HasGeolocation;
 use Bkhim\Geolocation\Traits\HasGeolocationSecurity;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Schema;
@@ -12,6 +13,7 @@ use Illuminate\Support\Facades\Schema;
 class TestGeolocationUser extends Model
 {
     protected $table = 'test_users';
+
     public $timestamps = true;
 
     protected $fillable = ['name', 'email'];
@@ -279,6 +281,6 @@ it('has login histories relationship', function () {
         'occurred_at' => now(),
     ]);
 
-    expect($user->loginHistories())->toBeInstanceOf(\Illuminate\Database\Eloquent\Relations\HasMany::class);
+    expect($user->loginHistories())->toBeInstanceOf(HasMany::class);
     expect($user->loginHistories()->count())->toBe(1);
 });

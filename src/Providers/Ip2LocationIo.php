@@ -40,8 +40,6 @@ class Ip2LocationIo implements LookupInterface
     /**
      * Lookup geolocation data for an IP address.
      *
-     * @param  string|null  $ipAddress
-     * @param  string  $responseFilter
      *
      * @throws GeolocationException
      */
@@ -82,7 +80,7 @@ class Ip2LocationIo implements LookupInterface
      *
      * @param  string|null  $ipAddress
      * @param  bool  $skipLanguage  Skip language parameter (used for retry)
-     * @return array
+     *
      * @throws GeolocationException
      */
     protected function fetchGeolocationData($ipAddress, $skipLanguage = false): array
@@ -119,7 +117,7 @@ class Ip2LocationIo implements LookupInterface
         // 2. API key is present (paid plans support translation)
         // 3. Language is not 'en' (default, no translation needed)
         // 4. Language is explicitly configured and not empty
-        if (!$skipLanguage && $apiKey && $language && $language !== 'en') {
+        if (! $skipLanguage && $apiKey && $language && $language !== 'en') {
             $params['lang'] = $language;
         }
 
@@ -152,7 +150,7 @@ class Ip2LocationIo implements LookupInterface
                 $errorCode = $data['error']['error_code'] ?? null;
 
                 // Handle translation not available error (10004) - retry without lang parameter
-                if (!$skipLanguage && ($errorCode === 10004 || strpos($errorMessage, 'Translation is not available') !== false)) {
+                if (! $skipLanguage && ($errorCode === 10004 || strpos($errorMessage, 'Translation is not available') !== false)) {
                     // Retry without language parameter
                     return $this->fetchGeolocationData($ipAddress, true);
                 }

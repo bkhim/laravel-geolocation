@@ -151,7 +151,7 @@ it('uses client IP when none provided', function () {
     $provider = new IpInfo($cache);
 
     $this->app['config']->set('geolocation.cache.enabled', false);
-    
+
     $details = $provider->lookup();
 
     expect($details->getIp())->toBe('127.0.0.1');
@@ -159,7 +159,7 @@ it('uses client IP when none provided', function () {
 
 it('handles currency code correctly from ipinfo response', function () {
     Cache::flush();
-    
+
     Http::fake([
         '*' => Http::response([
             'ip' => '8.8.8.8',
@@ -171,10 +171,10 @@ it('handles currency code correctly from ipinfo response', function () {
     ]);
 
     config(['geolocation.cache.enabled' => false]);
-    
+
     $cache = Cache::driver();
     $provider = new IpInfo($cache);
-    
+
     $details = $provider->lookup('8.8.8.8');
 
     expect($details->getCurrencyCode())->toBe('USD')

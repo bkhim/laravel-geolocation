@@ -5,12 +5,16 @@ namespace Bkhim\Geolocation\Providers;
 use Bkhim\Geolocation\Contracts\LookupInterface;
 use Bkhim\Geolocation\GeolocationDetails;
 use Bkhim\Geolocation\GeolocationException;
+use Illuminate\Contracts\Cache\Repository;
 use Illuminate\Contracts\Cache\Repository as CacheRepository;
+use Illuminate\Http\Client\RequestException;
+use Illuminate\Support\Facades\Http;
 
 /**
  * Class IpGeolocation.
  *
  * @author Blancos Khim <https://www.briankimathi.com>
+ *
  * @date 2025-12-08
  */
 class IpGeolocation implements LookupInterface
@@ -21,14 +25,12 @@ class IpGeolocation implements LookupInterface
     const BASEURL = 'https://api.ipgeolocation.io/ipgeo';
 
     /**
-     * @var \Illuminate\Contracts\Cache\Repository
+     * @var Repository
      */
     protected $cache;
 
     /**
      * IpGeolocation constructor.
-     *
-     * @param  CacheRepository  $cache
      */
     public function __construct(CacheRepository $cache)
     {
@@ -38,9 +40,6 @@ class IpGeolocation implements LookupInterface
     /**
      * Lookup geolocation data for an IP address.
      *
-     * @param  string|null  $ipAddress
-     * @param  string  $responseFilter
-     * @return GeolocationDetails
      * @throws GeolocationException
      */
     public function lookup(?string $ipAddress = null, string $responseFilter = 'geo'): GeolocationDetails
@@ -53,8 +52,9 @@ class IpGeolocation implements LookupInterface
         $ipAddress = $ipAddress ?: request()->ip();
 
         // Check if caching is enabled before attempting to cache
-        if (!config('geolocation.cache.enabled', true)) {
+        if (! config('geolocation.cache.enabled', true)) {
             $data = $this->fetchGeolocationData($ipAddress);
+
             return new GeolocationDetails($data);
         }
 
@@ -70,15 +70,15 @@ class IpGeolocation implements LookupInterface
         } catch (GeolocationException $e) {
             throw $e;
         } catch (\Exception $e) {
-            throw new GeolocationException("Unexpected error: ".$e->getMessage(), $e->getCode(), $e);
+            throw new GeolocationException('Unexpected error: '.$e->getMessage(), $e->getCode(), $e);
         }
     }
 
     /**
      * Fetch geolocation data from IPGeolocation API.
      *
-     * @param string|null $ipAddress
-     * @return array
+     * @param  string|null  $ipAddress
+     *
      * @throws GeolocationException
      */
     protected function fetchGeolocationData($ipAddress): array
@@ -87,14 +87,14 @@ class IpGeolocation implements LookupInterface
         $apiKey = config('geolocation.providers.ipgeolocation.api_key');
 
         if (empty($apiKey)) {
-            throw new GeolocationException("IPGeolocation API key is missing. Set IPGEOLOCATION_API_KEY in your .env file");
+            throw new GeolocationException('IPGeolocation API key is missing. Set IPGEOLOCATION_API_KEY in your .env file');
         }
 
         $endpoint = static::BASEURL;
 
         $params = [
             'apiKey' => $apiKey,
-            'format' => 'json'
+            'format' => 'json',
         ];
 
         // Add IP address if provided
@@ -114,27 +114,33 @@ class IpGeolocation implements LookupInterface
         $includeUserAgent = config('geolocation.providers.ipgeolocation.include_useragent', false);
 
         $fields = [];
-        if ($includeHostname) $fields[] = 'hostname';
-        if ($includeSecurity) $fields[] = 'security';
-        if ($includeUserAgent) $fields[] = 'user_agent';
+        if ($includeHostname) {
+            $fields[] = 'hostname';
+        }
+        if ($includeSecurity) {
+            $fields[] = 'security';
+        }
+        if ($includeUserAgent) {
+            $fields[] = 'user_agent';
+        }
 
-        if (!empty($fields)) {
+        if (! empty($fields)) {
             $params['fields'] = implode(',', $fields);
         }
 
         try {
-            $response = \Illuminate\Support\Facades\Http::timeout(config('geolocation.timeout', 5))
+            $response = Http::timeout(config('geolocation.timeout', 5))
                 ->get($endpoint, $params);
 
             $statusCode = $response->status();
 
             if ($statusCode !== 200) {
-                $errorMessage = match($statusCode) {
-                    401 => "Invalid API key - please check your IPGEOLOCATION_API_KEY",
-                    403 => "Access forbidden - verify your API key permissions or subscription status",
-                    423 => "Request quota exceeded - upgrade your plan",
-                    429 => "Rate limit exceeded - too many requests",
-                    500 => "IPGeolocation API server error",
+                $errorMessage = match ($statusCode) {
+                    401 => 'Invalid API key - please check your IPGEOLOCATION_API_KEY',
+                    403 => 'Access forbidden - verify your API key permissions or subscription status',
+                    423 => 'Request quota exceeded - upgrade your plan',
+                    429 => 'Rate limit exceeded - too many requests',
+                    500 => 'IPGeolocation API server error',
                     default => "API returned HTTP error: {$statusCode}"
                 };
                 throw new GeolocationException($errorMessage);
@@ -144,11 +150,11 @@ class IpGeolocation implements LookupInterface
 
             // Check for API errors in the response
             if (isset($data['message']) && str_contains(strtolower($data['message']), 'error')) {
-                throw new GeolocationException("IPGeolocation API error: " . $data['message']);
+                throw new GeolocationException('IPGeolocation API error: '.$data['message']);
             }
 
-            if ( ! isset($data['ip'])) {
-                throw new GeolocationException("Incomplete geolocation data received from IPGeolocation API");
+            if (! isset($data['ip'])) {
+                throw new GeolocationException('Incomplete geolocation data received from IPGeolocation API');
             }
 
             // Transform IPGeolocation response to our standard format
@@ -180,15 +186,15 @@ class IpGeolocation implements LookupInterface
                 'isProxy' => isset($data['security']['is_proxy']) ? (bool) $data['security']['is_proxy'] : null,
                 'isCrawler' => isset($data['security']['is_crawler']) ? (bool) $data['security']['is_crawler'] : null,
                 'isTor' => isset($data['security']['is_tor']) ? (bool) $data['security']['is_tor'] : null,
-                'hostname' => $data['hostname'] ?? null
+                'hostname' => $data['hostname'] ?? null,
             ];
 
             return $transformedData;
 
-        } catch (\Illuminate\Http\Client\RequestException $e) {
-            throw new GeolocationException("IPGeolocation API request failed: " . $e->getMessage());
+        } catch (RequestException $e) {
+            throw new GeolocationException('IPGeolocation API request failed: '.$e->getMessage());
         } catch (\Exception $e) {
-            throw new GeolocationException("Unexpected error: ".$e->getMessage(), $e->getCode(), $e);
+            throw new GeolocationException('Unexpected error: '.$e->getMessage(), $e->getCode(), $e);
         }
     }
 }

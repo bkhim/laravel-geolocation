@@ -1,7 +1,6 @@
 <?php
 
 use Bkhim\Geolocation\Addons\Gdpr\LocationConsentManager;
-use Bkhim\Geolocation\GeolocationDetails;
 use Illuminate\Support\Facades\Cookie;
 
 it('checks if consent is needed for eu countries', function () {
@@ -14,7 +13,7 @@ it('checks if consent is needed for eu countries', function () {
         ],
     ]);
 
-    $manager = new LocationConsentManager();
+    $manager = new LocationConsentManager;
 
     // Mock geolocation lookup for EU country
     expect(method_exists($manager, 'needsConsent'))->toBe(true);
@@ -28,7 +27,7 @@ it('returns false when gdpr is disabled', function () {
         ],
     ]);
 
-    $manager = new LocationConsentManager();
+    $manager = new LocationConsentManager;
 
     $result = $manager->needsConsent('8.8.8.8');
 
@@ -45,7 +44,7 @@ it('checks for eea region', function () {
         ],
     ]);
 
-    $manager = new LocationConsentManager();
+    $manager = new LocationConsentManager;
 
     // EEA includes Iceland, Liechtenstein, Norway
     expect(method_exists($manager, 'needsConsent'))->toBe(true);
@@ -61,7 +60,7 @@ it('checks for gdpr region', function () {
         ],
     ]);
 
-    $manager = new LocationConsentManager();
+    $manager = new LocationConsentManager;
 
     // GDPR includes both EU and EEA countries
     expect(method_exists($manager, 'needsConsent'))->toBe(true);
@@ -75,7 +74,7 @@ it('checks if user has given consent', function () {
         ],
     ]);
 
-    $manager = new LocationConsentManager();
+    $manager = new LocationConsentManager;
 
     // Without cookie, should return false
     expect($manager->hasGivenConsent())->toBe(false);
@@ -89,7 +88,7 @@ it('sets consent cookie', function () {
         ],
     ]);
 
-    $manager = new LocationConsentManager();
+    $manager = new LocationConsentManager;
 
     // Should not throw exception
     expect(fn () => $manager->giveConsent())
@@ -104,7 +103,7 @@ it('withdraws consent', function () {
         ],
     ]);
 
-    $manager = new LocationConsentManager();
+    $manager = new LocationConsentManager;
 
     // Should not throw exception
     expect(fn () => $manager->withdrawConsent())
@@ -119,7 +118,7 @@ it('uses correct cookie name from config', function () {
         ],
     ]);
 
-    $manager = new LocationConsentManager();
+    $manager = new LocationConsentManager;
 
     // The manager should use the configured cookie name
     expect(method_exists($manager, 'hasGivenConsent'))->toBe(true);
@@ -133,7 +132,7 @@ it('allows custom consent lifetime', function () {
         ],
     ]);
 
-    $manager = new LocationConsentManager();
+    $manager = new LocationConsentManager;
 
     // Should accept custom lifetime parameter
     expect(fn () => $manager->giveConsent(30))
@@ -148,7 +147,7 @@ it('identifies eu countries', function () {
         ],
     ]);
 
-    $manager = new LocationConsentManager();
+    $manager = new LocationConsentManager;
 
     // Manager is instantiable
     expect($manager)->not->toBeNull();
@@ -162,7 +161,7 @@ it('identifies eea countries', function () {
         ],
     ]);
 
-    $manager = new LocationConsentManager();
+    $manager = new LocationConsentManager;
 
     // EEA countries: IS, LI, NO
     expect(method_exists($manager, 'needsConsent'))->toBe(true);
@@ -178,7 +177,7 @@ it('handles multiple consent requirements', function () {
         ],
     ]);
 
-    $manager = new LocationConsentManager();
+    $manager = new LocationConsentManager;
 
     // Should check against all regions
     expect(method_exists($manager, 'needsConsent'))->toBe(true);

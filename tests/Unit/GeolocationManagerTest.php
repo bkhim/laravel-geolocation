@@ -1,9 +1,9 @@
 <?php
 
-use Bkhim\Geolocation\GeolocationManager;
+use Bkhim\Geolocation\GeolocationDetails;
 use Bkhim\Geolocation\GeolocationException;
+use Bkhim\Geolocation\GeolocationManager;
 use Illuminate\Support\Facades\Cache;
-
 
 it('can instantiate geolocation manager', function () {
     $config = config('geolocation');
@@ -72,7 +72,7 @@ it('uses fallback when primary provider fails', function () {
     // When fallback is enabled and primary (ipinfo) fails,
     // it should try ipapi which doesn't need an API key
     $result = $manager->lookup('8.8.8.8');
-    expect($result)->toBeInstanceOf(\Bkhim\Geolocation\GeolocationDetails::class);
+    expect($result)->toBeInstanceOf(GeolocationDetails::class);
     expect($result->getCountryCode())->toBe('US');
 });
 

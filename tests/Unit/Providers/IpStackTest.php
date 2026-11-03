@@ -118,7 +118,7 @@ it('handles timezone offset calculation', function () {
 
 it('always uses https endpoint', function () {
     config(['geolocation.cache.enabled' => false]);
-    
+
     Http::fake([
         '*' => Http::response([
             'ip' => '8.8.8.8',
@@ -137,5 +137,3 @@ it('always uses https endpoint', function () {
         return str_starts_with($request->url(), 'https://');
     });
 });
-
-

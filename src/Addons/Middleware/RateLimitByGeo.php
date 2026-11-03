@@ -34,16 +34,15 @@ class RateLimitByGeo
     /**
      * Handle an incoming request.
      *
-     * @param Request $request
-     * @param Closure $next
-     * @param int $maxAttempts
-     * @param int $decayMinutes
+     * @param  int  $maxAttempts
+     * @param  int  $decayMinutes
      * @return mixed
+     *
      * @throws GeolocationException
      */
     public function handle(Request $request, Closure $next, $maxAttempts = 60, $decayMinutes = 1)
     {
-        $location    = null;
+        $location = null;
         try {
             $location = Geolocation::lookup($request->ip());
         } catch (\Throwable $e) {
@@ -57,7 +56,7 @@ class RateLimitByGeo
         }
 
         // Get specific limit for country or use default
-        $limits       = config('geolocation.addons.rate_limiting.limits', []);
+        $limits = config('geolocation.addons.rate_limiting.limits', []);
         $countryLimit = $limits[$countryCode] ?? $limits['*'] ?? ['requests_per_minute' => $maxAttempts];
 
         // Handle both array and integer configurations
@@ -88,28 +87,22 @@ class RateLimitByGeo
     /**
      * Resolve the request signature for rate limiting.
      *
-     * @param Request $request
-     * @param string $countryCode
-     * @return string
+     * @param  Request  $request
+     * @param  string  $countryCode
      */
     protected function resolveRequestSignature($request, $countryCode): string
     {
         return sha1(
-            $request->method() .
-            '|' . $request->server('SERVER_NAME') .
-            '|' . $request->path() .
-            '|' . $countryCode .
-            '|' . $request->ip()
+            $request->method().
+            '|'.$request->server('SERVER_NAME').
+            '|'.$request->path().
+            '|'.$countryCode.
+            '|'.$request->ip()
         );
     }
 
     /**
      * Build a rate-limited response.
-     *
-     * @param string $key
-     * @param int $maxAttempts
-     * @param int $decayMinutes
-     * @return SymfonyResponse
      */
     protected function buildResponse(string $key, int $maxAttempts, int $decayMinutes): SymfonyResponse
     {
@@ -126,9 +119,6 @@ class RateLimitByGeo
 
     /**
      * Create the rate-limited response.
-     *
-     * @param int $retryAfter
-     * @return SymfonyResponse
      */
     protected function createRateLimitedResponse(int $retryAfter): SymfonyResponse
     {
@@ -148,10 +138,6 @@ class RateLimitByGeo
 
     /**
      * Calculate the number of remaining attempts.
-     *
-     * @param string $key
-     * @param int $maxAttempts
-     * @return int
      */
     protected function calculateRemainingAttempts(string $key, int $maxAttempts): int
     {
@@ -160,10 +146,6 @@ class RateLimitByGeo
 
     /**
      * Calculate the retry-after time in seconds.
-     *
-     * @param string $key
-     * @param int $decayMinutes
-     * @return int
      */
     protected function calculateRetryAfter(string $key, int $decayMinutes): int
     {
@@ -179,12 +161,6 @@ class RateLimitByGeo
 
     /**
      * Add rate limiting headers to the response.
-     *
-     * @param SymfonyResponse $response
-     * @param int $maxAttempts
-     * @param int $remainingAttempts
-     * @param int $retryAfter
-     * @return SymfonyResponse
      */
     protected function addHeaders(
         SymfonyResponse $response,
@@ -208,15 +184,11 @@ class RateLimitByGeo
 
         $response->headers->add($headers);
 
-
         return $response;
     }
 
     /**
      * Remove any stale rate limiting headers from the response.
-     *
-     * @param SymfonyResponse $response
-     * @return void
      */
     protected function removeStaleHeaders(SymfonyResponse $response): void
     {
@@ -227,8 +199,6 @@ class RateLimitByGeo
 
     /**
      * Get the rate limiter instance.
-     *
-     * @return RateLimiter
      */
     public function getLimiter(): RateLimiter
     {

@@ -1,9 +1,6 @@
 <?php
 
-use Bkhim\Geolocation\Console\GeolocationCommand;
-use Bkhim\Geolocation\Console\AuditCommand;
-use Bkhim\Geolocation\GeolocationManager;
-use Illuminate\Support\Facades\Cache;
+use Bkhim\Geolocation\Models\LoginHistory;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Schema;
 
@@ -69,7 +66,7 @@ it('geolocation:audit handles empty database gracefully', function () {
 it('geolocation:audit shows login statistics', function () {
     $now = now();
 
-    \Bkhim\Geolocation\Models\LoginHistory::create([
+    LoginHistory::create([
         'user_id' => 1,
         'ip' => '1.2.3.4',
         'country_code' => 'US',
@@ -77,7 +74,7 @@ it('geolocation:audit shows login statistics', function () {
         'occurred_at' => $now,
     ]);
 
-    \Bkhim\Geolocation\Models\LoginHistory::create([
+    LoginHistory::create([
         'user_id' => 1,
         'ip' => '5.6.7.8',
         'country_code' => 'KE',

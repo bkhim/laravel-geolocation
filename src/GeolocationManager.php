@@ -14,13 +14,11 @@ use MaxMind\Db\Reader\InvalidDatabaseException;
  * Class GeolocationManager.
  *
  * @author Adriano Rosa <https://adrianorosa.com>
- * @date 2019-08-13 11:50
  *
- * @package Bkhim\Geolocation
+ * @date 2019-08-13 11:50
  */
 class GeolocationManager
 {
-
     /**
      * @var array
      */
@@ -40,11 +38,10 @@ class GeolocationManager
      * Geolocation constructor.
      *
      * @param  array  $config
-     * @param  Repository  $cacheProvider
      */
     public function __construct($config, Repository $cacheProvider)
     {
-        $this->config        = $config;
+        $this->config = $config;
         $this->cacheProvider = $cacheProvider;
 
         $this->setDefaultDriver();
@@ -52,9 +49,6 @@ class GeolocationManager
 
     /**
      * Set the default driver.
-     *
-     * @param  string|null  $name
-     * @return void
      */
     protected function setDefaultDriver(?string $name = null): void
     {
@@ -67,8 +61,6 @@ class GeolocationManager
 
     /**
      * Get the default driver name.
-     *
-     * @return string
      */
     protected function getDefaultDriver(): string
     {
@@ -78,11 +70,9 @@ class GeolocationManager
     /**
      * Resolve the given provider.
      *
-     * @param  string  $name
-     * @return LookupInterface
      * @throws InvalidArgumentException
      */
-    protected function resolve(string $name): Contracts\LookupInterface
+    protected function resolve(string $name): LookupInterface
     {
         $config = $this->getConfig($name);
 
@@ -101,9 +91,6 @@ class GeolocationManager
 
     /**
      * Get configuration for a provider.
-     *
-     * @param  string  $name
-     * @return array|null
      */
     protected function getConfig(string $name): ?array
     {
@@ -126,9 +113,6 @@ class GeolocationManager
      * Get location details for an IP address.
      *
      * Alias for lookup() method for backward compatibility.
-     *
-     * @param  string  $ip
-     * @return GeolocationDetails
      */
     public function getDetails(string $ip): GeolocationDetails
     {
@@ -142,22 +126,22 @@ class GeolocationManager
      *
      * @param  string|null  $ip
      * @param  string  $responseFilter
-     * @return GeolocationDetails
+     *
      * @throws GeolocationException
      */
     public function lookup($ipAddress = null, $responseFilter = 'geo'): GeolocationDetails
     {
         $fallbackEnabled = $this->config['fallback']['enabled'] ?? false;
-        $fallbackOrder   = $this->config['fallback']['order'] ?? [];
-        $maxAttempts     = $this->config['fallback']['max_attempts'] ?? 2;
+        $fallbackOrder = $this->config['fallback']['order'] ?? [];
+        $maxAttempts = $this->config['fallback']['max_attempts'] ?? 2;
 
-        if ( ! $fallbackEnabled || empty($fallbackOrder)) {
+        if (! $fallbackEnabled || empty($fallbackOrder)) {
             return $this->driver()->lookup($ipAddress, $responseFilter);
         }
 
-        $providers     = array_merge([$this->getDefaultDriver()], $fallbackOrder);
-        $providers     = array_unique($providers);
-        $attempts      = 0;
+        $providers = array_merge([$this->getDefaultDriver()], $fallbackOrder);
+        $providers = array_unique($providers);
+        $attempts = 0;
         $lastException = null;
 
         foreach ($providers as $provider) {
@@ -185,11 +169,8 @@ class GeolocationManager
 
     /**
      * Get a Geolocation driver instance.
-     *
-     * @param  string|null  $name
-     * @return LookupInterface
      */
-    public function driver(?string $name = null): Contracts\LookupInterface
+    public function driver(?string $name = null): LookupInterface
     {
         $name = $name ?: $this->getDefaultDriver();
 
@@ -198,11 +179,8 @@ class GeolocationManager
 
     /**
      * Get a provider instance.
-     *
-     * @param  string|null  $name
-     * @return LookupInterface
      */
-    protected function provider(?string $name = null): Contracts\LookupInterface
+    protected function provider(?string $name = null): LookupInterface
     {
         $name = $name ?: $this->getDefaultDriver();
 
@@ -226,34 +204,32 @@ class GeolocationManager
     /**
      * Create MaxMind driver instance.
      *
-     * @param  array  $config
-     * @return LookupInterface
      * @throws InvalidArgumentException
      */
-    protected function createMaxmindDriver(array $config): Contracts\LookupInterface
+    protected function createMaxmindDriver(array $config): LookupInterface
     {
         $databasePath = $config['database_path'] ?? null;
 
-        if ( ! $databasePath) {
-            throw new InvalidArgumentException("MaxMind database path is not configured.");
+        if (! $databasePath) {
+            throw new InvalidArgumentException('MaxMind database path is not configured.');
         }
 
         // Resolve relative paths
-        if ( ! Str::startsWith($databasePath, '/')) {
+        if (! Str::startsWith($databasePath, '/')) {
             $databasePath = storage_path($databasePath);
         }
 
-        if ( ! file_exists($databasePath)) {
+        if (! file_exists($databasePath)) {
             throw new InvalidArgumentException(
                 "MaxMind database not found at: {$databasePath}. ".
-                "Please download from: https://dev.maxmind.com/geoip/geolite2-free-geolocation-data"
+                'Please download from: https://dev.maxmind.com/geoip/geolite2-free-geolocation-data'
             );
         }
 
-        if ( ! is_readable($databasePath)) {
+        if (! is_readable($databasePath)) {
             throw new InvalidArgumentException(
                 "MaxMind database is not readable: {$databasePath}. ".
-                "Check file permissions. Current: ".substr(sprintf('%o', fileperms($databasePath)), -4)
+                'Check file permissions. Current: '.substr(sprintf('%o', fileperms($databasePath)), -4)
             );
         }
 
@@ -264,11 +240,11 @@ class GeolocationManager
 
         } catch (InvalidDatabaseException $e) {
             throw new InvalidArgumentException(
-                "MaxMind database is corrupt or invalid: ".$e->getMessage()
+                'MaxMind database is corrupt or invalid: '.$e->getMessage()
             );
         } catch (Exception $e) {
             throw new InvalidArgumentException(
-                "Failed to initialize MaxMind reader: ".$e->getMessage()
+                'Failed to initialize MaxMind reader: '.$e->getMessage()
             );
         }
     }
@@ -327,44 +303,36 @@ class GeolocationManager
 
     /**
      * Clear geolocation cache.
-     *
-     * @param  string|null  $ip
-     * @param  string|null  $provider
-     * @return bool
      */
     public function clearCache(?string $ip = null, ?string $provider = null): bool
     {
         $provider = $provider ?? $this->getDefaultDriver();
-        
+
         if ($ip) {
             $key = $this->getCacheKey($provider, $ip);
+
             return $this->cacheProvider->forget($key);
         }
-        
+
         $tagsEnabled = config('geolocation.cache.tags.enabled', false);
         $tagNames = config('geolocation.cache.tags.names', ['geolocation']);
-        
+
         if ($tagsEnabled && method_exists($this->cacheProvider, 'tags')) {
             return $this->cacheProvider->tags($tagNames)->flush();
         }
-        
+
         return false;
     }
 
     /**
      * Get cache key for an IP address.
-     *
-     * @param  string  $ip
-     * @param  string|null  $provider
-     * @return string
      */
     public function getCacheKey(string $ip, ?string $provider = null): string
     {
         $provider = $provider ?? $this->getDefaultDriver();
         $prefix = config('geolocation.cache.prefix', 'geolocation');
         $hash = md5($ip);
-        
+
         return "{$prefix}:{$provider}:{$hash}";
     }
-
 }

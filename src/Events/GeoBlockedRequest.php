@@ -7,8 +7,6 @@ use Illuminate\Queue\SerializesModels;
 
 /**
  * Class GeoBlockedRequest.
- *
- * @package Bkhim\Geolocation\Events
  */
 class GeoBlockedRequest
 {
@@ -27,8 +25,6 @@ class GeoBlockedRequest
     /**
      * Create a new event instance.
      *
-     * @param  mixed  $user
-     * @param  string  $ip
      * @return void
      */
     public function __construct(mixed $user, string $ip)

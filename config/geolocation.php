@@ -1,5 +1,7 @@
 <?php
 
+use Bkhim\Geolocation\Models\LoginHistory;
+
 return [
 
     /*
@@ -137,7 +139,6 @@ return [
             // Your IPStack API access key
             'access_key' => env('GEOLOCATION_IPSTACK_ACCESS_KEY', null),
 
-
         ],
 
         /*
@@ -205,7 +206,6 @@ return [
             // No configuration needed - free tier provides 30K requests/month
             // Paid plans available for higher volumes and production use
         ],
-
 
         /*
         |----------------------------------------------------------------------
@@ -366,7 +366,7 @@ return [
             'ipv4_mask' => '255.255.255.0', // Last octet
             'ipv6_mask' => 'ffff:ffff:ffff:ffff:0000:0000:0000:0000',
             'preserve_local' => true,
-            'gdpr_countries' => ['AT','BE','BG','HR','CY','CZ','DK','EE','FI','FR','DE','GR','HU','IE','IT','LV','LT','LU','MT','NL','PL','PT','RO','SK','SI','ES','SE','GB','IS','LI','NO'],
+            'gdpr_countries' => ['AT', 'BE', 'BG', 'HR', 'CY', 'CZ', 'DK', 'EE', 'FI', 'FR', 'DE', 'GR', 'HU', 'IE', 'IT', 'LV', 'LT', 'LU', 'MT', 'NL', 'PL', 'PT', 'RO', 'SK', 'SI', 'ES', 'SE', 'GB', 'IS', 'LI', 'NO'],
         ],
 
         'gdpr' => [
@@ -394,7 +394,7 @@ return [
     'user_trait' => [
         'enabled' => env('GEOLOCATION_USER_TRAIT_ENABLED', true),
         'login_history_table' => 'user_login_locations',
-        'login_history_model' => \Bkhim\Geolocation\Models\LoginHistory::class,
+        'login_history_model' => LoginHistory::class,
         'login_history_retention_days' => env('GEOLOCATION_LOGIN_RETENTION_DAYS', 30),
         'cache_ttl' => env('GEOLOCATION_USER_TRAIT_CACHE_TTL', 86400), // seconds
         'anonymization_mode' => env('GEOLOCATION_ANONYMIZATION_MODE', 'partial'), // none|partial|full

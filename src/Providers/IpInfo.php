@@ -6,13 +6,18 @@ use Bkhim\Geolocation\Contracts\LookupInterface;
 use Bkhim\Geolocation\GeolocationDetails;
 use Bkhim\Geolocation\GeolocationException;
 use Bkhim\Geolocation\Traits\CalculatesTimezoneOffset;
+use Illuminate\Contracts\Cache\Repository;
 use Illuminate\Contracts\Cache\Repository as CacheRepository;
+use Illuminate\Http\Client\RequestException;
+use Illuminate\Support\Facades\Http;
 
 /**
  * Class IpInfo.
  *
  * @author Adriano Rosa <https://adrianorosa.com>
+ *
  * @maintainer Blancos khim <https://www.briankimathi.com>
+ *
  * @date 2019-08-13 13:55
  */
 class IpInfo implements LookupInterface
@@ -25,14 +30,12 @@ class IpInfo implements LookupInterface
     const BASEURL = 'https://ipinfo.io';
 
     /**
-     * @var \Illuminate\Contracts\Cache\Repository
+     * @var Repository
      */
     protected $cache;
 
     /**
      * IpInfo constructor.
-     *
-     * @param  CacheRepository  $cache
      */
     public function __construct(CacheRepository $cache)
     {
@@ -42,9 +45,6 @@ class IpInfo implements LookupInterface
     /**
      * Lookup geolocation data for an IP address.
      *
-     * @param  string|null  $ipAddress
-     * @param  string  $responseFilter
-     * @return GeolocationDetails
      * @throws GeolocationException
      */
     public function lookup(?string $ipAddress = null, string $responseFilter = 'geo'): GeolocationDetails
@@ -57,8 +57,9 @@ class IpInfo implements LookupInterface
         $ipAddress = $ipAddress ?: request()->ip();
 
         // Check if caching is enabled before attempting to cache
-        if (!config('geolocation.cache.enabled', true)) {
+        if (! config('geolocation.cache.enabled', true)) {
             $data = $this->fetchGeolocationData($ipAddress);
+
             return new GeolocationDetails($data);
         }
 
@@ -74,53 +75,53 @@ class IpInfo implements LookupInterface
         } catch (GeolocationException $e) {
             throw $e;
         } catch (\Exception $e) {
-            throw new GeolocationException("Unexpected error: ".$e->getMessage(), $e->getCode(), $e);
+            throw new GeolocationException('Unexpected error: '.$e->getMessage(), $e->getCode(), $e);
         }
     }
 
     /**
      * Fetch geolocation data from IpInfo API.
      *
-     * @param string|null $ipAddress
-     * @return array
+     * @param  string|null  $ipAddress
+     *
      * @throws GeolocationException
      */
     protected function fetchGeolocationData($ipAddress): array
     {
-        $endpoint    = static::BASEURL;
+        $endpoint = static::BASEURL;
         $accessToken = config('geolocation.providers.ipinfo.access_token');
         if (empty($accessToken)) {
-            throw new GeolocationException("IpInfo API key is missing. Set IPINFO_API_KEY in your .env file");
+            throw new GeolocationException('IpInfo API key is missing. Set IPINFO_API_KEY in your .env file');
         }
         $filter = 'geo';
         if ($ipAddress) {
             $endpoint .= "/{$ipAddress}/{$filter}";
         }
         try {
-            $response = \Illuminate\Support\Facades\Http::withHeaders([
-                'Authorization' => 'Bearer ' . $accessToken,
-                'Accept' => 'application/json'
+            $response = Http::withHeaders([
+                'Authorization' => 'Bearer '.$accessToken,
+                'Accept' => 'application/json',
             ])->timeout(config('geolocation.timeout', 5))
-              ->get($endpoint);
+                ->get($endpoint);
             $statusCode = $response->status();
             if ($statusCode !== 200) {
-                $errorMessage = match($statusCode) {
-                    401 => "Invalid API key - please check your IPINFO_API_KEY",
-                    403 => "Access forbidden - verify your API key permissions",
-                    429 => "Rate limit exceeded - too many requests",
-                    500 => "IpInfo API server error",
+                $errorMessage = match ($statusCode) {
+                    401 => 'Invalid API key - please check your IPINFO_API_KEY',
+                    403 => 'Access forbidden - verify your API key permissions',
+                    429 => 'Rate limit exceeded - too many requests',
+                    500 => 'IpInfo API server error',
                     default => "API returned HTTP error: {$statusCode}"
                 };
                 throw new GeolocationException($errorMessage);
             }
             $data = $response->json();
-            if ( ! isset($data['ip']) || ! (isset($data['country_code']) || isset($data['country']))) {
-                throw new GeolocationException("Incomplete geolocation data received from API");
+            if (! isset($data['ip']) || ! (isset($data['country_code']) || isset($data['country']))) {
+                throw new GeolocationException('Incomplete geolocation data received from API');
             }
             if (isset($data['loc'])) {
                 $coordinates = explode(',', $data['loc']);
                 if (count($coordinates) === 2) {
-                    $data['latitude']  = (float) $coordinates[0];
+                    $data['latitude'] = (float) $coordinates[0];
                     $data['longitude'] = (float) $coordinates[1];
                 }
             }
@@ -155,8 +156,8 @@ class IpInfo implements LookupInterface
             $data['hostname'] = $data['hostname'] ?? null;
 
             // Parse ASN from org field if available (format: "AS15169 Google LLC")
-            if (!empty($data['org']) && preg_match('/^AS(\d+)\s+(.+)/', $data['org'], $matches)) {
-                $data['asn'] = 'AS' . $matches[1];
+            if (! empty($data['org']) && preg_match('/^AS(\d+)\s+(.+)/', $data['org'], $matches)) {
+                $data['asn'] = 'AS'.$matches[1];
                 $data['asnName'] = trim($matches[2]);
             }
 
@@ -164,13 +165,12 @@ class IpInfo implements LookupInterface
             $data['timezoneOffset'] = $this->calculateTimezoneOffset($data['timezone'] ?? null);
 
             return $data;
-        } catch (\Illuminate\Http\Client\RequestException $e) {
-            throw new GeolocationException("API request failed: " . $e->getMessage());
+        } catch (RequestException $e) {
+            throw new GeolocationException('API request failed: '.$e->getMessage());
         } catch (GeolocationException $e) {
             throw $e;
         } catch (\Exception $e) {
-            throw new GeolocationException("Unexpected error: ".$e->getMessage(), $e->getCode(), $e);
+            throw new GeolocationException('Unexpected error: '.$e->getMessage(), $e->getCode(), $e);
         }
     }
-
 }
