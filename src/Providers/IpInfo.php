@@ -6,6 +6,7 @@ use Bkhim\Geolocation\Contracts\LookupInterface;
 use Bkhim\Geolocation\GeolocationDetails;
 use Bkhim\Geolocation\GeolocationException;
 use Bkhim\Geolocation\Traits\CalculatesTimezoneOffset;
+use Bkhim\Geolocation\Traits\CachesGeolocationData;
 use Illuminate\Contracts\Cache\Repository;
 use Illuminate\Contracts\Cache\Repository as CacheRepository;
 use Illuminate\Http\Client\RequestException;
@@ -23,6 +24,7 @@ use Illuminate\Support\Facades\Http;
 class IpInfo implements LookupInterface
 {
     use CalculatesTimezoneOffset;
+    use CachesGeolocationData;
 
     /**
      * @const Define the baseurl.
@@ -67,7 +69,7 @@ class IpInfo implements LookupInterface
         $cacheTtl = config('geolocation.cache.ttl', 86400);
 
         try {
-            $data = $this->cache->remember($cacheKey, $cacheTtl, function () use ($ipAddress) {
+            $data = $this->cacheRemember($cacheKey, $cacheTtl, function () use ($ipAddress) {
                 return $this->fetchGeolocationData($ipAddress);
             });
 

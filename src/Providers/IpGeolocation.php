@@ -5,6 +5,7 @@ namespace Bkhim\Geolocation\Providers;
 use Bkhim\Geolocation\Contracts\LookupInterface;
 use Bkhim\Geolocation\GeolocationDetails;
 use Bkhim\Geolocation\GeolocationException;
+use Bkhim\Geolocation\Traits\CachesGeolocationData;
 use Illuminate\Contracts\Cache\Repository;
 use Illuminate\Contracts\Cache\Repository as CacheRepository;
 use Illuminate\Http\Client\RequestException;
@@ -19,6 +20,8 @@ use Illuminate\Support\Facades\Http;
  */
 class IpGeolocation implements LookupInterface
 {
+    use CachesGeolocationData;
+
     /**
      * @const Define the base URL for IPGeolocation API.
      */
@@ -62,7 +65,7 @@ class IpGeolocation implements LookupInterface
         $cacheTtl = config('geolocation.cache.ttl', 86400);
 
         try {
-            $data = $this->cache->remember($cacheKey, $cacheTtl, function () use ($ipAddress) {
+            $data = $this->cacheRemember($cacheKey, $cacheTtl, function () use ($ipAddress) {
                 return $this->fetchGeolocationData($ipAddress);
             });
 

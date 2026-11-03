@@ -280,6 +280,12 @@ return [
         // IP geolocation data doesn't change frequently
         'ttl' => env('GEOLOCATION_CACHE_TTL', 86400),
 
+        // Sliding expiration: extend the TTL on every cache hit so frequently
+        // looked-up IPs never expire while idle entries still age out.
+        // Uses Cache::touch() and requires Laravel 13+; older versions silently
+        // fall back to a fixed TTL.
+        'sliding' => env('GEOLOCATION_CACHE_SLIDING', true),
+
         // Optional: Specify a custom cache store (redis, memcached, database, etc.)
         // Null uses the default cache store from config/cache.php
         // For production, consider using Redis or Memcached for better performance

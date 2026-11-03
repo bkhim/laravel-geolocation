@@ -55,7 +55,12 @@ trait CachesGeolocationData
     }
 
     /**
-     * Remember data in cache with optional tags support.
+     * Remember data in cache with optional tags and sliding TTL support.
+     *
+     * When `geolocation.cache.sliding` is enabled and the cache store supports
+     * it, the item's TTL is extended on every access so frequently used IPs
+     * never expire while idle ones still age out. Requires Laravel 13+
+     * (Cache::touch()); older versions silently fall back to fixed TTL.
      *
      * @param  string  $key  Cache key
      * @param  int  $ttl  Time to live in seconds
@@ -64,13 +69,56 @@ trait CachesGeolocationData
      */
     protected function cacheRemember(string $key, int $ttl, \Closure $callback)
     {
+        $repository = $this->resolveCacheRepository();
+
+        $value = $repository->remember($key, $ttl, $callback);
+
+        $this->slideCacheTtl($repository, $key, $ttl);
+
+        return $value;
+    }
+
+    /**
+     * Resolve the cache repository, applying tags when configured.
+     *
+     * @return \Illuminate\Contracts\Cache\Repository
+     */
+    protected function resolveCacheRepository()
+    {
         $tags = $this->getCacheTags();
 
         if ($tags && method_exists($this->cache, 'tags')) {
-            return $this->cache->tags($tags)->remember($key, $ttl, $callback);
+            return $this->cache->tags($tags);
         }
 
-        return $this->cache->remember($key, $ttl, $callback);
+        return $this->cache;
+    }
+
+    /**
+     * Extend the cached item's TTL (sliding expiration) when supported.
+     *
+     * Best-effort: never let a store without touch support (or a failing
+     * touch) break a geolocation lookup.
+     *
+     * @param  \Illuminate\Contracts\Cache\Repository  $repository
+     * @param  string  $key
+     * @param  int  $ttl
+     */
+    protected function slideCacheTtl($repository, string $key, int $ttl): void
+    {
+        if (! config('geolocation.cache.sliding', true)) {
+            return;
+        }
+
+        if (! method_exists($repository, 'touch')) {
+            return;
+        }
+
+        try {
+            $repository->touch($key, $ttl);
+        } catch (\Throwable $e) {
+            // Sliding TTL is an optimization; ignore failures.
+        }
     }
 
     /**

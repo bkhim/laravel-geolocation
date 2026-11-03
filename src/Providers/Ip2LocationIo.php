@@ -5,6 +5,7 @@ namespace Bkhim\Geolocation\Providers;
 use Bkhim\Geolocation\Contracts\LookupInterface;
 use Bkhim\Geolocation\GeolocationDetails;
 use Bkhim\Geolocation\GeolocationException;
+use Bkhim\Geolocation\Traits\CachesGeolocationData;
 use Exception;
 use Illuminate\Contracts\Cache\Repository as CacheRepository;
 use Illuminate\Http\Client\RequestException;
@@ -19,6 +20,8 @@ use Illuminate\Support\Facades\Http;
  */
 class Ip2LocationIo implements LookupInterface
 {
+    use CachesGeolocationData;
+
     /**
      * @const Define the baseurl.
      */
@@ -63,7 +66,7 @@ class Ip2LocationIo implements LookupInterface
         $cacheTtl = config('geolocation.cache.ttl', 86400);
 
         try {
-            $data = $this->cache->remember($cacheKey, $cacheTtl, function () use ($ipAddress) {
+            $data = $this->cacheRemember($cacheKey, $cacheTtl, function () use ($ipAddress) {
                 return $this->fetchGeolocationData($ipAddress);
             });
 

@@ -6,6 +6,7 @@ use Bkhim\Geolocation\Contracts\LookupInterface;
 use Bkhim\Geolocation\GeolocationDetails;
 use Bkhim\Geolocation\GeolocationException;
 use Bkhim\Geolocation\Traits\CalculatesTimezoneOffset;
+use Bkhim\Geolocation\Traits\CachesGeolocationData;
 use GeoIp2\Database\Reader;
 use GeoIp2\Exception\AddressNotFoundException;
 use Illuminate\Contracts\Cache\Repository;
@@ -22,6 +23,7 @@ use MaxMind\Db\Reader\InvalidDatabaseException;
 class MaxMind implements LookupInterface
 {
     use CalculatesTimezoneOffset;
+    use CachesGeolocationData;
 
     /**
      * @var Reader
@@ -70,7 +72,7 @@ class MaxMind implements LookupInterface
         $cacheTtl = config('geolocation.cache.ttl', 86400);
 
         try {
-            $data = $this->cache->remember($cacheKey, $cacheTtl, function () use ($ipAddress) {
+            $data = $this->cacheRemember($cacheKey, $cacheTtl, function () use ($ipAddress) {
                 return $this->fetchGeolocationData($ipAddress);
             });
 
