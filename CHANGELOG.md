@@ -1,5 +1,30 @@
 # Changelog
 
+## [v4.6.0] - 2026-11-03
+
+### Added
+
+- **Sliding cache TTL** via `Cache::touch()`. Every cache hit now extends the
+  entry's TTL, so frequently looked-up IPs stay warm while idle entries still
+  expire on the normal TTL. Controlled by `geolocation.cache.sliding`
+  (`GEOLOCATION_CACHE_SLIDING`, default `true`). Requires Laravel 13+; on older
+  versions and stores without `touch()` support it transparently falls back to a
+  fixed TTL. Applies to all 6 providers through the shared
+  `CachesGeolocationData` trait.
+- Tests for the caching trait (hit, sliding extension, and disabled path).
+
+### Fixed
+
+- **Flaky Ip2Location.io test**: replaced the live-network assertion (which
+  hard-coded a `-07:00` offset and failed every winter/DST change and needed a
+  real API key) with a deterministic `Http::fake` payload.
+- **`phpunit.xml`**: disabled `stopOnFailure` so a single failure no longer
+  hides the rest of the suite.
+
+### Changed
+
+- Applied a Pint formatting pass across the codebase (no behavior change).
+
 ## [v4.5.0] - 2026-07-05
 
 ### Stability & Quality Release
