@@ -144,8 +144,26 @@ it('transforms timezone offset correctly', function () {
     expect($details->getTimezoneOffset())->toEqual(-7);
 });
 
-it('can fetch real data from ip2location.io api', function () {
-    // Test without API key (free tier - 1000 requests/day)
+it('transforms a full ip2location.io response', function () {
+    // Deterministic fake payload — never depends on the live API, wall-clock
+    // time (DST) or a real API key.
+    Http::fake([
+        '*' => Http::response([
+            'ip' => '8.8.8.8',
+            'country_code' => 'US',
+            'country_name' => 'United States of America',
+            'region_name' => 'California',
+            'city_name' => 'Mountain View',
+            'latitude' => 37.38605,
+            'longitude' => -122.08385,
+            'zip_code' => '94035',
+            'time_zone' => '-07:00',
+            'asn' => '15169',
+            'as' => 'Google LLC',
+            'is_proxy' => false,
+        ]),
+    ]);
+
     config(['geolocation.providers.ip2locationio.api_key' => null]);
 
     $cache = Cache::store();
@@ -161,7 +179,7 @@ it('can fetch real data from ip2location.io api', function () {
     expect($details->getRegion())->toBe('California');
     expect($details->getAsn())->toBe('AS15169');
     expect($details->getAsnName())->toBe('Google LLC');
-    expect($details->getTimezoneOffset())->toEqual(-7.0); // Use toEqual for type flexibility
+    expect($details->getTimezoneOffset())->toEqual(-7.0);
     expect($details->isProxy())->toBe(false);
 });
 
