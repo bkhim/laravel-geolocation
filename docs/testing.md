@@ -4,7 +4,7 @@ This package includes comprehensive tests using Pest PHP.
 
 ## Running Tests
 
-The suite currently contains **187 tests / 365 assertions**.
+The suite currently contains **188 tests / 367 assertions**.
 
 ```bash
 # Run all tests

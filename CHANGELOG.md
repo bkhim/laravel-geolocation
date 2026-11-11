@@ -1,5 +1,15 @@
 # Changelog
 
+## [Unreleased]
+
+### Fixed
+
+- **PHP 8.2 CI job failed on the sliding-TTL test.** PHP 8.2 resolves Laravel
+  12, which has no `Cache::touch()`; the trait correctly falls back to a fixed
+  TTL, so the test now skips itself when the store has no `touch()` support.
+  Added an explicit test covering the no-`touch()` fallback so the Laravel 12
+  path stays asserted.
+
 ## [v4.7.0] - 2026-11-11
 
 ### Security

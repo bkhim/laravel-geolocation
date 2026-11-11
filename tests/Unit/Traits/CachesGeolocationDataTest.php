@@ -61,6 +61,12 @@ it('remembers a value and returns the cached copy on subsequent calls', function
 });
 
 it('slides the ttl on access when sliding is enabled', function () {
+    // Cache::touch() ships in Laravel 13; on Laravel 12 (PHP 8.2 CI job) the
+    // trait falls back to a fixed TTL by design, so there is nothing to slide.
+    if (! method_exists(Cache::store(), 'touch')) {
+        $this->markTestSkipped('Cache::touch() requires Laravel 13+; Laravel 12 uses a fixed TTL.');
+    }
+
     Carbon::setTestNow(now());
 
     $host = cacheTraitHost();
@@ -73,6 +79,27 @@ it('slides the ttl on access when sliding is enabled', function () {
     // At t=150 a fixed TTL (t=100) would be gone; sliding keeps it alive.
     Carbon::setTestNow(now()->addSeconds(70));
     expect(Cache::has('geo:slide'))->toBeTrue();
+});
+
+it('falls back to a fixed ttl when the store has no touch() support', function () {
+    // A minimal store that only implements remember() and has no touch(),
+    // mimicking Laravel 12 / any store without touch support.
+    $store = new class
+    {
+        public int $rememberCalls = 0;
+
+        public function remember(string $key, int $ttl, \Closure $callback)
+        {
+            $this->rememberCalls++;
+
+            return $callback();
+        }
+    };
+
+    $host = cacheTraitHost($store);
+
+    expect($host->remember('geo:notouch', 100, fn () => 'value'))->toBe('value')
+        ->and($store->rememberCalls)->toBe(1);
 });
 
 it('does not extend the ttl when sliding is disabled', function () {

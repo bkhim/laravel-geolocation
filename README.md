@@ -28,7 +28,7 @@ Detect location, personalize experiences, prevent fraud, and secure logins — a
 ## Trusted By Developers
 
 - 1,000+ installs and growing
-- 187 tests passing
+- 188 tests passing
 - Built for Laravel 12-13
 - PHP 8.2, 8.3, 8.4, 8.5 compatible
 - MIT Licensed
