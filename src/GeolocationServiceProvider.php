@@ -13,9 +13,12 @@ use Bkhim\Geolocation\Console\GeolocationCommand;
 use Bkhim\Geolocation\Console\PruneOldDataCommand;
 use Bkhim\Geolocation\Console\UpdateMaxMindCommand;
 use Bkhim\Geolocation\Contracts\AuditLoggerInterface;
+use Bkhim\Geolocation\Events\LoginLocationRecorded;
+use Bkhim\Geolocation\Listeners\CheckLoginSecurity;
 use Bkhim\Geolocation\Services\AnomalyDetector;
 use Bkhim\Geolocation\Services\AuditLogger;
 use Bkhim\Geolocation\Services\ThreatIntelligenceService;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 
 /**
@@ -110,6 +113,12 @@ class GeolocationServiceProvider extends ServiceProvider
             ]);
         }
 
+        // Register the login-security listener once (not per model using the
+        // trait) so security events are not dispatched multiple times.
+        if (config('geolocation.security.events_enabled', true)) {
+            Event::listen(LoginLocationRecorded::class, CheckLoginSecurity::class);
+        }
+
         $this->bootAddons();
     }
 
@@ -184,31 +193,25 @@ class GeolocationServiceProvider extends ServiceProvider
 
     protected function registerAddons(): void
     {
-        // Anonymization
-        if (config('geolocation.addons.anonymization.enabled')) {
-            $this->app->singleton(IpAnonymizer::class, function ($app) {
-                return new IpAnonymizer;
-            });
-        }
-
-        // GDPR
-        if (config('geolocation.addons.gdpr.enabled')) {
-            $this->app->singleton(LocationConsentManager::class, function ($app) {
-                return new LocationConsentManager;
-            });
-        }
+        // Addon services are registered unconditionally: they read their
+        // config at call time, and the facades should always resolve. Gating
+        // them behind config previously caused "Target class not found" errors
+        // when an addon was toggled on after boot.
+        $this->app->singleton(IpAnonymizer::class, fn ($app) => new IpAnonymizer);
+        $this->app->singleton(LocationConsentManager::class, fn ($app) => new LocationConsentManager);
     }
 
     protected function bootAddons(): void
     {
-        // Register middleware
-        if (config('geolocation.addons.middleware.enabled')) {
-            $router = $this->app['router'];
-            $router->aliasMiddleware('geo.allow', GeoMiddleware::class);
-            $router->aliasMiddleware('geo.deny', GeoMiddleware::class);
-            $router->aliasMiddleware('geo.ratelimit', GeoRateLimitMiddleware::class);
-            $router->aliasMiddleware('geo.security', SecurityCheckMiddleware::class);
-        }
+        // Always alias the middleware. Each middleware checks its own
+        // feature flag on every request, so registering is cheap and avoids
+        // the previous bug where `geo.ratelimit` did not exist unless the
+        // unrelated `addons.middleware.enabled` flag was on.
+        $router = $this->app['router'];
+        $router->aliasMiddleware('geo.allow', GeoMiddleware::class);
+        $router->aliasMiddleware('geo.deny', GeoMiddleware::class);
+        $router->aliasMiddleware('geo.ratelimit', GeoRateLimitMiddleware::class);
+        $router->aliasMiddleware('geo.security', SecurityCheckMiddleware::class);
 
         // Register GDPR consent routes if enabled
         $this->registerGdprRoutes();

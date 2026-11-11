@@ -47,22 +47,21 @@ IpBlocklist::block('1.2.3.4', 'Manual block - spam');
 
 ### Block for Custom Duration
 
-```php
-use DateTime;
+`block()` accepts any `DateTimeInterface` (Carbon, immutable dates, etc.):
 
-IpBlocklist::block('1.2.3.4', 'Brute force', new DateTime('+7 days'));
+```php
+IpBlocklist::block('1.2.3.4', 'Brute force', now()->addDays(7));
+IpBlocklist::block('1.2.3.5', 'Spam', new \DateTimeImmutable('+7 days'));
 ```
 
 ### Automatic Blocking
 
 Blocking happens automatically when the `geo.security` middleware is enabled and threat intelligence detects a threat:
 
-```php
-// In config/geolocation.php
-'threat_intelligence' => [
-    'enabled' => true,
-    'auto_block' => true,
-],
+```env
+GEOLOCATION_THREAT_INTELLIGENCE_ENABLED=true
+GEOLOCATION_THREAT_AUTO_BLOCK=true
+ABUSEIPDB_API_KEY=your_key
 ```
 
 ---
@@ -84,14 +83,11 @@ if (IpBlocklist::isBlocked($request->ip())) {
 ```php
 use Bkhim\Geolocation\Models\IpBlocklist;
 
-$blocked = IpBlocklist::where('ip', '1.2.3.4')->first();
-
-if ($blocked) {
-    $blocked->delete(); // or
-    $blocked->blocked_until = now();
-    $blocked->save();
-}
+IpBlocklist::unblock('1.2.3.4');   // delete the row immediately
+IpBlocklist::pruneExpired();       // delete rows whose blocked_until has passed
 ```
+
+`geolocation:prune` also removes expired entries automatically.
 
 ---
 
@@ -107,9 +103,11 @@ Route::middleware('geo.security')->group(function () {
 ```
 
 This middleware:
-1. Checks if IP is in blocklist
-2. Checks threat intelligence
-3. Auto-blocks if configured
+1. Rejects IPs present in `geolocation_ip_blocklist` (403)
+2. Audits threat-intelligence detections
+3. Auto-blocks when `threat_intelligence.auto_block=true`
+
+Disable the blocklist check with `security.enable_blocking=false`.
 
 ---
 

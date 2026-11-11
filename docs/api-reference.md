@@ -27,18 +27,18 @@ $details = Geolocation::driver('maxmind')->lookup('8.8.8.8');
 Clear geolocation cache.
 
 ```php
-// Clear all geolocation cache
-Geolocation::clearCache();
+// Clear one IP for one provider (works without cache tags)
+Geolocation::clearCache('8.8.8.8', 'ipapi');
 
-// Clear specific IP cache
+// Clear one IP for the default provider
 Geolocation::clearCache('8.8.8.8');
 
-// Clear specific provider cache
-Geolocation::clearCache(null, 'ipapi');
-
-// Clear specific IP for specific provider
-Geolocation::clearCache('8.8.8.8', 'ipapi');
+// Clear every geolocation entry (requires cache tags + taggable store)
+Geolocation::clearCache();
 ```
+
+> Bulk clearing returns `false` when `cache.tags.enabled` is off, because the
+> package will not flush an untagged shared cache.
 
 ### `getCacheKey(string $ip, ?string $provider = null)`
 
@@ -46,10 +46,21 @@ Get cache key for an IP.
 
 ```php
 $key = Geolocation::getCacheKey('8.8.8.8');
-// Returns: "geolocation:ipapi:a1b2c3d4e5f6..."
+// Returns: "{prefix}:ipapi:{md5}"
 
 $key = Geolocation::getCacheKey('8.8.8.8', 'maxmind');
-// Returns: "geolocation:maxmind:a1b2c3d4e5f6..."
+// Returns: "{prefix}:maxmind:{md5}"
+
+// The prefix is configurable via GEOLOCATION_CACHE_PREFIX.
+```
+
+### `countries($locale = null)`
+
+Return the bundled ISO country-code → name map.
+
+```php
+$countries = Geolocation::countries();      // ['US' => 'United States', ...]
+$countries = Geolocation::countries('pt_BR');
 ```
 
 ### Console Commands
@@ -151,9 +162,11 @@ php artisan geolocation:cache optimize
 | `getOpenStreetMapLink()` | `?string` | OpenStreetMap URL |
 | `getAppleMapsLink()` | `?string` | Apple Maps URL |
 | `getCountryFlag()` | `?string` | Flag emoji (🇺🇸) |
+| `getCountryFlagEmoji()` | `?string` | Alias of `getCountryFlag()` |
 | `getCountryFlagUrl(int $width)` | `?string` | Flag CDN URL |
+| `hasCoordinates()` | `bool` | Both lat/long present (0 is valid) |
 | `toArray()` | `array` | All data as array |
-| `isValid()` | `bool` | Has valid location data |
+| `isValid()` | `bool` | IP + country + coordinates present |
 
 ### Time
 
@@ -172,8 +185,26 @@ php artisan geolocation:cache optimize
 ```php
 use Bkhim\Geolocation\Facades\IpAnonymizer;
 
-$anonymized = IpAnonymizer::anonymize('192.168.1.100');
-$isAnon = IpAnonymizer::isAnonymized('192.168.1.100');
+// Applies the configured policy (enabled + country scope)
+$anonymized = IpAnonymizer::anonymize('8.8.8.1');   // "8.8.8.0"
+
+// Force masking regardless of policy (used by storage decisions)
+$masked = IpAnonymizer::mask('8.8.8.1');            // "8.8.8.0"
+
+// Inspect
+IpAnonymizer::isEnabled();          // bool
+IpAnonymizer::scope();              // "none" | "all" | "gdpr"
+IpAnonymizer::shouldAnonymize($ip); // bool
+```
+
+### ThreatIntelligence
+
+```php
+use Bkhim\Geolocation\Facades\ThreatIntelligence;
+
+ThreatIntelligence::checkIp('1.2.3.4');   // ?array (cached)
+ThreatIntelligence::isThreat('1.2.3.4');  // bool
+ThreatIntelligence::forget('1.2.3.4');    // clear the cached reputation
 ```
 
 ### LocationConsentManager

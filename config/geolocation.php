@@ -349,42 +349,57 @@ return [
 
     'addons' => [
         'middleware' => [
-            'enabled' => false,
-            'cache_time' => 3600, // 1 hour
-            'response_type' => 'abort', // abort, redirect, json
-            'redirect_to' => '/restricted',
-            'status_code' => 403,
+            'enabled' => env('GEOLOCATION_MIDDLEWARE_ENABLED', false),
+            'cache_time' => env('GEOLOCATION_MIDDLEWARE_CACHE_TIME', 3600), // 1 hour
+            'response_type' => env('GEOLOCATION_MIDDLEWARE_RESPONSE_TYPE', 'abort'), // abort, redirect, json
+            'redirect_to' => env('GEOLOCATION_MIDDLEWARE_REDIRECT_TO', '/restricted'),
+            'status_code' => env('GEOLOCATION_MIDDLEWARE_STATUS_CODE', 403),
         ],
 
         'rate_limiting' => [
-            'enabled' => false,
+            'enabled' => env('GEOLOCATION_RATE_LIMITING_ENABLED', false),
             'limits' => [
-                // 'country_code' => ['requests_per_minute' => X]
+                // Each country accepts either an int or an array:
+                //   'US' => 100
+                //   'US' => ['requests_per_minute' => 100]
                 'US' => ['requests_per_minute' => 100],
                 'CN' => ['requests_per_minute' => 50],
                 '*' => ['requests_per_minute' => 30], // Default
             ],
-            'storage' => 'redis', // redis, database, file
         ],
 
         'anonymization' => [
-            'enabled' => false,
-            'ipv4_mask' => '255.255.255.0', // Last octet
-            'ipv6_mask' => 'ffff:ffff:ffff:ffff:0000:0000:0000:0000',
-            'preserve_local' => true,
-            'gdpr_countries' => ['AT', 'BE', 'BG', 'HR', 'CY', 'CZ', 'DK', 'EE', 'FI', 'FR', 'DE', 'GR', 'HU', 'IE', 'IT', 'LV', 'LT', 'LU', 'MT', 'NL', 'PL', 'PT', 'RO', 'SK', 'SI', 'ES', 'SE', 'GB', 'IS', 'LI', 'NO'],
+            'enabled' => env('GEOLOCATION_ANONYMIZATION_ENABLED', false),
+
+            // Bitmasks: how much of the address to keep.
+            'ipv4_mask' => env('GEOLOCATION_ANONYMIZATION_IPV4_MASK', '255.255.255.0'), // keep /24
+            'ipv6_mask' => env('GEOLOCATION_ANONYMIZATION_IPV6_MASK', 'ffff:ffff:ffff:ffff:0000:0000:0000:0000'), // keep /64
+            'preserve_local' => env('GEOLOCATION_ANONYMIZATION_PRESERVE_LOCAL', true),
+
+            // Masking scope (comma-separated env value):
+            //   ''                  → anonymize every IP (default)
+            //   '*'                 → anonymize every IP
+            //   'DE,FR,...'         → anonymize only these countries
+            // The addon is off entirely when addons.anonymization.enabled=false.
+            'gdpr_countries' => array_values(array_filter(array_map(
+                'trim',
+                explode(',', (string) env('GEOLOCATION_ANONYMIZATION_COUNTRIES', ''))
+            ))),
         ],
 
         'gdpr' => [
-            'enabled' => false,
-            'require_consent_for' => ['EU', 'EEA', 'GDPR'],
-            'consent_cookie' => 'geo_consent',
-            'consent_lifetime' => 365, // days
-            'banner_view' => 'geolocation::gdpr.banner',
+            'enabled' => env('GEOLOCATION_GDPR_ENABLED', false),
+            'require_consent_for' => array_values(array_filter(array_map(
+                'trim',
+                explode(',', (string) env('GEOLOCATION_GDPR_REGIONS', 'EU,EEA,GDPR'))
+            ))),
+            'consent_cookie' => env('GEOLOCATION_GDPR_CONSENT_COOKIE', 'geo_consent'),
+            'consent_lifetime' => env('GEOLOCATION_GDPR_CONSENT_LIFETIME', 365), // days
+            'banner_view' => env('GEOLOCATION_GDPR_BANNER_VIEW', 'geolocation::gdpr.banner'),
             'routes' => [
-                'enabled' => false,
-                'give' => '/consent/accept',
-                'withdraw' => '/consent/withdraw',
+                'enabled' => env('GEOLOCATION_GDPR_ROUTES_ENABLED', false),
+                'give' => env('GEOLOCATION_GDPR_ROUTE_GIVE', '/consent/accept'),
+                'withdraw' => env('GEOLOCATION_GDPR_ROUTE_WITHDRAW', '/consent/withdraw'),
             ],
         ],
     ],
@@ -401,10 +416,15 @@ return [
         'enabled' => env('GEOLOCATION_USER_TRAIT_ENABLED', true),
         'login_history_table' => 'user_login_locations',
         'login_history_model' => LoginHistory::class,
+
+        // The model that owns login history. Defaults to the configured
+        // auth.providers.users.model when null.
+        'user_model' => env('GEOLOCATION_USER_MODEL'),
+
         'login_history_retention_days' => env('GEOLOCATION_LOGIN_RETENTION_DAYS', 30),
         'cache_ttl' => env('GEOLOCATION_USER_TRAIT_CACHE_TTL', 86400), // seconds
-        'anonymization_mode' => env('GEOLOCATION_ANONYMIZATION_MODE', 'partial'), // none|partial|full
-        'store_ip' => env('GEOLOCATION_STORE_IP', true), // true = masked, false = don't store
+        'anonymization_mode' => env('GEOLOCATION_ANONYMIZATION_MODE', env('GEOLOCATION_USER_TRAIT_ANONYMIZATION_MODE', 'partial')), // none|partial|full
+        'store_ip' => env('GEOLOCATION_STORE_IP', env('GEOLOCATION_USER_TRAIT_STORE_IP', true)), // true = masked, false = don't store
     ],
 
     /*
@@ -418,6 +438,11 @@ return [
     'security' => [
         'enable_mfa_trigger' => env('GEOLOCATION_SECURITY_MFA_ENABLED', true),
         'enable_blocking' => env('GEOLOCATION_SECURITY_BLOCKING_ENABLED', true),
+
+        // Dispatch SuspiciousLocationDetected / HighRiskIpDetected for each
+        // recorded login. Disable to skip the extra risk evaluation.
+        'events_enabled' => env('GEOLOCATION_SECURITY_EVENTS_ENABLED', true),
+
         'risk_threshold' => env('GEOLOCATION_SECURITY_RISK_THRESHOLD', 'high'),
 
         // Risk scoring rules for isHighRiskLogin method
@@ -463,5 +488,15 @@ return [
         'enabled' => env('GEOLOCATION_THREAT_INTELLIGENCE_ENABLED', false),
         'abuseipdb_api_key' => env('ABUSEIPDB_API_KEY'),
         'min_confidence_score' => env('GEOLOCATION_THREAT_MIN_SCORE', 50),
+
+        // How long (seconds) a successful reputation lookup is cached.
+        'cache_ttl' => env('GEOLOCATION_THREAT_CACHE_TTL', 3600),
+
+        // How long (seconds) a failed lookup is remembered before retrying,
+        // so an API outage does not trigger a request on every page view.
+        'failure_ttl' => env('GEOLOCATION_THREAT_FAILURE_TTL', 300),
+
+        // Automatically add IPs flagged as threats to the blocklist.
+        'auto_block' => env('GEOLOCATION_THREAT_AUTO_BLOCK', false),
     ],
 ];

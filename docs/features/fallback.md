@@ -23,19 +23,23 @@ In `config/geolocation.php`:
 ],
 ```
 
-Or via environment variables:
+Or partially via environment variables:
 
 ```env
 GEOLOCATION_FALLBACK_ENABLED=true
-GEOLOCATION_FALLBACK_ORDER=ipinfo,maxmind
-GEOLOCATION_FALLBACK_MAX_ATTEMPTS=2
+GEOLOCATION_FALLBACK_ATTEMPTS=2
 ```
+
+The order itself is only configurable in `config/geolocation.php`
+(`fallback.order`). `max_attempts` counts **fallback** providers after the
+primary, so `2` means primary + up to two fallbacks. `0` disables fallbacks.
 
 ## How It Works
 
 1. Primary provider is called first
 2. If it fails (timeout, error), the next provider in order is tried
-3. This continues until a provider succeeds or all are exhausted
+3. This continues until a provider succeeds, or `max_attempts` fallbacks have
+   failed
 4. If all fail, the last exception is thrown
 
 ## Example

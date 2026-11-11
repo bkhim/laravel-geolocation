@@ -33,8 +33,9 @@ echo $details->isProxy(); // false
 | **Fraud Prevention** | Proxy/VPN/Tor detection, risk scoring, threat intelligence |
 | **Login Security** | Track logins, detect new countries/cities, trigger MFA |
 | **Geo-Blocking** | Allow/deny countries and continents via middleware |
-| **Compliance Built-in** | GDPR consent, IP anonymization, audit logging |
-| **CLI Tools** | Security audits, MaxMind updates, data pruning |
+| **Compliance Built-in** | GDPR consent, IP anonymization (IPv4 + IPv6), audit logging |
+| **Caching** | TTL, configurable prefix, tags, sliding expiration on Laravel 13+ |
+| **CLI Tools** | Lookup, cache management, security audit, pruning, MaxMind updater |
 
 ---
 
@@ -63,16 +64,16 @@ echo $details->isProxy(); // false
 - [IpInfo](providers/ipinfo.md) - Popular choice
 - [MaxMind](providers/maxmind.md) - Local database
 - [IPStack](providers/ipstack.md) - Comprehensive data
-- [IPGeolocation](sources/ipgeolocation.md) - Security-focused
+- [IPGeolocation](providers/ipgeolocation.md) - Security-focused
 
 ### Features
 
-- [CLI Commands](features/commands.md) - Audit, MaxMind updates, pruning
-- [Middleware](features/middleware.md) - Geo-blocking, rate limiting
-- [Caching](features/caching.md) - Performance optimization
+- [CLI Commands](features/commands.md) - Lookup, cache, audit, prune, MaxMind updates
+- [Middleware](features/middleware.md) - Geo-blocking, per-country rate limiting, threat blocking
+- [Caching](features/caching.md) - TTL, sliding expiration, tags, prefix
 - [Fallback](features/fallback.md) - Provider redundancy
-- [Events](features/events.md) - Hook into geolocation events
-- [User Traits](features/user-traits.md) - Model traits for User
+- [Events](features/events.md) - Automatic security events + your listeners
+- [User Traits](features/user-traits.md) - Login history, risk scoring, personalization
 
 ### Compliance
 
@@ -128,8 +129,9 @@ Route::middleware('geo.security')->group(function () {
 
 ## Requirements
 
-- PHP 8.2+
-- Laravel 10.x - 13.x
+- PHP 8.2 – 8.5
+- Laravel 12.x - 13.x
+- 187 tests / 365 assertions
 
 ---
 

@@ -141,23 +141,25 @@ class GeolocationManager
 
         $providers = array_merge([$this->getDefaultDriver()], $fallbackOrder);
         $providers = array_unique($providers);
-        $attempts = 0;
+        $failed = 0;
         $lastException = null;
 
         foreach ($providers as $provider) {
-            if ($attempts >= $maxAttempts) {
-                break;
-            }
-
             try {
                 return $this->driver($provider)->lookup($ipAddress, $responseFilter);
             } catch (Exception $e) {
                 $lastException = $e;
-                $attempts++;
+                $failed++;
 
                 if ($this->config['logging']['enabled'] ?? false) {
                     $logLevel = $this->config['logging']['level_error'] ?? 'error';
                     logger()->$logLevel("Geolocation provider '{$provider}' failed: ".$e->getMessage());
+                }
+
+                // max_attempts counts fallback attempts after the primary
+                // provider. A value of 0 disables fallbacks entirely.
+                if ($failed > $maxAttempts) {
+                    break;
                 }
 
                 continue;
@@ -309,7 +311,7 @@ class GeolocationManager
         $provider = $provider ?? $this->getDefaultDriver();
 
         if ($ip) {
-            $key = $this->getCacheKey($provider, $ip);
+            $key = $this->getCacheKey($ip, $provider);
 
             return $this->cacheProvider->forget($key);
         }

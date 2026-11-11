@@ -1,14 +1,65 @@
 # CLI Commands
 
-The package provides CLI commands for security management, maintenance, and troubleshooting.
+The package registers five Artisan commands for security management, maintenance and troubleshooting. They are available automatically after install (no manual registration).
 
 ---
 
-## Available Commands
+## `geolocation:lookup`
 
-### `geolocation:audit`
+Look up an IP using the configured driver.
 
-Generate a security audit report.
+```bash
+# Configured default provider
+php artisan geolocation:lookup --ip=8.8.8.8
+
+# Current server IP (when --ip is omitted)
+php artisan geolocation:lookup
+
+# Bypass the cache for this lookup
+php artisan geolocation:lookup --ip=8.8.8.8 --no-cache
+
+# Clear the (tagged) cache first
+php artisan geolocation:lookup --ip=8.8.8.8 --clear-cache
+
+# Show the resolved cache configuration
+php artisan geolocation:lookup --show-cache-info
+```
+
+---
+
+## `geolocation:cache`
+
+Manage the geolocation cache.
+
+```bash
+# Show cache configuration and driver capabilities
+php artisan geolocation:cache info
+
+# Clear a single IP for one provider (works without tags)
+php artisan geolocation:cache clear --ip=8.8.8.8 --provider=ipapi
+
+# Clear all geolocation entries (requires a taggable store: redis/memcached)
+php artisan geolocation:cache clear
+
+# Clear every provider's entries (requires tags)
+php artisan geolocation:cache clear --provider=ipapi
+
+# Warm one provider, or all configured providers
+php artisan geolocation:cache warm-up
+php artisan geolocation:cache warm-up --provider=ipinfo
+
+# Inspect TTL, sliding support, driver recommendations
+php artisan geolocation:cache optimize
+```
+
+> Bulk clears require cache tags (`cache.tags.enabled=true`) and a taggable
+> store. Without tags you can still clear individual entries with `--ip`.
+
+---
+
+## `geolocation:audit`
+
+Generate a security audit report from `user_login_locations`.
 
 ```bash
 # Last 30 days (default)
@@ -18,9 +69,10 @@ php artisan geolocation:audit
 php artisan geolocation:audit --days=7
 ```
 
-**Output:**
+Sample output:
+
 ```
-🔒 Geolocation Security Audit – April 11, 2026
+Geolocation Security Audit – November 11, 2026
 Period: Last 30 days
 
 Login Locations:
@@ -31,7 +83,7 @@ Login Locations:
 └─ 2 Tor exit node logins
 
 Recommendations:
-├─ Enable MFA for users logging from high-risk countries
+├─ Enable MFA for users with VPN/proxy logins (8 users)
 └─ Review 12 logins occurring between midnight and 5AM
 
 Compliance:
@@ -39,124 +91,77 @@ Compliance:
 └─ Data Retention: 30 days (configured)
 ```
 
----
-
-### `geolocation:update-maxmind`
-
-Download/update MaxMind database.
-
-```bash
-# Dry run - show what would happen
-php artisan geolocation:update-maxmind --dry-run
-
-# Download actual database
-php artisan geolocation:update-maxmind
-```
-
-**Requirements:**
-```env
-# In .env
-GEOLOCATION_MAXMIND_LICENSE_KEY=your_license_key
-```
-
-After downloading, extract the archive and replace the `.mmdb` file in `storage/app/geoip/`.
+If the login-history table has not been migrated yet, the command says so and exits cleanly.
 
 ---
 
-### `geolocation:prune`
+## `geolocation:prune`
 
-Remove old login history data for GDPR compliance.
+Remove old login history and expired IP blocklist entries.
 
 ```bash
-# Preview what would be deleted
+# Preview
 php artisan geolocation:prune --dry-run
 
-# Delete old records
+# Delete using the configured retention window
 php artisan geolocation:prune
+
+# Override the retention period for this run
+php artisan geolocation:prune --days=90
+
+# Keep expired blocklist rows (login history only)
+php artisan geolocation:prune --keep-blocks
 ```
 
-**Configuration:**
+Retention is configured with:
+
 ```env
-# In .env - days to retain (default: 30)
 GEOLOCATION_LOGIN_RETENTION_DAYS=30
 ```
 
-Or in `config/geolocation.php`:
-```php
-'user_trait' => [
-    'login_history_retention_days' => 30,
-],
-```
+or `config/geolocation.php` → `user_trait.login_history_retention_days`.
 
 ---
 
-### `geolocation:lookup`
+## `geolocation:update-maxmind`
 
-Lookup geolocation data for an IP address.
-
-```bash
-# Specific IP
-php artisan geolocation:lookup --ip=8.8.8.8
-
-# Current server IP
-php artisan geolocation:lookup
-
-# Skip cache
-php artisan geolocation:lookup --ip=8.8.8.4 --no-cache
-
-# Clear cache first
-php artisan geolocation:lookup --ip=8.8.8.4 --clear-cache
-
-# Show cache info
-php artisan geolocation:lookup --show-cache-info
-```
-
----
-
-### `geolocation:clear-cache`
-
-Clear geolocation cache.
+Download, extract and install a MaxMind database.
 
 ```bash
-# Clear all geolocation cache
-php artisan geolocation:clear-cache
+# Show what would happen
+php artisan geolocation:update-maxmind --dry-run
 
-# Clear specific IP cache
-php artisan geolocation:clear-cache --ip=8.8.8.8
+# Download, extract and install (overwrites after confirmation)
+php artisan geolocation:update-maxmind
+
+# Overwrite without asking (for cron)
+php artisan geolocation:update-maxmind --force
+
+# Download a different edition
+php artisan geolocation:update-maxmind --edition=GeoLite2-Country
 ```
 
----
+Requirements:
 
-## Usage Examples
-
-### Daily Security Check
-
-```bash
-# Run audit as part of daily cron
-0 6 * * * php artisan geolocation:audit --days=1 >> /var/log/geo-audit.log
+```env
+MAXMIND_LICENSE_KEY=your_license_key
+MAXMIND_DATABASE_PATH=storage/app/geoip/GeoLite2-City.mmdb
 ```
 
-### Weekly Maintenance
-
-```bash
-# Weekly MaxMind update
-0 2 * * 0 php artisan geolocation:update-maxmind
-
-# Weekly data prune
-0 3 * * 0 php artisan geolocation:prune
-```
+The command extracts the archive with the system `tar` binary, locates the
+`.mmdb` file and moves it into place atomically, then removes the archive.
 
 ---
 
 ## Scheduling
 
-Add to `app/Console/Kernel.php`:
+Laravel 11+ schedules commands in `routes/console.php`:
 
 ```php
-protected function schedule(Schedule $schedule)
-{
-    $schedule->command('geolocation:audit --days=1')->dailyAt('6am');
-    $schedule->command('geolocation:prune')->weekly();
-    $schedule->command('geolocation:update-maxmind')->weekly()->sundays()->at('2am');
-}
+use Illuminate\Support\Facades\Schedule;
+
+Schedule::command('geolocation:audit --days=1')->dailyAt('06:00');
+Schedule::command('geolocation:prune')->weekly();
+Schedule::command('geolocation:update-maxmind --force')->weekly()->sundays()->at('02:00');
 ```
+

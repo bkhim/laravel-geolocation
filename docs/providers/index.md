@@ -7,7 +7,7 @@ This package supports 6 geolocation providers. Choose based on your needs.
 | Provider | Free Tier | API Key | Fraud Score | Proxy Detection | Mobile Detection |
 |----------|-----------|---------|-------------|------------------|------------------|
 | **ipapi.co** | 30,000/month | ❌ No | ❌ Basic | ✅ | ❌ |
-| **IP2Location.io** | 50,000/day | ✅ Yes | ✅ Advanced | ✅ | ✅ |
+| **IP2Location.io** | 1,000/day (no key) / 50,000/month (free key) | Optional | ✅ Advanced | ✅ | ✅ |
 | **IpInfo** | Unlimited (Lite) | ✅ Yes | ❌ Basic | ❌ | ❌ |
 | **MaxMind** | Unlimited (local) | ❌ No | ❌ None | ❌ | ❌ |
 | **IPStack** | 100/month | ✅ Yes | ❌ Basic | ❌ | ❌ |

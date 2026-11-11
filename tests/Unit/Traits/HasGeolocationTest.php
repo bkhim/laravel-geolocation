@@ -284,3 +284,34 @@ it('has login histories relationship', function () {
     expect($user->loginHistories())->toBeInstanceOf(HasMany::class);
     expect($user->loginHistories()->count())->toBe(1);
 });
+
+it('masks ipv6 addresses without erasing them and honours the configured mask', function () {
+    $user = new class extends TestGeolocationUser
+    {
+        public function mask(string $ip, string $mode = 'partial'): ?string
+        {
+            return $this->getIpToStore($ip, $mode);
+        }
+    };
+
+    // Default mask keeps the first 64 bits.
+    expect($user->mask('2001:4860:4860::8888'))->toBe('2001:4860:4860::')
+        ->and($user->mask('2a00:1450:4009:81f::200e'))->toBe('2a00:1450:4009:81f::')
+        ->and($user->mask('8.8.8.8'))->toBe('8.8.8.0')
+        ->and($user->mask('8.8.8.8', 'none'))->toBe('8.8.8.8')
+        ->and($user->mask('8.8.8.8', 'full'))->toBeNull();
+});
+
+it('applies a custom ipv6 mask for stored login ips', function () {
+    config(['geolocation.addons.anonymization.ipv6_mask' => 'ffff:ffff:ffff:0000:0000:0000:0000:0000']);
+
+    $user = new class extends TestGeolocationUser
+    {
+        public function mask(string $ip): ?string
+        {
+            return $this->getIpToStore($ip, 'partial');
+        }
+    };
+
+    expect($user->mask('2a00:1450:4009:81f::200e'))->toBe('2a00:1450:4009::');
+});

@@ -168,3 +168,28 @@ it('security check middleware respects enable_blocking config', function () {
 
     expect($response->getStatusCode())->toBe(200);
 });
+
+it('security middleware blocks a threat-intelligence flagged ip', function () {
+    config([
+        'geolocation.security.enable_blocking' => true,
+        'geolocation.threat_intelligence.enabled' => true,
+        'geolocation.threat_intelligence.abuseipdb_api_key' => 'test',
+        'geolocation.threat_intelligence.min_confidence_score' => 50,
+    ]);
+
+    \Illuminate\Support\Facades\Cache::flush();
+    \Illuminate\Support\Facades\Http::fake([
+        'api.abuseipdb.com/*' => \Illuminate\Support\Facades\Http::response([
+            'data' => ['abuseConfidenceScore' => 95],
+        ]),
+    ]);
+
+    // The threat is logged but, without auto_block, the request continues.
+    $middleware = new SecurityCheckMiddleware;
+    $request = Request::create('/test', 'GET', [], [], [], ['REMOTE_ADDR' => '6.6.6.6']);
+
+    $response = $middleware->handle($request, fn () => response('ok', 200));
+
+    expect($response->getStatusCode())->toBe(200);
+    \Illuminate\Support\Facades\Http::assertSent(fn ($r) => str_contains($r->url(), 'abuseipdb.com'));
+});

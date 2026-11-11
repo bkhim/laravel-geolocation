@@ -10,24 +10,18 @@ The GDPR (General Data Protection Regulation) requires consent before collecting
 
 In `config/geolocation.php`:
 
-```php
-'addons' => [
-    'gdpr' => [
-        'enabled' => env('GEOLOCATION_GDPR_ENABLED', false),
-        'require_consent_for' => ['GDPR'], // EU + UK + EEA
-        'consent_cookie' => 'geo_consent',
-        'consent_lifetime' => 365, // days
-        'banner_view' => 'geolocation::gdpr.banner',
-        
-        // Built-in consent routes (optional)
-        'routes' => [
-            'enabled' => env('GEOLOCATION_GDPR_ROUTES_ENABLED', false),
-            'give' => '/consent/accept',
-            'withdraw' => '/consent/withdraw',
-        ],
-    ],
-],
+```env
+GEOLOCATION_GDPR_ENABLED=true
+GEOLOCATION_GDPR_REGIONS=EU,EEA,GDPR
+GEOLOCATION_GDPR_CONSENT_COOKIE=geo_consent
+GEOLOCATION_GDPR_CONSENT_LIFETIME=365
+GEOLOCATION_GDPR_ROUTES_ENABLED=false
+GEOLOCATION_GDPR_ROUTE_GIVE=/consent/accept
+GEOLOCATION_GDPR_ROUTE_WITHDRAW=/consent/withdraw
 ```
+
+Equivalent config keys live under `addons.gdpr`. `enabled=false` makes
+`needsConsent()` always return `false`.
 
 ## Auto-Generated Routes (Recommended)
 

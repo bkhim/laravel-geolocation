@@ -405,11 +405,23 @@ class GeolocationDetails implements \ArrayAccess, \JsonSerializable, Arrayable
     }
 
     /**
+     * Whether the details contain a usable coordinate pair.
+     *
+     * 0 is a valid latitude/longitude (equator / prime meridian), so this
+     * checks for null rather than truthiness.
+     */
+    public function hasCoordinates(): bool
+    {
+        return $this->latitude !== null && $this->longitude !== null
+            && is_numeric($this->latitude) && is_numeric($this->longitude);
+    }
+
+    /**
      * Get Google Maps link for the coordinates.
      */
     public function getGoogleMapsLink(): ?string
     {
-        if (! $this->latitude || ! $this->longitude) {
+        if (! $this->hasCoordinates()) {
             return null;
         }
 
@@ -421,7 +433,7 @@ class GeolocationDetails implements \ArrayAccess, \JsonSerializable, Arrayable
      */
     public function getOpenStreetMapLink(): ?string
     {
-        if (! $this->latitude || ! $this->longitude) {
+        if (! $this->hasCoordinates()) {
             return null;
         }
 
@@ -433,7 +445,7 @@ class GeolocationDetails implements \ArrayAccess, \JsonSerializable, Arrayable
      */
     public function getAppleMapsLink(): ?string
     {
-        if (! $this->latitude || ! $this->longitude) {
+        if (! $this->hasCoordinates()) {
             return null;
         }
 
@@ -481,8 +493,7 @@ class GeolocationDetails implements \ArrayAccess, \JsonSerializable, Arrayable
     {
         return ! empty($this->ip) &&
                ! empty($this->countryCode) &&
-               ! empty($this->latitude) &&
-               ! empty($this->longitude);
+               $this->hasCoordinates();
     }
 
     /**

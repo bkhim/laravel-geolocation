@@ -31,7 +31,7 @@ echo $details->getCountryFlag();    // 🇺🇸
 $details = Geolocation::driver('ipapi')->lookup('8.8.8.8');
 
 // Use IP2Location.io (advanced fraud detection)
-$details = Geolocation::driver('ip2location')->lookup('8.8.8.8');
+$details = Geolocation::driver('ip2locationio')->lookup('8.8.8.8');
 
 // Use MaxMind (local database)
 $details = Geolocation::driver('maxmind')->lookup('8.8.8.8');
@@ -92,10 +92,11 @@ try {
 
 ```bash
 # Test geolocation lookup
-php artisan geolocation:lookup 8.8.8.8
+php artisan geolocation:lookup --ip=8.8.8.8
 
-# Clear geolocation cache
-php artisan geolocation:cache:clear
+# Inspect or clear the cache
+php artisan geolocation:cache info
+php artisan geolocation:cache clear --ip=8.8.8.8 --provider=ipapi
 ```
 
 ## Next Steps

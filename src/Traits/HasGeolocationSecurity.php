@@ -2,11 +2,7 @@
 
 namespace Bkhim\Geolocation\Traits;
 
-use Bkhim\Geolocation\Events\HighRiskIpDetected;
-use Bkhim\Geolocation\Events\LoginLocationRecorded;
-use Bkhim\Geolocation\Events\SuspiciousLocationDetected;
 use Bkhim\Geolocation\GeolocationException;
-use Illuminate\Support\Facades\Event;
 
 /**
  * Trait HasGeolocationSecurity
@@ -254,45 +250,5 @@ trait HasGeolocationSecurity
         $levels = ['low' => 1, 'high' => 2, 'critical' => 3];
 
         return ($levels[$currentLevel] ?? 0) >= ($levels[$thresholdLevel] ?? 0);
-    }
-
-    /**
-     * Boot the trait - fire events when suspicious activity is detected.
-     */
-    protected static function bootHasGeolocationSecurity(): void
-    {
-        static::created(function ($model) {
-            // When a user is created, we don't have login history yet
-        });
-
-        static::updated(function ($model) {
-            // Check for suspicious activity on user updates if needed
-        });
-
-        // Listen for login location recorded events to check for suspicious activity
-        Event::listen(
-            LoginLocationRecorded::class,
-            function (LoginLocationRecorded $event) {
-                /** @var HasGeolocationSecurity $user */
-                $user = $event->user;
-                $loginHistory = $event->loginHistory;
-
-                // Check if this login requires MFA
-                if ($user instanceof self && $user->requiresMfaDueToLocation($loginHistory->ip)) {
-                    // Fire suspicious location detected event
-                    Event::dispatch(
-                        new SuspiciousLocationDetected($user, $loginHistory)
-                    );
-                }
-
-                // Check if IP is high risk using the new method
-                if ($user instanceof self && $user->isHighRiskLogin($loginHistory->ip)) {
-                    // Fire high risk IP detected event
-                    Event::dispatch(
-                        new HighRiskIpDetected($user, $loginHistory)
-                    );
-                }
-            }
-        );
     }
 }

@@ -90,3 +90,62 @@ it('throws exception when all providers fail', function () {
     expect(fn () => $manager->lookup('8.8.8.8'))
         ->toThrow(GeolocationException::class);
 });
+
+it('builds cache keys using the configured prefix and provider', function () {
+    config(['geolocation.cache.prefix' => 'myapp']);
+
+    $manager = app('geolocation');
+
+    expect($manager->getCacheKey('8.8.8.8', 'ipinfo'))
+        ->toBe('myapp:ipinfo:'.md5('8.8.8.8'));
+});
+
+it('clears the exact cache entry that the provider wrote', function () {
+    config([
+        'geolocation.cache.enabled' => true,
+        'geolocation.cache.prefix' => 'geo-test',
+    ]);
+    \Illuminate\Support\Facades\Cache::flush();
+
+    \Illuminate\Support\Facades\Http::fake([
+        'ipinfo.io/*' => \Illuminate\Support\Facades\Http::response([
+            'ip' => '8.8.8.8',
+            'country_code' => 'US',
+            'country' => 'US',
+            'loc' => '37.3860,-122.0838',
+        ]),
+    ]);
+
+    $manager = app('geolocation');
+    $manager->driver('ipinfo')->lookup('8.8.8.8');
+
+    $key = $manager->getCacheKey('8.8.8.8', 'ipinfo');
+
+    expect(\Illuminate\Support\Facades\Cache::has($key))->toBeTrue();
+
+    $manager->clearCache('8.8.8.8', 'ipinfo');
+
+    expect(\Illuminate\Support\Facades\Cache::has($key))->toBeFalse();
+});
+
+it('honours the fallback max_attempts count', function () {
+    \Illuminate\Support\Facades\Http::fake([
+        '*' => \Illuminate\Support\Facades\Http::response([], 500),
+    ]);
+
+    $config = array_merge(config('geolocation'), [
+        'cache' => array_merge(config('geolocation.cache'), ['enabled' => false]),
+        'fallback' => [
+            'enabled' => true,
+            'order' => ['ipstack', 'ipgeolocation'],
+            'max_attempts' => 0,
+        ],
+    ]);
+
+    $manager = new \Bkhim\Geolocation\GeolocationManager($config, \Illuminate\Support\Facades\Cache::driver());
+
+    // max_attempts = 0 means: try the primary, then give up (no fallbacks).
+    expect(fn () => $manager->lookup('8.8.8.8'))->toThrow(\Bkhim\Geolocation\GeolocationException::class);
+
+    \Illuminate\Support\Facades\Http::assertSentCount(1);
+});

@@ -56,14 +56,14 @@ class Ip2LocationIo implements LookupInterface
         $ipAddress = $ipAddress ?: request()->ip();
 
         // Check if caching is enabled before attempting to cache
-        if (! config('geolocation.cache.enabled', true)) {
+        if (! $this->isCacheEnabled()) {
             $data = $this->fetchGeolocationData($ipAddress);
 
             return new GeolocationDetails($data);
         }
 
-        $cacheKey = 'geolocation:ip2locationio:'.md5($ipAddress ?? 'current');
-        $cacheTtl = config('geolocation.cache.ttl', 86400);
+        $cacheKey = $this->getCacheKey($ipAddress, 'ip2locationio');
+        $cacheTtl = $this->getCacheTtl();
 
         try {
             $data = $this->cacheRemember($cacheKey, $cacheTtl, function () use ($ipAddress) {

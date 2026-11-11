@@ -1,5 +1,110 @@
 # Changelog
 
+## [v4.7.0] - 2026-11-11
+
+### Security
+
+- **Upgraded Guzzle to `^7.15.2`** and refreshed the lock file, clearing
+  CVE-2026-69246 (host-based check bypass) and CVE-2026-69245 (cookie domain
+  scope). `composer audit` now reports no advisories.
+- Dev dependencies were locked to `-dev` branches; they are now pinned to
+  stable releases (testbench 11.3, Pest 4.7, pest-plugin-laravel 4.1).
+
+### Fixed
+
+- **Rate limiting middleware raised a `TypeError`** whenever the documented
+  array limit shape (`['requests_per_minute' => 100]`) was used. The limit is
+  now parsed from either the array or integer form.
+- **`Geolocation::clearCache()` passed arguments to `getCacheKey()` in the
+  wrong order**, so single-IP cache invalidation never matched the entry the
+  provider wrote.
+- **Providers bypassed the configured cache prefix**, building keys by hand.
+  All providers now use the shared `CachesGeolocationData::getCacheKey()` so
+  `cache.prefix` is honoured and invalidation is consistent.
+- **IPv6 partial anonymization erased the entire address** (compressed `::`
+  input produced `0:0:0`). Masking now uses binary `inet_pton`/`inet_ntop`.
+- **Zero coordinates were treated as missing**, so `0,0` (and equator /
+  prime-meridian points) returned null map links and failed `isValid()`.
+  Added `GeolocationDetails::hasCoordinates()`.
+- **Security event listeners were registered once per model** using the
+  trait, dispatching duplicate events. The listener now lives in
+  `Listeners\CheckLoginSecurity` and is registered once by the provider.
+- **Middleware aliases were only registered when `addons.middleware.enabled`
+  was true**, so `geo.ratelimit` / `geo.security` were missing when only their
+  own flags were enabled. Aliases are now always registered and each
+  middleware self-gates.
+- **Addon services were only bound when enabled**, causing container errors
+  if a facade was resolved first. `IpAnonymizer` and `LocationConsentManager`
+  are now always bound.
+- **Threat intelligence negative-caching**: a failed lookup was retried on
+  every request because `null` is not cached. Failures are now remembered for
+  `threat_intelligence.failure_ttl` seconds.
+- **Addon toggles ignored `.env`.** The `enabled` flags for middleware, rate
+  limiting, anonymization, GDPR and GDPR routes were hard-coded to `false`,
+  so `GEOLOCATION_MIDDLEWARE_ENABLED` and friends had no effect. They are now
+  read from the environment (`GEOLOCATION_*_ENABLED`).
+- **Anonymization and GDPR settings are env-configurable**: masks
+  (`GEOLOCATION_ANONYMIZATION_IPV4_MASK` / `_IPV6_MASK`), `preserve_local`,
+  country scope (`GEOLOCATION_ANONYMIZATION_COUNTRIES`, comma-separated),
+  consent cookie/lifetime and GDPR consent routes. The login-storage env names
+  `GEOLOCATION_STORE_IP` / `GEOLOCATION_ANONYMIZATION_MODE` are now accepted
+  (the previously documented `GEOLOCATION_USER_TRAIT_*` variants still work).
+- **`LoginHistory::user()` could fatal** when `auth.providers.users.model`
+  was unset (custom guards); it now falls back to a configurable model.
+- **`IpBlocklist::block()` required `\DateTime`**; it now accepts any
+  `DateTimeInterface`.
+- **`LoginHistory` ignored the configured table name**; the model now reads
+  `user_trait.login_history_table`.
+
+### Changed
+
+- **IP anonymization now honours `enabled` as a master switch.** Previously the
+  flag was ignored and masking only applied to `gdpr_countries`. Now
+  `enabled: false` never masks, `enabled: true` masks everything, and a
+  non-empty `gdpr_countries` list opts into country-scoped masking. The
+  packaged default list changed from the 31-country EU set to `[]` (mask all);
+  published application configs are unaffected.
+- `HasGeolocation` now delegates partial IP masking to `IpAnonymizer`, so the
+  configured `ipv4_mask` / `ipv6_mask` apply to stored login IPs as well.
+- `geolocation:prune` also removes expired IP blocklist entries and accepts
+  `--days` / `--keep-blocks`.
+- `geolocation:update-maxmind` now extracts the archive and installs the
+  `.mmdb` automatically (`--edition`, `--force`).
+- `geolocation:cache` honours the configured cache store and uses the real
+  key builder; `warm-up` covers every configured provider.
+- Removed the unused `RateLimitByGeo` middleware (duplicate of
+  `GeoRateLimitMiddleware`).
+- Package description and docs now correctly state **Laravel 12–13**
+  (previously claimed 10–13) and **PHP 8.2+**.
+- Added explicit `illuminate/*` requirements so the package can be installed
+  outside a full Laravel application.
+
+### Tests & CI
+
+- CI now runs on every push and pull request (previously weekly schedule only),
+  across PHP 8.2, 8.3, 8.4 and 8.5, and validates `composer.json`.
+- Added a `psalm.xml` so the scheduled security scan works; it also runs on
+  push/PR.
+- Test count raised from 152 to **187** (365 assertions), covering rate
+  limiting, audit logging, IPv6 masking, zero coordinates, cache-key
+  consistency, negative caching, environment-driven config, and the blocklist
+  helpers.
+
+### Documentation
+
+- Reworked the docs to match the code: commands (new flags, auto-extract,
+  actual command names), middleware (automatic alias registration, array/int
+  limits, self-gating), caching (prefix, sliding TTL, tag requirements),
+  events (real properties, single listener), configuration (complete env
+  reference, `drivers.default`, anonymization scope), IP blocking
+  (`unblock`, `pruneExpired`, `DateTimeInterface`), threat intelligence
+  (AbuseIPDB service + caching), rate limiting, GDPR consent, user traits,
+  upgrading guide for v4.7, testing structure, and the IP2Location.io
+  provider page (correct driver/env names and limits).
+- Removed the stale internal `docs/FEATURES.md` issue tracker.
+- README and docs now state Laravel 12–13, PHP 8.2–8.5 and the current test
+  count.
+
 ## [v4.6.0] - 2026-11-03
 
 ### Added

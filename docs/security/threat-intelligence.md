@@ -105,20 +105,42 @@ if ($type === 'datacenter') {
 }
 ```
 
-## Events
-
-The package dispatches events for threat detection:
+## AbuseIPDB reputation checks
 
 ```php
-// In your EventServiceProvider
-protected $listen = [
-    'Bkhim\Geolocation\Events\HighRiskIpDetected' => [
-        App\Listeners\LogHighRiskLogin::class,
-    ],
-    'Bkhim\Geolocation\Events\SuspiciousLocationDetected' => [
-        App\Listeners\AlertSecurityTeam::class,
-    ],
-];
+use Bkhim\Geolocation\Services\ThreatIntelligenceService;
+
+$service = app(ThreatIntelligenceService::class);
+
+$service->checkIp('1.2.3.4');   // ?array — cached reputation data
+$service->isThreat('1.2.3.4');  // bool — score >= min_confidence_score
+$service->forget('1.2.3.4');    // drop the cached value
+```
+
+Configuration:
+
+```env
+GEOLOCATION_THREAT_INTELLIGENCE_ENABLED=true
+ABUSEIPDB_API_KEY=your_key
+GEOLOCATION_THREAT_MIN_SCORE=50
+GEOLOCATION_THREAT_CACHE_TTL=3600
+GEOLOCATION_THREAT_FAILURE_TTL=300
+GEOLOCATION_THREAT_AUTO_BLOCK=false
+```
+
+Successful lookups are cached for `cache_ttl`; failures are negative-cached for
+`failure_ttl` so an API outage does not trigger a request per page view.
+
+## Events
+
+Security events are dispatched automatically for recorded logins (the package
+registers a single listener). Add your own:
+
+```php
+use Illuminate\Support\Facades\Event;
+use Bkhim\Geolocation\Events\HighRiskIpDetected;
+
+Event::listen(HighRiskIpDetected::class, App\Listeners\LogHighRiskLogin::class);
 ```
 
 ## Best Practices

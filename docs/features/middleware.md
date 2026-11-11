@@ -1,66 +1,108 @@
 # Middleware
 
-Geo-blocking middleware for access control based on country/continent.
+The package registers four route middleware aliases automatically. You do not
+need to add them to `bootstrap/app.php` or `app/Http/Kernel.php`.
 
-## Available Middleware
+| Alias | Class | Purpose |
+|-------|-------|---------|
+| `geo.allow` | `GeoMiddleware` | Allow only listed countries/continents |
+| `geo.deny` | `GeoMiddleware` | Block listed countries/continents |
+| `geo.ratelimit` | `GeoRateLimitMiddleware` | Per-country request throttling |
+| `geo.security` | `SecurityCheckMiddleware` | Block blocklisted / threat-flagged IPs |
 
-### GeoAllow - Allow Specific Locations
+Each middleware checks its own feature flag at request time, so registering the
+alias is free. `geo.allow` / `geo.deny` always apply when attached to a route.
+
+## GeoAllow — allow specific locations
 
 ```php
-// Allow only US and Canada
-Route::get('/us-only', function () {
-    return 'US and Canada only';
-})->middleware('geo.allow:US,CA');
+Route::get('/us-only', fn () => 'US and Canada only')
+    ->middleware('geo.allow:US,CA');
 
-// Allow by continent
-Route::get('/na-only', function () {
-    return 'North America only'
-})->middleware('geo.allow:NA');
+// Continents work too
+Route::get('/na-only', fn () => 'North America only')
+    ->middleware('geo.allow:NA');
 ```
 
-### GeoDeny - Block Specific Locations
+## GeoDeny — block specific locations
 
 ```php
-// Block specific countries
 Route::get('/admin')->middleware('geo.deny:CN,RU,KP');
 
-// Block entire continents
-Route::get('/no-eu')->middleware('geo.deny:EU');
-
-// Block high-risk countries + Tor users
 Route::middleware('geo.deny:CN,RU,KP,AF,PK')->group(function () {
     // Sensitive routes
 });
 ```
 
-### GeoRateLimit - Country-Based Rate Limiting
+Deny responses are configurable:
 
 ```php
-// Default: 60 requests/minute
-Route::post('/api/data')->middleware('geo.ratelimit:60,1');
+'addons' => [
+    'middleware' => [
+        'response_type' => 'abort',   // abort | json | redirect
+        'status_code' => 403,
+        'redirect_to' => '/restricted',
+    ],
+],
+```
 
-// Stricter limits for high-risk countries
+## GeoRateLimit — country-based throttling
+
+Requires `addons.rate_limiting.enabled=true` (or `GEOLOCATION_RATE_LIMITING_ENABLED=true`).
+
+```php
+// Uses the per-country limits from config
+Route::post('/api/data')->middleware('geo.ratelimit');
+
+// Optional: override max attempts and decay minutes (60s default)
 Route::post('/login')->middleware('geo.ratelimit:10,1');
 ```
 
-## Registration
-
-### Laravel 10 and earlier
-
-In `app/Http/Kernel.php`:
+Limits accept either an integer or the documented array shape:
 
 ```php
-protected $middlewareAliases = [
-    'geo.allow' => \Bkhim\Geolocation\Addons\Middleware\GeoMiddleware::class,
-    'geo.deny' => \Bkhim\Geolocation\Addons\Middleware\GeoMiddleware::class,
-    'geo.ratelimit' => \Bkhim\Geolocation\Addons\Middleware\GeoRateLimitMiddleware::class,
-    'geo.security' => \Bkhim\Geolocation\Addons\Middleware\SecurityCheckMiddleware::class,
-];
+'addons' => [
+    'rate_limiting' => [
+        'enabled' => env('GEOLOCATION_RATE_LIMITING_ENABLED', false),
+        'limits' => [
+            'US' => ['requests_per_minute' => 100],
+            'CN' => 10,                          // int form works too
+            '*' => ['requests_per_minute' => 60], // default
+        ],
+    ],
+],
 ```
 
-### Laravel 11+
+Behaviour:
 
-In `bootstrap/app.php`:
+- The country comes from `Geolocation::lookup($request->ip())`; if that lookup
+  throws, the request falls back to the `'*'` limit rather than failing.
+- Responses include `X-RateLimit-Limit`, `X-RateLimit-Remaining`,
+  `X-RateLimit-Reset`, and `Retry-After` on 429.
+- Throttled requests receive `429` JSON: `{"error":"Too Many Attempts","retry_after":N}`.
+
+## GeoSecurity — block threats
+
+Requires `security.enable_blocking=true` for blocklist checks; threat checks
+additionally require `threat_intelligence.enabled=true`.
+
+```php
+Route::middleware('geo.security')->group(function () {
+    Route::post('/login', [AuthController::class, 'login']);
+    Route::post('/checkout', [CheckoutController::class, 'store']);
+});
+```
+
+It will:
+
+1. Reject IPs present in `geolocation_ip_blocklist` with `403`.
+2. Query threat intelligence and audit-log detections.
+3. Optionally auto-block when `threat_intelligence.auto_block=true`.
+
+## Advanced: manual registration
+
+Aliases are already registered, but if you disable auto-discovery or need to
+override the classes, register them yourself. In `bootstrap/app.php`:
 
 ```php
 ->withMiddleware(function (Middleware $middleware) {
@@ -73,70 +115,4 @@ In `bootstrap/app.php`:
 })
 ```
 
-**Note**: When using Laravel 11+, set `GEOLOCATION_MIDDLEWARE_ENABLED=false` in `.env` to prevent duplicate registration.
-
-## Configuration
-
-In `config/geolocation.php`:
-
-```php
-'addons' => [
-    'middleware' => [
-        'enabled' => env('GEOLOCATION_MIDDLEWARE_ENABLED', false),
-        'response_type' => 'abort', // 'abort', 'json', 'redirect'
-        'status_code' => 403,
-        'redirect_to' => '/',
-    ],
-    
-    'rate_limiting' => [
-        'enabled' => env('GEOLOCATION_RATE_LIMITING_ENABLED', false),
-        'limits' => [
-            'CN' => ['requests_per_minute' => 5],
-            'RU' => ['requests_per_minute' => 3],
-            '*' => ['requests_per_minute' => 60], // default
-        ],
-        'message' => 'Too Many Attempts.',
-    ],
-],
-```
-
-## Response Types
-
-```php
-// JSON response (for APIs)
-'response_type' => 'json'
-// Returns: {"error": "Access denied from your location", "code": "GEO_BLOCKED"}
-
-# Redirect
-'response_type' => 'redirect',
-'redirect_to' => '/blocked'
-
-// Abort with status code (default)
-'response_type' => 'abort',
-'status_code' => 403
-```
-
-### GeoSecurity - Threat Blocking
-
-Blocks IPs that are in the blocklist or flagged by threat intelligence.
-
-```php
-// Enable in config/geolocation.php
-'addons' => [
-    'middleware' => [
-        'enabled' => true,
-    ],
-],
-
-// In routes
-Route::middleware('geo.security')->group(function () {
-    Route::post('/login', [AuthController::class, 'login']);
-    Route::post('/checkout', [CheckoutController::class, 'store']);
-});
-```
-
-This middleware:
-- Checks if IP is in the blocklist (`geolocation_ip_blocklist`)
-- Checks AbuseIPDB threat intelligence (if configured)
-- Auto-blocks threats if enabled
-- Returns 403 with JSON error response
+The package supports Laravel 12–13 only.

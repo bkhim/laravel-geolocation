@@ -187,7 +187,7 @@ php artisan geolocation:audit
 
 Output:
 ```
-🔒 Geolocation Security Audit – April 11, 2026
+Geolocation Security Audit – November 11, 2026
 
 Login Locations:
 ├─ 47 logins from new countries
@@ -239,8 +239,8 @@ public function handleLogin(Request $request)
     // 2. Check geolocation
     $details = Geolocation::lookup($ip);
     
-    // 3. Record login
-    $user->recordLoginLocation($ip, $details);
+    // 3. Record login (the trait performs its own lookup)
+    $user->recordLoginLocation($ip);
     
     // 4. Check anomalies
     $detector = new AnomalyDetector();
@@ -251,8 +251,8 @@ public function handleLogin(Request $request)
         return redirect()->route('mfa.challenge');
     }
     
-    // 5. Block proxies if configured
-    if (config('geolocation.security.block_proxies') && $details->isProxy()) {
+    // 5. Block proxies when they are not trusted
+    if ($details->isProxy() && ! in_array($details->getCountryCode(), config('geolocation.security.trusted_countries', []))) {
         return $this->blockedResponse();
     }
     

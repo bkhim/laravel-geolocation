@@ -2,8 +2,6 @@
 
 namespace Bkhim\Geolocation\Traits;
 
-use Illuminate\Support\Facades\Cache;
-
 /**
  * Trait CachesGeolocationData
  *
@@ -13,14 +11,18 @@ use Illuminate\Support\Facades\Cache;
 trait CachesGeolocationData
 {
     /**
-     * Get cache key for geolocation data.
+     * Build a cache key for geolocation data.
      *
-     * @param  string  $provider  Provider name (e.g., 'ipinfo', 'maxmind')
-     * @param  string|null  $ipAddress  IP address to cache
+     * The signature mirrors GeolocationManager::getCacheKey() so provider
+     * cache entries and the public cache-invalidation API always agree.
+     *
+     * @param  string|null  $ipAddress  IP address being cached
+     * @param  string|null  $provider   Provider name (defaults to the driver key)
      */
-    protected function getCacheKey(string $provider, ?string $ipAddress = null): string
+    protected function getCacheKey(?string $ipAddress = null, ?string $provider = null): string
     {
         $prefix = config('geolocation.cache.prefix', 'geolocation');
+        $provider = $provider ?? 'geolocation';
         $hash = md5($ipAddress ?? 'current');
 
         return "{$prefix}:{$provider}:{$hash}";

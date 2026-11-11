@@ -4,14 +4,16 @@ This package includes comprehensive tests using Pest PHP.
 
 ## Running Tests
 
+The suite currently contains **187 tests / 365 assertions**.
+
 ```bash
 # Run all tests
-composer test
+composer test          # = vendor/bin/pest
 
-# Run specific test file
+# Run a specific file
 vendor/bin/pest tests/Unit/Providers/IpApiTest.php
 
-# Run with coverage
+# Run with coverage (requires xdebug/pcov)
 vendor/bin/pest --coverage
 ```
 
@@ -19,21 +21,29 @@ vendor/bin/pest --coverage
 
 ```
 tests/
-├── Feature/           # Integration tests
-│   └── GeolocationTest.php
-├── Unit/              # Unit tests
-│   ├── Providers/     # Provider tests
-│   │   ├── IpApiTest.php
-│   │   ├── IpInfoTest.php
-│   │   ├── Ip2LocationTest.php
-│   │   ├── MaxMindTest.php
-│   │   ├── IpStackTest.php
-│   │   └── IpGeolocationTest.php
+├── Feature/
+│   └── GeolocationServiceProviderTest.php
+├── Unit/
+│   ├── Addons/
+│   │   ├── AnonymizationTest.php
+│   │   ├── GdprTest.php
+│   │   └── Middleware/
+│   │       ├── GeoMiddlewareTest.php
+│   │       └── GeoRateLimitMiddlewareTest.php
+│   ├── Config/
+│   │   └── GeolocationConfigTest.php
+│   ├── Console/GeolocationCommandTest.php
+│   ├── Models/IpBlocklistTest.php
+│   ├── Providers/ (6 provider suites)
+│   ├── Services/
+│   │   ├── AnomalyDetectorTest.php
+│   │   ├── AuditLoggerTest.php
+│   │   └── ThreatIntelligenceServiceTest.php
+│   ├── Traits/
+│   │   ├── CachesGeolocationDataTest.php
+│   │   └── HasGeolocationTest.php
 │   ├── GeolocationDetailsTest.php
-│   ├── GeolocationManagerTest.php
-│   └── Addons/        # Addon tests
-│       ├── AnonymizationTest.php
-│       └── GdprTest.php
+│   └── GeolocationManagerTest.php
 └── TestCase.php
 ```
 

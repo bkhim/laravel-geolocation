@@ -49,10 +49,31 @@ class LoginHistory extends Model
     ];
 
     /**
+     * The table is configurable so applications can relocate it.
+     */
+    public function __construct(array $attributes = [])
+    {
+        parent::__construct($attributes);
+
+        $table = config('geolocation.user_trait.login_history_table');
+
+        if (is_string($table) && $table !== '') {
+            $this->setTable($table);
+        }
+    }
+
+    /**
      * Get the user that owns the login history.
+     *
+     * Falls back to the application's default auth model when
+     * `auth.providers.users.model` is not configured (custom guards).
      */
     public function user(): BelongsTo
     {
-        return $this->belongsTo(config('auth.providers.users.model'));
+        $model = config('auth.providers.users.model')
+            ?? config('geolocation.user_trait.user_model')
+            ?? \Illuminate\Foundation\Auth\User::class;
+
+        return $this->belongsTo($model);
     }
 }

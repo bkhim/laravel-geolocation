@@ -2,6 +2,7 @@
 
 namespace Bkhim\Geolocation\Models;
 
+use DateTimeInterface;
 use Illuminate\Database\Eloquent\Model;
 
 class IpBlocklist extends Model
@@ -19,7 +20,7 @@ class IpBlocklist extends Model
         'blocked_until' => 'datetime',
     ];
 
-    public static function block(string $ip, string $reason, ?\DateTime $until = null): self
+    public static function block(string $ip, string $reason, ?DateTimeInterface $until = null): self
     {
         $record = static::where('ip', $ip)->first();
 
@@ -46,5 +47,21 @@ class IpBlocklist extends Model
         return static::where('ip', $ip)
             ->where('blocked_until', '>', now())
             ->exists();
+    }
+
+    /**
+     * Remove expired block entries. Returns the number of rows deleted.
+     */
+    public static function pruneExpired(): int
+    {
+        return static::where('blocked_until', '<=', now())->delete();
+    }
+
+    /**
+     * Lift a block immediately, regardless of its expiry.
+     */
+    public static function unblock(string $ip): bool
+    {
+        return (bool) static::where('ip', $ip)->delete();
     }
 }

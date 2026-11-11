@@ -1,127 +1,80 @@
 # Events
 
-The package dispatches events for monitoring and integration with your application.
+The package dispatches events for monitoring and integration.
 
 ## Available Events
 
-### HighRiskIpDetected
-
-Dispatched when high-risk indicators are detected:
+| Event | Properties | Dispatched when |
+|-------|------------|-----------------|
+| `LoginLocationRecorded` | `$user`, `$loginHistory` | `recordLoginLocation()` stores a login |
+| `SuspiciousLocationDetected` | `$user`, `$loginHistory` | A recorded login requires MFA by location |
+| `HighRiskIpDetected` | `$user`, `$loginHistory` | A recorded login's risk score is high |
+| `GeoBlockedRequest` | `$user`, `$ip` | Class is available for your own geo-block flows |
 
 ```php
-// Event: Bkhim\Geolocation\Events\HighRiskIpDetected
-// Properties: $ip, $riskScore, $indicators
-
 use Bkhim\Geolocation\Events\HighRiskIpDetected;
-use App\Listeners\LogHighRiskLogin;
 
-protected $listen = [
-    HighRiskIpDetected::class => [
-        LogHighRiskLogin::class,
-    ],
-];
-```
-
-### SuspiciousLocationDetected
-
-Dispatched when unusual location patterns are detected:
-
-```php
-use Bkhim\Geolocation\Events\SuspiciousLocationDetected;
-
-// In a listener
-public function handle(SuspiciousLocationDetected $event)
+public function handle(HighRiskIpDetected $event): void
 {
-    Log::warning('Suspicious login location', [
+    Log::warning('High-risk login', [
         'user_id' => $event->user->id,
-        'ip' => $event->location->getIp(),
-        'country' => $event->location->getCountryCode(),
+        'ip' => $event->loginHistory->ip,
+        'country' => $event->loginHistory->country_code,
+        'proxy' => $event->loginHistory->is_proxy,
+        'tor' => $event->loginHistory->is_tor,
     ]);
 }
 ```
 
-### GeoBlockedRequest
+## Automatic security events
 
-Dispatched when a request is blocked by geo-middleware:
+The package registers **one** listener for `LoginLocationRecorded`
+(`Bkhim\Geolocation\Listeners\CheckLoginSecurity`) when the service provider
+boots. It evaluates the recorded login and dispatches
+`SuspiciousLocationDetected` / `HighRiskIpDetected`.
 
-```php
-use Bkhim\Geolocation\Events\GeoBlockedRequest;
+You do not register this listener yourself, and it never fires twice — earlier
+versions registered it inside a trait boot method, which duplicated events for
+every model using the trait.
 
-// In a listener
-public function handle(GeoBlockedRequest $event)
-{
-    Log::warning('Geo-blocked request', [
-        'ip' => $event->request->ip(),
-        'country' => $event->countryCode,
-    ]);
-}
+Disable the automatic evaluation with:
+
+```env
+GEOLOCATION_SECURITY_EVENTS_ENABLED=false
 ```
 
-### LoginLocationRecorded
+## Registering your own listeners
 
-Dispatched after a login location is recorded:
-
-```php
-use Bkhim\Geolocation\Events\LoginLocationRecorded;
-
-// In your EventServiceProvider
-protected $listen = [
-    LoginLocationRecorded::class => [
-        App\Listeners\NotifySecurityTeam::class,
-    ],
-];
-```
-
-## Registering Listeners
-
-In `app/Providers/EventServiceProvider.php`:
+Laravel 11+ — in `AppServiceProvider::boot()`:
 
 ```php
+use Illuminate\Support\Facades\Event;
 use Bkhim\Geolocation\Events\HighRiskIpDetected;
-use Bkhim\Geolocation\Events\SuspiciousLocationDetected;
-use Bkhim\Geolocation\Events\GeoBlockedRequest;
 use App\Listeners\LogHighRiskLogin;
-use App\Listeners\NotifySecurityTeam;
-use App\Listeners\LogGeoBlocked;
 
-protected $listen = [
-    HighRiskIpDetected::class => [
-        LogHighRiskLogin::class,
-    ],
-    SuspiciousLocationDetected::class => [
-        NotifySecurityTeam::class,
-    ],
-    GeoBlockedRequest::class => [
-        LogGeoBlocked::class,
-    ],
-];
+public function boot(): void
+{
+    Event::listen(HighRiskIpDetected::class, LogHighRiskLogin::class);
+}
 ```
 
-## Event Properties
 
-| Event | Properties |
-|-------|------------|
-| `HighRiskIpDetected` | `$user`, `$loginHistory` |
-| `SuspiciousLocationDetected` | `$user`, `$loginHistory` |
-| `GeoBlockedRequest` | `$request`, `$countryCode` |
-| `LoginLocationRecorded` | `$user`, `$loginHistory` |
-
-## Event Property Details
-
-### HighRiskIpDetected & SuspiciousLocationDetected
-
-Both events have the same properties:
+## Property reference
 
 ```php
-$event->user;           // The user model
-$event->loginHistory;   // LoginHistory model with location data
-```
-
-Access location data:
-```php
-$event->loginHistory->ip;
-$event->loginHistory->country_code;
+// LoginLocationRecorded, SuspiciousLocationDetected, HighRiskIpDetected
+$event->user;                         // the user model
+$event->loginHistory;                 // LoginHistory model
+$event->loginHistory->ip;             // masked IP as stored
+$event->loginHistory->country_code;   // e.g. "US"
 $event->loginHistory->city;
+$event->loginHistory->timezone;
+$event->loginHistory->currency_code;
 $event->loginHistory->is_proxy;
 $event->loginHistory->is_tor;
+$event->loginHistory->occurred_at;
+
+// GeoBlockedRequest
+$event->user;
+$event->ip;
 ```

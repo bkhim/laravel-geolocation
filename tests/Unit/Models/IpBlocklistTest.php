@@ -49,3 +49,28 @@ it('is blocked returns false for expired block', function () {
 it('is blocked returns false for non-blocked ip', function () {
     expect(IpBlocklist::isBlocked('5.6.7.8'))->toBeFalse();
 });
+
+it('accepts any DateTimeInterface implementation', function () {
+    $result = IpBlocklist::block('2.2.2.2', 'Immutable test', new \DateTimeImmutable('+1 hour'));
+
+    expect(IpBlocklist::isBlocked('2.2.2.2'))->toBeTrue()
+        ->and($result->ip)->toBe('2.2.2.2');
+});
+
+it('can unblock an ip immediately', function () {
+    IpBlocklist::block('3.3.3.3', 'Test', now()->addDay()->toDateTime());
+
+    expect(IpBlocklist::unblock('3.3.3.3'))->toBeTrue()
+        ->and(IpBlocklist::isBlocked('3.3.3.3'))->toBeFalse();
+});
+
+it('prunes expired entries only', function () {
+    IpBlocklist::block('4.4.4.4', 'Expired', now()->subHour()->toDateTime());
+    IpBlocklist::block('5.5.5.5', 'Active', now()->addHour()->toDateTime());
+
+    $deleted = IpBlocklist::pruneExpired();
+
+    expect($deleted)->toBe(1)
+        ->and(IpBlocklist::where('ip', '4.4.4.4')->exists())->toBeFalse()
+        ->and(IpBlocklist::where('ip', '5.5.5.5')->exists())->toBeTrue();
+});

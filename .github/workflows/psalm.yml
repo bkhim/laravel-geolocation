@@ -1,8 +1,13 @@
 name: Psalm Security Scan
 
 on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
   schedule:
     - cron: '55 3 * * SUN'
+  workflow_dispatch:
 
 permissions:
   contents: read

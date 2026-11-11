@@ -27,10 +27,10 @@ Detect location, personalize experiences, prevent fraud, and secure logins — a
 
 ## Trusted By Developers
 
-- 780+ installs and growing
-- 149 tests passing
-- Built for Laravel 10-13
-- PHP 8.2, 8.3, 8.4 compatible
+- 1,000+ installs and growing
+- 187 tests passing
+- Built for Laravel 12-13
+- PHP 8.2, 8.3, 8.4, 8.5 compatible
 - MIT Licensed
 
 [View on Packagist](https://packagist.org/packages/bkhim/laravel-geolocation) ·
@@ -122,4 +122,4 @@ echo $location->getCountry(); // "United States"
 
 ---
 
-Built for Laravel 10-13 | PHP 8.2+ | [MIT License](LICENSE)
+Built for Laravel 12-13 | PHP 8.2–8.5 | [MIT License](LICENSE)

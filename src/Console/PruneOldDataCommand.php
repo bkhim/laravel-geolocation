@@ -2,43 +2,62 @@
 
 namespace Bkhim\Geolocation\Console;
 
+use Bkhim\Geolocation\Models\IpBlocklist;
 use Bkhim\Geolocation\Models\LoginHistory;
 use Illuminate\Console\Command;
 
 class PruneOldDataCommand extends Command
 {
-    protected $signature = 'geolocation:prune {--dry-run : Show what would be deleted without deleting}';
+    protected $signature = 'geolocation:prune
+                            {--dry-run : Show what would be deleted without deleting}
+                            {--days= : Override the configured login-history retention period}
+                            {--keep-blocks : Do not remove expired IP blocklist entries}';
 
-    protected $description = 'Prune old login history data for GDPR compliance';
+    protected $description = 'Prune old login history and expired IP blocklist entries';
 
     public function handle(): int
     {
-        $retentionDays = config('geolocation.user_trait.login_history_retention_days', 30);
+        $retentionDays = (int) ($this->option('days')
+            ?: config('geolocation.user_trait.login_history_retention_days', 30));
+
         $cutoff = now()->subDays($retentionDays);
+        $dryRun = (bool) $this->option('dry-run');
 
-        $toDelete = LoginHistory::where('occurred_at', '<', $cutoff)->count();
+        // --- Login history -------------------------------------------------
+        $logins = LoginHistory::where('occurred_at', '<', $cutoff)->count();
 
-        if ($toDelete === 0) {
-            $this->info("No records older than {$retentionDays} days to prune.");
-
-            return 0;
+        if ($logins === 0) {
+            $this->info("No login records older than {$retentionDays} days.");
+        } else {
+            $this->line("Login history older than {$retentionDays} days: {$logins} record(s).");
         }
 
-        $this->info("Found {$toDelete} records older than {$retentionDays} days.");
+        // --- Expired IP blocks --------------------------------------------
+        $blocks = $this->option('keep-blocks') ? 0 : IpBlocklist::where('blocked_until', '<=', now())->count();
 
-        if ($this->option('dry-run')) {
-            $this->line("Dry run - would delete {$toDelete} records.");
-
-            return 0;
+        if ($blocks > 0) {
+            $this->line("Expired IP blocklist entries: {$blocks}.");
         }
 
-        if (! $this->confirm("Delete {$toDelete} records?")) {
-            return 1;
+        if ($logins === 0 && $blocks === 0) {
+            return self::SUCCESS;
         }
 
-        $deleted = LoginHistory::where('occurred_at', '<', $cutoff)->delete();
-        $this->info("Deleted {$deleted} records.");
+        if ($dryRun) {
+            $this->info('Dry run - nothing was deleted.');
 
-        return 0;
+            return self::SUCCESS;
+        }
+
+        if (! $this->confirm('Delete the records listed above?')) {
+            return self::FAILURE;
+        }
+
+        $deletedLogins = $logins > 0 ? LoginHistory::where('occurred_at', '<', $cutoff)->delete() : 0;
+        $deletedBlocks = $blocks > 0 ? IpBlocklist::where('blocked_until', '<=', now())->delete() : 0;
+
+        $this->info("Deleted {$deletedLogins} login record(s) and {$deletedBlocks} expired block(s).");
+
+        return self::SUCCESS;
     }
 }

@@ -357,3 +357,41 @@ it('handles country data with separate countrycode field', function () {
 
     expect($details->getCountryCode())->toBe('US');
 });
+
+it('treats zero coordinates as valid', function () {
+    $details = new GeolocationDetails([
+        'ip' => '1.1.1.1',
+        'countryCode' => 'GH',
+        'latitude' => 0,
+        'longitude' => 0,
+    ]);
+
+    expect($details->hasCoordinates())->toBeTrue()
+        ->and($details->isValid())->toBeTrue()
+        ->and($details->getGoogleMapsLink())->toBe('https://maps.google.com/?q=0,0')
+        ->and($details->getOpenStreetMapLink())->toContain('mlat=0')
+        ->and($details->getAppleMapsLink())->toContain('ll=0,0');
+});
+
+it('reports missing coordinates without a false positive', function () {
+    $details = new GeolocationDetails([
+        'ip' => '1.1.1.1',
+        'countryCode' => 'GH',
+    ]);
+
+    expect($details->hasCoordinates())->toBeFalse()
+        ->and($details->isValid())->toBeFalse()
+        ->and($details->getGoogleMapsLink())->toBeNull();
+});
+
+it('handles a coordinate exactly on the equator', function () {
+    $details = new GeolocationDetails([
+        'ip' => '1.1.1.1',
+        'countryCode' => 'KE',
+        'latitude' => 0,
+        'longitude' => 36.8219,
+    ]);
+
+    expect($details->hasCoordinates())->toBeTrue()
+        ->and($details->getGoogleMapsLink())->toContain('0,36.8219');
+});

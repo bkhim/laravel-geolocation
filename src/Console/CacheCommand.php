@@ -2,59 +2,51 @@
 
 namespace Bkhim\Geolocation\Console;
 
+use Bkhim\Geolocation\GeolocationManager;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Cache;
 
 /**
- * Class CacheCommand
- *
- * Console command for managing geolocation cache data following Laravel best practices.
+ * Console command for managing geolocation cache data.
  */
 class CacheCommand extends Command
 {
-    /**
-     * The name and signature of the console command.
-     *
-     * @var string
-     */
     protected $signature = 'geolocation:cache
                             {action : Action to perform: clear, info, warm-up, optimize}
                             {--provider= : Specific provider to target (ipinfo, maxmind, etc.)}
                             {--ip= : Specific IP to target for cache operations}';
 
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
     protected $description = 'Manage geolocation cache data';
 
-    /**
-     * Execute the console command.
-     */
-    public function handle()
+    public function handle(): int
     {
         $action = $this->argument('action');
 
-        switch ($action) {
-            case 'clear':
-                return $this->clearCache();
+        return match ($action) {
+            'clear' => $this->clearCache(),
+            'info' => $this->showCacheInfo(),
+            'warm-up' => $this->warmUpCache(),
+            'optimize' => $this->optimizeCache(),
+            default => $this->unknownAction($action),
+        };
+    }
 
-            case 'info':
-                return $this->showCacheInfo();
+    protected function unknownAction(string $action): int
+    {
+        $this->error("Unknown action: {$action}");
+        $this->info('Available actions: clear, info, warm-up, optimize');
 
-            case 'warm-up':
-                return $this->warmUpCache();
+        return self::FAILURE;
+    }
 
-            case 'optimize':
-                return $this->optimizeCache();
+    /**
+     * Resolve the cache repository configured for geolocation.
+     */
+    protected function cacheStore()
+    {
+        $store = config('geolocation.cache.store');
 
-            default:
-                $this->error("Unknown action: {$action}");
-                $this->info('Available actions: clear, info, warm-up, optimize');
-
-                return 1;
-        }
+        return $store ? Cache::store($store) : Cache::store();
     }
 
     /**
@@ -65,116 +57,108 @@ class CacheCommand extends Command
         $provider = $this->option('provider');
         $ip = $this->option('ip');
 
-        if ($ip && $provider) {
-            // Clear specific IP for specific provider
+        if ($ip) {
             return $this->clearSpecificCache($provider, $ip);
         }
 
         if ($provider) {
-            // Clear all cache for specific provider
             return $this->clearProviderCache($provider);
         }
 
-        // Clear all geolocation cache
         return $this->clearAllGeolocationCache();
     }
 
     /**
-     * Clear specific cache entry.
+     * Clear a single cache entry using the same key builder as the package.
      */
-    protected function clearSpecificCache(string $provider, string $ip): int
+    protected function clearSpecificCache(?string $provider, string $ip): int
     {
-        $prefix = config('geolocation.cache.prefix', 'geolocation');
-        $cacheKey = "{$prefix}:{$provider}:".md5($ip);
+        $manager = app('geolocation');
+        $provider = $provider ?: config('geolocation.drivers.default');
 
-        $this->info("Clearing cache for {$provider} provider and IP {$ip}...");
+        $this->info("Clearing cache for provider [{$provider}] and IP [{$ip}]...");
 
         try {
-            Cache::forget($cacheKey);
-            $this->info('Cache cleared successfully');
+            $key = $manager instanceof GeolocationManager
+                ? $manager->getCacheKey($ip, $provider)
+                : '';
 
-            return 0;
-        } catch (\Exception $e) {
+            $cleared = $key !== '' && $this->cacheStore()->forget($key);
+
+            $cleared
+                ? $this->info('Cache entry cleared.')
+                : $this->warn('No matching cache entry found (it may already be expired).');
+
+            return self::SUCCESS;
+        } catch (\Throwable $e) {
             $this->error('Failed to clear cache: '.$e->getMessage());
 
-            return 1;
+            return self::FAILURE;
         }
     }
 
     /**
-     * Clear cache for specific provider.
+     * Clear cache for a specific provider (requires tags).
      */
     protected function clearProviderCache(string $provider): int
     {
         $this->info("Clearing cache for {$provider} provider...");
 
-        $cacheConfig = config('geolocation.cache');
+        $store = $this->cacheStore();
 
-        if ($cacheConfig['tags']['enabled'] ?? false) {
-            $tags = array_merge($cacheConfig['tags']['names'] ?? ['geolocation'], [$provider]);
+        if (! method_exists($store, 'tags')) {
+            $this->warn('The configured cache store does not support tags.');
+            $this->info('Use --ip= to clear individual entries instead.');
 
-            try {
-                Cache::tags($tags)->flush();
-                $this->info('Provider cache cleared successfully using tags');
-
-                return 0;
-            } catch (\Exception $e) {
-                $this->error('Failed to clear provider cache: '.$e->getMessage());
-
-                return 1;
-            }
+            return self::FAILURE;
         }
 
-        $this->warn('Cache tags are not enabled. Cannot clear provider-specific cache safely.');
-        $this->info('Consider enabling cache tags in your configuration for better cache management.');
+        try {
+            $store->tags($this->tagNames())->flush();
+            $this->info('Provider cache cleared successfully.');
 
-        return 1;
+            return self::SUCCESS;
+        } catch (\Throwable $e) {
+            $this->error('Failed to clear provider cache: '.$e->getMessage());
+
+            return self::FAILURE;
+        }
     }
 
     /**
-     * Clear all geolocation cache.
+     * Clear all geolocation cache entries.
      */
     protected function clearAllGeolocationCache(): int
     {
         $this->info('Clearing all geolocation cache...');
 
-        $cacheConfig = config('geolocation.cache');
+        $store = $this->cacheStore();
 
-        if ($cacheConfig['tags']['enabled'] ?? false) {
-            $tags = $cacheConfig['tags']['names'] ?? ['geolocation'];
+        if (! method_exists($store, 'tags')) {
+            $this->warn('The configured cache store does not support tags, so a safe bulk clear is not possible.');
+            $this->info('Clear individual entries with: php artisan geolocation:cache clear --ip=8.8.8.8');
 
-            try {
-                Cache::tags($tags)->flush();
-                $this->info('All geolocation cache cleared successfully using tags');
-
-                return 0;
-            } catch (\Exception $e) {
-                $this->error('Failed to clear cache using tags: '.$e->getMessage());
-
-                return 1;
-            }
+            return self::FAILURE;
         }
 
-        $this->warn('Cache tags are disabled. Cannot safely clear cache without affecting other data.');
-        $this->warn('Consider enabling cache tags in your configuration.');
+        try {
+            $store->tags($this->tagNames())->flush();
+            $this->info('All geolocation cache cleared.');
 
-        if ($this->confirm('Do you want to manually clear cache entries? (This will attempt pattern matching)')) {
-            return $this->manualCacheClear();
+            return self::SUCCESS;
+        } catch (\Throwable $e) {
+            $this->error('Failed to clear cache using tags: '.$e->getMessage());
+
+            return self::FAILURE;
         }
-
-        return 1;
     }
 
     /**
-     * Manually clear cache entries by pattern (fallback method).
+     * @return array<int, string>
      */
-    protected function manualCacheClear(): int
+    protected function tagNames(): array
     {
-        $this->warn('Manual cache clearing is not recommended and may not work with all cache drivers.');
-        $this->info('Please consider using Redis or Memcached with cache tags for better cache management.');
-
-        // This is a fallback and won't work with all cache drivers
-        return 1;
+        return config('geolocation.cache.tags.names', ['geolocation']);
     }
 
     /**
@@ -192,8 +176,9 @@ class CacheCommand extends Command
         $this->table(
             ['Setting', 'Value', 'Description'],
             [
-                ['Enabled', $cacheConfig['enabled'] ? 'Yes' : 'No', 'Whether caching is active'],
-                ['TTL', $cacheConfig['ttl'].'s ('.$this->formatDuration($cacheConfig['ttl']).')', 'Cache lifetime'],
+                ['Enabled', ($cacheConfig['enabled'] ?? true) ? 'Yes' : 'No', 'Whether caching is active'],
+                ['TTL', ($cacheConfig['ttl'] ?? 0).'s ('.$this->formatDuration((int) ($cacheConfig['ttl'] ?? 0)).')', 'Cache lifetime'],
+                ['Sliding TTL', ($cacheConfig['sliding'] ?? true) ? 'Yes' : 'No', 'Extend TTL on each hit'],
                 ['Store', $cacheStore, 'Cache driver being used'],
                 ['Prefix', $cacheConfig['prefix'] ?? 'geolocation', 'Cache key prefix'],
                 ['Tags Enabled', ($cacheConfig['tags']['enabled'] ?? false) ? 'Yes' : 'No', 'Cache tags for bulk operations'],
@@ -204,68 +189,83 @@ class CacheCommand extends Command
         $this->line('');
         $this->info('Cache Driver Capabilities:');
 
-        // Check cache driver capabilities
         try {
-            $cache = Cache::store($cacheConfig['store']);
-            $supportsTagging = method_exists($cache, 'tags');
+            $cache = $this->cacheStore();
 
             $this->table(
                 ['Feature', 'Supported'],
                 [
-                    ['Cache Tags', $supportsTagging ? 'Yes' : 'No'],
+                    ['Cache Tags', method_exists($cache, 'tags') ? 'Yes' : 'No'],
+                    ['Sliding TTL (touch)', method_exists($cache, 'touch') ? 'Yes' : 'No'],
                     ['Atomic Operations', method_exists($cache, 'lock') ? 'Yes' : 'No'],
                 ]
             );
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->error('Error checking cache driver: '.$e->getMessage());
         }
 
-        return 0;
+        return self::SUCCESS;
     }
 
     /**
-     * Warm up cache with common IP addresses.
+     * Warm up the cache with common IP addresses for every configured provider.
      */
     protected function warmUpCache(): int
     {
-        $this->info('Warming up geolocation cache...');
+        $provider = $this->option('provider');
 
-        // Common IP addresses to pre-cache
-        $commonIps = [
-            '8.8.8.8',      // Google DNS
-            '1.1.1.1',      // Cloudflare DNS
-            '208.67.222.222', // OpenDNS
-            '77.88.8.8',    // Yandex DNS
-        ];
+        $providers = $provider
+            ? [$provider]
+            : array_keys(config('geolocation.providers', []));
 
-        $provider = $this->option('provider') ?: config('geolocation.drivers.default');
-        $geolocation = app('geolocation')->driver($provider);
+        if (empty($providers)) {
+            $this->error('No providers configured.');
 
-        $this->info("Using provider: {$provider}");
-
-        $progressBar = $this->output->createProgressBar(count($commonIps));
-        $progressBar->start();
-
-        foreach ($commonIps as $ip) {
-            try {
-                $geolocation->lookup($ip);
-                $progressBar->advance();
-            } catch (\Exception $e) {
-                $this->line(''); // New line after progress bar
-                $this->warn("Failed to warm up cache for {$ip}: ".$e->getMessage());
-                $progressBar->advance();
-            }
+            return self::FAILURE;
         }
 
-        $progressBar->finish();
-        $this->line(''); // New line after progress bar
-        $this->info('Cache warm-up completed');
+        $ips = [
+            '8.8.8.8',        // Google DNS
+            '1.1.1.1',        // Cloudflare DNS
+            '208.67.222.222', // OpenDNS
+            '77.88.8.8',      // Yandex DNS
+        ];
 
-        return 0;
+        foreach ($providers as $name) {
+            $this->info("Warming up provider [{$name}]...");
+
+            try {
+                $driver = app('geolocation')->driver($name);
+            } catch (\Throwable $e) {
+                $this->warn("  skipped: {$e->getMessage()}");
+
+                continue;
+            }
+
+            $bar = $this->output->createProgressBar(count($ips));
+            $bar->start();
+
+            foreach ($ips as $ip) {
+                try {
+                    $driver->lookup($ip);
+                } catch (\Throwable $e) {
+                    // Ignore individual failures; the summary reports counts.
+                }
+
+                $bar->advance();
+            }
+
+            $bar->finish();
+            $this->line('');
+        }
+
+        $this->info('Cache warm-up completed.');
+
+        return self::SUCCESS;
     }
 
     /**
-     * Optimize cache configuration and provide recommendations.
+     * Analyse the cache configuration and suggest improvements.
      */
     protected function optimizeCache(): int
     {
@@ -275,75 +275,59 @@ class CacheCommand extends Command
         $cacheConfig = config('geolocation.cache');
         $recommendations = [];
 
-        // Check cache driver
         $cacheStore = $cacheConfig['store'] ?: config('cache.default');
         $cacheDriver = config("cache.stores.{$cacheStore}.driver");
 
-        if (in_array($cacheDriver, ['file', 'database'])) {
-            $recommendations[] = [
-                'area' => 'Cache Driver',
-                'issue' => 'Using '.$cacheDriver.' driver',
-                'recommendation' => 'Consider using Redis or Memcached for better performance',
-                'priority' => 'High',
-            ];
+        if (in_array($cacheDriver, ['file', 'database'], true)) {
+            $recommendations[] = ['Cache Driver', "Using {$cacheDriver} driver", 'Consider Redis or Memcached for better performance', 'High'];
         }
 
-        // Check TTL
-        $ttl = $cacheConfig['ttl'];
+        $ttl = (int) ($cacheConfig['ttl'] ?? 0);
+
         if ($ttl < 3600) {
-            $recommendations[] = [
-                'area' => 'TTL',
-                'issue' => 'Short TTL ('.$this->formatDuration($ttl).')',
-                'recommendation' => 'Consider increasing TTL to 1-24 hours for geolocation data',
-                'priority' => 'Medium',
-            ];
+            $recommendations[] = ['TTL', 'Short TTL ('.$this->formatDuration($ttl).')', 'Increase to 1-24 hours for geolocation data', 'Medium'];
         } elseif ($ttl > 604800) {
-            $recommendations[] = [
-                'area' => 'TTL',
-                'issue' => 'Very long TTL ('.$this->formatDuration($ttl).')',
-                'recommendation' => 'Consider shorter TTL (1-7 days) for more current data',
-                'priority' => 'Low',
-            ];
+            $recommendations[] = ['TTL', 'Very long TTL ('.$this->formatDuration($ttl).')', 'Consider 1-7 days for fresher data', 'Low'];
         }
 
-        // Check cache tags
         if (! ($cacheConfig['tags']['enabled'] ?? false)) {
-            $recommendations[] = [
-                'area' => 'Cache Tags',
-                'issue' => 'Cache tags disabled',
-                'recommendation' => 'Enable cache tags for easier cache management',
-                'priority' => 'Medium',
-            ];
+            $recommendations[] = ['Cache Tags', 'Cache tags disabled', 'Enable tags for easier bulk invalidation', 'Medium'];
         }
 
-        // Display recommendations
+        if (! ($cacheConfig['sliding'] ?? true)) {
+            $recommendations[] = ['Sliding TTL', 'Sliding TTL disabled', 'Enable geolocation.cache.sliding to keep hot IPs warm', 'Low'];
+        }
+
         if (empty($recommendations)) {
-            $this->info('✅ Cache configuration looks optimal!');
-        } else {
-            $this->warn('Found '.count($recommendations).' optimization opportunities:');
-            $this->line('');
-            $this->table(
-                ['Area', 'Issue', 'Recommendation', 'Priority'],
-                $recommendations
-            );
+            $this->info('Cache configuration looks optimal.');
+
+            return self::SUCCESS;
         }
 
-        return 0;
+        $this->warn('Found '.count($recommendations).' optimization opportunities:');
+        $this->line('');
+        $this->table(['Area', 'Issue', 'Recommendation', 'Priority'], $recommendations);
+
+        return self::SUCCESS;
     }
 
     /**
-     * Format duration in human-readable format.
+     * Format a duration in seconds for humans.
      */
     protected function formatDuration(int $seconds): string
     {
         if ($seconds < 60) {
             return "{$seconds}s";
-        } elseif ($seconds < 3600) {
-            return round($seconds / 60, 1).'m';
-        } elseif ($seconds < 86400) {
-            return round($seconds / 3600, 1).'h';
-        } else {
-            return round($seconds / 86400, 1).'d';
         }
+
+        if ($seconds < 3600) {
+            return round($seconds / 60, 1).'m';
+        }
+
+        if ($seconds < 86400) {
+            return round($seconds / 3600, 1).'h';
+        }
+
+        return round($seconds / 86400, 1).'d';
     }
 }

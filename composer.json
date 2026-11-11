@@ -1,67 +1,93 @@
 {
-  "name": "bkhim/laravel-geolocation",
-  "version": "4.6.0",
-  "description": "Laravel geolocation with built-in fraud prevention, risk scoring, MFA triggers, IP blocking, threat intelligence, and security auditing. 6 providers (IP2Location.io, MaxMind, IpInfo, IpStack, IpApi, IpGeolocation), proxy/VPN/Tor detection, login tracking, timezone/currency personalization for Laravel 10-13",
-  "keywords": ["geolocation", "ip", "location", "laravel", "fraud-prevention", "security", "risk-scoring", "mfa", "proxy-detection", "vpn-detection", "tor", "login-tracking", "timezone", "currency", "maxmind", "ipinfo", "ipstack", "ipgeolocation", "ip2location"],
-  "homepage": "https://github.com/bkhim/laravel-geolocation",
-  "license": "MIT",
-  "authors": [
-    {
-      "name": "Brian Kimathi",
-      "email": "brian@briankimathi.com",
-      "homepage": "https://briankimathi.com/packages/laravel-geolocation"
-    }
-  ],
-  "minimum-stability": "stable",
-  "require": {
-    "php": "^8.2",
-    "ext-openssl": "*",
-    "illuminate/support": "^12.0|^13.0",
-    "guzzlehttp/guzzle": "^7.5",
-    "geoip2/geoip2": "^v3.3.0"
-  },
+    "name": "bkhim/laravel-geolocation",
+    "version": "4.7.0",
+    "description": "Laravel geolocation with built-in fraud prevention, risk scoring, MFA triggers, IP blocking, threat intelligence, and security auditing. 6 providers (IP2Location.io, MaxMind, IpInfo, IpStack, IpApi, IpGeolocation), proxy/VPN/Tor detection, login tracking, timezone/currency personalization for Laravel 12-13 on PHP 8.2+",
+    "keywords": [
+        "geolocation",
+        "ip",
+        "location",
+        "laravel",
+        "fraud-prevention",
+        "security",
+        "risk-scoring",
+        "mfa",
+        "proxy-detection",
+        "vpn-detection",
+        "tor",
+        "login-tracking",
+        "timezone",
+        "currency",
+        "maxmind",
+        "ipinfo",
+        "ipstack",
+        "ipgeolocation",
+        "ip2location"
+    ],
+    "homepage": "https://github.com/bkhim/laravel-geolocation",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Brian Kimathi",
+            "email": "brian@briankimathi.com",
+            "homepage": "https://briankimathi.com/packages/laravel-geolocation"
+        }
+    ],
+    "minimum-stability": "stable",
+    "require": {
+        "php": "^8.2",
+        "ext-openssl": "*",
+        "illuminate/cache": "^12.0|^13.0",
+        "illuminate/console": "^12.0|^13.0",
+        "illuminate/contracts": "^12.0|^13.0",
+        "illuminate/database": "^12.0|^13.0",
+        "illuminate/http": "^12.0|^13.0",
+        "illuminate/routing": "^12.0|^13.0",
+        "illuminate/support": "^12.0|^13.0",
+        "guzzlehttp/guzzle": "^7.15.2",
+        "geoip2/geoip2": "^3.4"
+    },
     "require-dev": {
         "orchestra/testbench": "^10.2|^11.0|^12.0|^13.0",
         "pestphp/pest": "^3.8|^4.0",
         "pestphp/pest-plugin-laravel": "^3.2|^4.0"
     },
-  "autoload": {
-    "psr-4": {
-      "Bkhim\\Geolocation\\": "src/"
+    "autoload": {
+        "psr-4": {
+            "Bkhim\\Geolocation\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Bkhim\\Geolocation\\Tests\\": "tests/"
+        }
+    },
+    "suggest": {
+        "ext-maxminddb": "For better performance with MaxMind databases"
+    },
+    "scripts": {
+        "test": "vendor/bin/pest",
+        "test:phpunit": "vendor/bin/phpunit"
+    },
+    "conflict": {
+        "adrianorsouza/laravel-geolocation": "*"
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Bkhim\\Geolocation\\GeolocationServiceProvider"
+            ],
+            "aliases": {
+                "Geolocation": "Bkhim\\Geolocation\\Geolocation",
+                "IpAnonymizer": "Bkhim\\Geolocation\\Facades\\IpAnonymizer",
+                "LocationConsentManager": "Bkhim\\Geolocation\\Facades\\LocationConsentManager",
+                "GeoAnomalyDetector": "Bkhim\\Geolocation\\Facades\\GeoAnomalyDetector",
+                "ThreatIntelligence": "Bkhim\\Geolocation\\Facades\\ThreatIntelligence"
+            }
+        }
+    },
+    "config": {
+        "allow-plugins": {
+            "pestphp/pest-plugin": true
+        }
     }
-  },
-  "autoload-dev": {
-    "psr-4": {
-      "Bkhim\\Geolocation\\Tests\\": "tests/"
-    }
-  },
-  "suggest": {
-    "ext-maxminddb": "For better performance with MaxMind databases"
-  },
-  "scripts": {
-    "test": "vendor/bin/pest",
-    "test:phpunit": "vendor/bin/phpunit"
-  },
-  "conflict": {
-    "adrianorsouza/laravel-geolocation": "*"
-  },
-  "extra": {
-    "laravel": {
-      "providers": [
-        "Bkhim\\Geolocation\\GeolocationServiceProvider"
-      ],
-      "aliases": {
-        "Geolocation": "Bkhim\\Geolocation\\Geolocation",
-        "IpAnonymizer": "Bkhim\\Geolocation\\Facades\\IpAnonymizer",
-        "LocationConsentManager": "Bkhim\\Geolocation\\Facades\\LocationConsentManager",
-        "GeoAnomalyDetector": "Bkhim\\Geolocation\\Facades\\GeoAnomalyDetector",
-        "ThreatIntelligence": "Bkhim\\Geolocation\\Facades\\ThreatIntelligence"
-      }
-    }
-  },
-  "config": {
-    "allow-plugins": {
-      "pestphp/pest-plugin": true
-    }
-  }
 }

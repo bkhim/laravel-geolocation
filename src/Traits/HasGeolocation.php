@@ -2,6 +2,7 @@
 
 namespace Bkhim\Geolocation\Traits;
 
+use Bkhim\Geolocation\Addons\Anonymization\IpAnonymizer;
 use Bkhim\Geolocation\Events\LoginLocationRecorded;
 use Bkhim\Geolocation\Models\LoginHistory;
 use Illuminate\Database\Eloquent\Model;
@@ -165,25 +166,21 @@ trait HasGeolocation
             return null;
         }
 
-        // partial mode (default): mask the last octet for IPv4, or last 80 bits for IPv6
-        if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
-            $ipParts = explode('.', $ip);
-            $ipParts[3] = '0';
+        // partial mode (default): delegate to the anonymizer so the
+        // configured ipv4_mask / ipv6_mask are honoured and both code paths
+        // (storage + addon) behave identically.
+        return $this->anonymizer()->mask($ip);
+    }
 
-            return implode('.', $ipParts);
+    /**
+     * Resolve the IP anonymizer (falls back to a fresh instance outside Laravel).
+     */
+    protected function anonymizer(): IpAnonymizer
+    {
+        if (function_exists('app') && app()->bound(IpAnonymizer::class)) {
+            return app(IpAnonymizer::class);
         }
 
-        // For IPv6, we'll mask the last 80 bits (last 10 hexadecimal groups)
-        if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)) {
-            $ipParts = explode(':', $ip);
-            // Mask last 5 groups (each group is 16 bits, 5*16=80 bits)
-            for ($i = count($ipParts) - 5; $i < count($ipParts); $i++) {
-                $ipParts[$i] = '0';
-            }
-
-            return implode(':', $ipParts);
-        }
-
-        return $ip;
+        return new IpAnonymizer;
     }
 }

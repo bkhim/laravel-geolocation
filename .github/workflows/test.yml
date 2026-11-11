@@ -1,35 +1,56 @@
 name: Tests
 
 on:
+  push:
+    branches: [main, 'release/**']
+  pull_request:
+    branches: [main]
   schedule:
     - cron: '55 3 * * SUN'
+  workflow_dispatch:
 
-permissions: {}
+permissions:
+  contents: read
+
+concurrency:
+  group: tests-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   test:
     runs-on: ${{ matrix.operating-system }}
     strategy:
+      fail-fast: false
       matrix:
-        operating-system: [ubuntu-latest, windows-latest, macos-latest]
-        php-versions: ['8.2', '8.3', '8.4']
-    name: "PHP ${{ matrix.php-versions }} test on ${{ matrix.operating-system }}"
+        operating-system: [ubuntu-latest]
+        php-versions: ['8.2', '8.3', '8.4', '8.5']
+        include:
+          # One Windows + macOS run on the newest PHP to catch path issues.
+          - operating-system: windows-latest
+            php-versions: '8.5'
+          - operating-system: macos-latest
+            php-versions: '8.5'
+    name: "PHP ${{ matrix.php-versions }} on ${{ matrix.operating-system }}"
+
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
       - name: Setup PHP
-        uses: shivammathur/setup-php@accd6127cb78bee3e8082180cb391013d204ef9f
+        uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php-versions }}
           extensions: fileinfo, bcmath, mbstring, pdo_mysql, pdo_sqlite, curl
-          tools: composer
+          coverage: none
+          tools: composer:v2
 
-      - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
-        with:
-          submodules: true
-          persist-credentials: false
+      - name: Validate composer.json
+        run: composer validate --no-check-publish
 
       - name: Install dependencies
         run: composer install --no-progress --prefer-dist --optimize-autoloader
 
-      - name: Test with Pest
+      - name: Run tests
         run: vendor/bin/pest --ci --colors=always

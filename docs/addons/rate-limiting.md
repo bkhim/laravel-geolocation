@@ -25,28 +25,28 @@ In `config/geolocation.php`:
     'rate_limiting' => [
         'enabled' => env('GEOLOCATION_RATE_LIMITING_ENABLED', false),
         'limits' => [
-            // Specific country limits
+            // Array form
             'CN' => ['requests_per_minute' => 5],
             'RU' => ['requests_per_minute' => 3],
-            'KP' => ['requests_per_minute' => 1],
-            
-            // Continent limits
-            'EU' => ['requests_per_minute' => 30],
-            
-            // Default limit
+
+            // Integer form is also accepted
+            'KP' => 1,
+
+            // Default for anything not listed
             '*' => ['requests_per_minute' => 60],
         ],
-        'message' => 'Too Many Attempts.',
     ],
 ],
 ```
 
+Enable with `GEOLOCATION_RATE_LIMITING_ENABLED=true`.
+
 ## How It Works
 
 1. User makes a request
-2. Middleware looks up the user's location
-3. It checks for a country-specific limit, then continent, then default
-4. Rate limit is applied based on the matched limit
+2. Middleware looks up the user's location (falls back to `'*'` if the lookup fails)
+3. It matches the country code, then the `'*'` default
+4. The limit is applied per user (id) or IP
 
 ## Priority
 
@@ -55,30 +55,26 @@ In `config/geolocation.php`:
 
 ## Response Headers
 
-When rate limited, these headers are added:
+The headers are added on both allowed and throttled responses:
 
 ```
 X-RateLimit-Limit: 60
-X-RateLimit-Remaining: 0
+X-RateLimit-Remaining: 42
 X-RateLimit-Reset: 1640000000
-Retry-After: 45
+Retry-After: 45        # only on 429
 ```
 
 ## JSON Response
 
 ```json
 {
-    "message": "Too Many Attempts.",
+    "error": "Too Many Attempts",
     "retry_after": 45
 }
 ```
 
-## Artisan Command
-
-```bash
-# No specific command, but works with Laravel's rate limiter
-php artisan cache:clear
-```
+The limiter uses Laravel's `RateLimiter` facade, so it is backed by your cache
+store. `php artisan cache:clear` resets counters.
 
 ## Best Practices
 
